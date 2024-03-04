@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "genericsuite_ai"
+version = "0.1.0"
+description = "The GenericSuite AI for Python (backend version)"
+authors = ["Carlos J. Ramirez <tomkat_cr@yahoo.com>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/tomkat-cr/genericsuite-be-ai.git"
+packages = [
+    { include = "genericsuite_ai" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+openai = "^1.7.2"
+langchain = "^0.1.1"
+click = "^8.1.7"
+jmespath = "^1.0.1"
+pyyaml = "^6.0.1"
+setuptools = "^65.5.1"
+six = "^1.16.0"
+typing-extensions = "^4.8.0"
+duckduckgo-search = "^4.1.1"
+requests-toolbelt = "^1.0.0"
+tiktoken = "^0.5.2"
+faiss-cpu = "^1.7.4"
+google-api-python-client = "^2.111.0"
+langchain-google-genai = "^0.0.5"
+pillow = "^10.1.0"
+clarifai = "^10.1.0"
+langchain-openai = "^0.0.8"
+langchainhub = "^0.1.14"
+jq = "^1.6.0"
+transformers = "^4.38.2"
+text-generation = "^0.6.1"
+genericsuite = {git = "https://github.com/tomkat-cr/genericsuite-be"}
+
+[tool.poetry.group.dev.dependencies]
+changelog-cli = "^0.7.1"
+mypy = "^0.931"
+pylint = "^3.1.0"
+pytest = "^7.0.1"
+pytest-cov = "^3.0.0"
+yapf = "^0.32.0"
+coverage = "^7.2.7"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
