@@ -1,29 +1,55 @@
-# genericsuite-be-ai
+# GenericSuite AI (backend version)
 The GenericSuite AI for Python (backend version).
 
-Welcome to the repository for the GenericSuite AI for Python (backend version). This project is designed to provide a comprehensive suite of tools and functionalities for AI development, specifically tailored for backend applications in Python.
+![GenericSuite AI Logo](https://github.com/tomkat-cr/genericsuite-fe-ai/blob/main/src/lib/images/gs_ai_logo_circle.svg)
+
+GenericSuite AI is a versatile backend solution, designed to provide a comprehensive suite of features, tools and functionalities for AI oriented Python APIs.
+
+It's bassed on [The Generic Suite (backend version)](https://github.com/tomkat-cr/genericsuite-be), so its features are inherited.
+
+The perfect companion for this backend solution is [The GenericSuite AI (frontend version)](https://github.com/tomkat-cr/genericsuite-fe-ai)
+
 
 ## Pre-requisites
 
-Python 3.9+, 3.10+, 3.11
+- Python >= 3.10+ and < 4.0
 
 ## Installation
 
 To use GenericSuite AI in your project, install it with the following command(s):
 
-### Pip
+### From Pypi
+
+#### Pip
 ```bash
-pip install git+https://github.com/tomkat-cr/genericsuite-be-ai
+pip install genericsuite-ai
 ```
 
-### Pipenv
+#### Pipenv
 ```bash
-pipenv install git+https://github.com/tomkat-cr/genericsuite-be-ai
+pipenv install genericsuite-ai
 ```
 
-### Poetry
+#### Poetry
 ```bash
-poetry add git+https://github.com/tomkat-cr/genericsuite-be-ai
+poetry add genericsuite-ai
+```
+
+### From a specific branch in the repository, e.g. "branch_x"
+
+#### Pip
+```bash
+pip install git+https://github.com/tomkat-cr/genericsuite-be-ai@branch_x
+```
+
+#### Pipenv
+```bash
+pipenv install git+https://github.com/tomkat-cr/genericsuite-be-ai@branch_x
+```
+
+#### Poetry
+```bash
+poetry add git+https://github.com/tomkat-cr/genericsuite-be-ai@branch_x
 ```
 
 ## Contents
@@ -58,9 +84,9 @@ For detailed documentation on each feature and module, please refer to the inlin
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
 
-- Carlos J. Ramirez, for initiating and maintaining this project.
-- All contributors who help in enhancing and expanding the capabilities of GenericSuite AI.
+## Credits
 
-Thank you for your interest in the GenericSuite AI for Python.
+This project is developed and maintained by Carlos J. Ramirez. For more information or to contribute to the project, visit [GenericSuite AI on GitHub](https://github.com/tomkat-cr/genericsuite-be-ai).
+
+Happy Coding!

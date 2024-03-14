@@ -17,7 +17,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## 0.1.0 (2024-03-03)
+## 0.1.0 (2024-03-14)
+---
+
+### New
+Publish to Pypi
+
+
+## 0.0.4 (2024-03-03)
 ---
 
 ### New

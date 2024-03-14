@@ -1,3 +1,22 @@
+[project]
+name = "genericsuite_ai"
+version = "0.1.0"
+authors = [
+    { name="Carlos J. Ramirez", email="<tomkat_cr@yahoo.com>" }
+]
+description = "The GenericSuite AI for Python (backend version)"
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/tomkat-cr/genericsuite-be-ai"
+Issues = "https://github.com/tomkat-cr/genericsuite-be-ai/issues"
+
 [tool.poetry]
 name = "genericsuite_ai"
 version = "0.1.0"
