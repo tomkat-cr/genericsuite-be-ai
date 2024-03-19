@@ -1,7 +1,6 @@
-# GenericSuite AI (backend version)
-The GenericSuite AI for Python (backend version).
+# The GenericSuite AI for Python (backend version)
 
-![GenericSuite AI Logo](https://github.com/tomkat-cr/genericsuite-fe-ai/blob/main/src/lib/images/gs_ai_logo_circle.svg)
+![GenericSuite AI Logo](https://github.com/tomkat-cr/genericsuite-fe-ai/blob/main/src/lib/images/gs_ai_logo_circle.png)
 
 GenericSuite AI is a versatile backend solution, designed to provide a comprehensive suite of features, tools and functionalities for AI oriented Python APIs.
 
@@ -9,12 +8,22 @@ It's bassed on [The Generic Suite (backend version)](https://github.com/tomkat-c
 
 The perfect companion for this backend solution is [The GenericSuite AI (frontend version)](https://github.com/tomkat-cr/genericsuite-fe-ai)
 
-
 ## Pre-requisites
 
-- Python >= 3.10+ and < 4.0
+- [Python](https://www.python.org/downloads/) >= 3.9 and < 4.0
+- [Git](https://www.atlassian.com/git/tutorials/install-git)
+- Make: [Mac](https://formulae.brew.sh/formula/make) | [Windows](https://stackoverflow.com/questions/32127524/how-to-install-and-use-make-in-windows)
+
+### AWS account and credentials
+
+* AWS account, see [free tier](https://aws.amazon.com/free).
+* AWS Token, see [Access Keys](https://us-east-1.console.aws.amazon.com/iamv2/home?region=us-east-1#/security_credentials?section=IAM_credentials).
+* AWS Command-line interface, see [awscli](https://formulae.brew.sh/formula/awscli).
+* API Framework and Serverless Deployment, see [Chalice](https://github.com/aws/chalice).
 
 ## Installation
+
+First check the [Getting Started](https://github.com/tomkat-cr/genericsuite-be-ai/blob/main/README.md#getting-started) section in the [GenericSuite backend version documentation](https://github.com/tomkat-cr/genericsuite-be-ai/blob/main/README.md#getting-started).
 
 To use GenericSuite AI in your project, install it with the following command(s):
 
@@ -76,9 +85,13 @@ This repository includes the following features:
 
 Configure your application by setting up the necessary environment variables. Refer to the example `.env.example` file for the required variables.
 
-## Documentation
+Please check the [GenericSuite backend version configuration section](https://github.com/tomkat-cr/genericsuite-be/blob/main/README.md#configuration) for more details.
 
-For detailed documentation on each feature and module, please refer to the inline comments and docstrings within the codebase.
+## Code examples and JSON configuration files
+
+The main menu, API endpoints and CRUD editor configurations are defined in the JSON configuration files.
+
+You can find examples about configurations and how to code an App in the [GenericSuite App Creation and Configuration guide](https://github.com/tomkat-cr/genericsuite-fe/blob/main/src/configs/README.md).
 
 ## License
 

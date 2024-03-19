@@ -17,6 +17,17 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.1 (2024-03-19)
+---
+
+### New
+Add Makefile with `build, `publish` and `publish-test` options.
+
+### Changes
+README enhanced instructions.
+Updated genericsuite = "0.1.1"
+
+
 ## 0.1.0 (2024-03-14)
 ---
 
