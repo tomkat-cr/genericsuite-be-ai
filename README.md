@@ -23,7 +23,7 @@ The perfect companion for this backend solution is [The GenericSuite AI (fronten
 
 ## Installation
 
-First check the [Getting Started](https://github.com/tomkat-cr/genericsuite-be-ai/blob/main/README.md#getting-started) section in the [GenericSuite backend version documentation](https://github.com/tomkat-cr/genericsuite-be-ai/blob/main/README.md#getting-started).
+First check the [Getting Started](https://github.com/tomkat-cr/genericsuite-be/blob/main/README.md#getting-started) section in the [GenericSuite backend version documentation](https://github.com/tomkat-cr/genericsuite-be/blob/main/README.md#getting-started).
 
 To use GenericSuite AI in your project, install it with the following command(s):
 
