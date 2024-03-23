@@ -17,6 +17,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## Unreleased
+---
+
+### Changes
+".env-example" renamed to ".env.example".
+AI configuration environment variables added to "/README.md".
+
+
 ## 0.1.1 (2024-03-19)
 ---
 
