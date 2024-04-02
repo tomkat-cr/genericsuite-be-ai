@@ -871,13 +871,13 @@ tqdm = ["tqdm"]
 
 [[package]]
 name = "genericsuite"
-version = "0.1.1"
+version = "0.1.2"
 description = "The GenericSuite for Python (backend version)"
 optional = false
-python-versions = ">=3.9,<4.0"
+python-versions = "<4.0,>=3.9"
 files = [
-    {file = "genericsuite-0.1.1-py3-none-any.whl", hash = "sha256:05fbfb6e1039d5d68287d5101844841384a63e97b5848b75c87cc2fcdfb9f555"},
-    {file = "genericsuite-0.1.1.tar.gz", hash = "sha256:d4f727a48f1df60f1b34f28da202eb1bc462a2b51789195d4797553db701b0f2"},
+    {file = "genericsuite-0.1.2-py3-none-any.whl", hash = "sha256:7dcdc29b8b69f8e568dbaa29fcb7becbb93d9c2314b31128211992d604043ab5"},
+    {file = "genericsuite-0.1.2.tar.gz", hash = "sha256:4ff33baa61e73f26705b73043f523d1953886d5b9c2b9b669b7386f3519ee870"},
 ]
 
 [package.dependencies]
@@ -3871,4 +3871,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "fcd67c4349cebc4e13a39ba4535326ac64ba6058067b0a99c6c5f285d82784bb"
+content-hash = "671e08053fd5dd07f6d070a3deb075001a2db7f5ae4ee8fe1d07a139ae75c56c"

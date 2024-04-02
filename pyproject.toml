@@ -1,6 +1,6 @@
 [project]
 name = "genericsuite_ai"
-version = "0.1.1"
+version = "0.1.2"
 authors = [
     { name="Carlos J. Ramirez", email="<tomkat_cr@yahoo.com>" }
 ]
@@ -19,7 +19,7 @@ Issues = "https://github.com/tomkat-cr/genericsuite-be-ai/issues"
 
 [tool.poetry]
 name = "genericsuite_ai"
-version = "0.1.1"
+version = "0.1.2"
 description = "The GenericSuite AI for Python (backend version)"
 authors = ["Carlos J. Ramirez <tomkat_cr@yahoo.com>"]
 license = "MIT"
@@ -52,7 +52,7 @@ langchainhub = "^0.1.14"
 jq = "^1.6.0"
 transformers = "^4.38.2"
 text-generation = "^0.6.1"
-genericsuite = "0.1.1"
+genericsuite = "^0.1.2"
 
 [tool.poetry.group.dev.dependencies]
 changelog-cli = "^0.7.1"

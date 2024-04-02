@@ -13,6 +13,7 @@ The perfect companion for this backend solution is [The GenericSuite AI (fronten
 - [Python](https://www.python.org/downloads/) >= 3.9 and < 4.0
 - [Git](https://www.atlassian.com/git/tutorials/install-git)
 - Make: [Mac](https://formulae.brew.sh/formula/make) | [Windows](https://stackoverflow.com/questions/32127524/how-to-install-and-use-make-in-windows)
+- Node version 18+, installed via [NVM (Node Package Manager)](https://nodejs.org/en/download/package-manager) or [NPM and Node](https://nodejs.org/en/download) install.
 
 ### AWS account and credentials
 
@@ -61,9 +62,34 @@ pipenv install git+https://github.com/tomkat-cr/genericsuite-be-ai@branch_x
 poetry add git+https://github.com/tomkat-cr/genericsuite-be-ai@branch_x
 ```
 
-## Contents
+### Test dependencies
 
-This repository includes the following features:
+To execute the unit and integration test, install `pytest` and `coverage`:
+
+#### Pip
+```bash
+pip install pytest coverage
+```
+
+#### Pipenv
+```bash
+pipenv install --dev pytest coverage
+```
+
+#### Poetry
+```bash
+poetry add --dev pytest coverage
+```
+
+### Development scripts installation
+
+[The GenericSuite backend development scripts](https://github.com/tomkat-cr/genericsuite-be-scripts?tab=readme-ov-file#the-genericsuite-scripts-backend-version) contains utilities to build and deploy APIs made by The GenericSuite.
+
+```bash
+npm install -D genericsuite-be-scripts
+```
+
+## Features
 
 - `ai_chatbot` endpoint to implement NLP conversations based on OpenAI or Langchain APIs.
 - OpenAPI, Google Gemini, Anthropic, Ollama, and Hugging Face models handling.
@@ -328,10 +354,13 @@ The main menu, API endpoints and CRUD editor configurations are defined in the J
 
 You can find examples about configurations and how to code an App in the [GenericSuite App Creation and Configuration guide](https://github.com/tomkat-cr/genericsuite-fe/blob/main/src/configs/README.md).
 
+## Usage
+
+Check the [The GenericSuite backend development scripts](https://github.com/tomkat-cr/genericsuite-be-scripts?tab=readme-ov-file#the-genericsuite-scripts-backend-version) for more details.
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
+This project is licensed under the ISC License - see the [LICENSE](https://github.com/tomkat-cr/genericsuite-be-ai/blob/main/LICENSE) file for details.
 
 ## Credits
 
