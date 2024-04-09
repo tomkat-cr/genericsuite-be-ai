@@ -17,14 +17,23 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.3 (2024-04-09)
+---
+
+### Changes
+Updated genericsuite = "0.1.3".
+Add links to https://www.carlosjramirez.com/genericsuite/ in the README.
+Remove deprecated FRONTEND_AUDIENCE.
+
+
 ## 0.1.2 (2024-04-01)
 ---
 
 ### New
-Add stage "demo" to APP_DB_ENGINE, APP_DB_NAME, APP_DB_URI, APP_FRONTEND_AUDIENCE, APP_CORS_ORIGIN, and AWS_S3_CHATBOT_ATTACHMENTS_BUCKET [FA-213].
+Add stage "demo" to APP_DB_ENGINE, APP_DB_NAME, APP_DB_URI, APP_CORS_ORIGIN, and AWS_S3_CHATBOT_ATTACHMENTS_BUCKET [FA-213].
 
 ### Changes
-Updated genericsuite = "0.1.2"
+Updated genericsuite = "0.1.2".
 ".env-example" renamed to ".env.example".
 AI configuration environment variables added to README.
 The GenericSuite backend development scripts added to README.
