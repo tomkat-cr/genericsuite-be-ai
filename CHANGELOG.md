@@ -17,6 +17,13 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## Unreleased
+---
+
+### Changes
+Change: README with clearer AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_* example values and main image from the official documentation site [FA-246].
+
+
 ## 0.1.3 (2024-04-09)
 ---
 

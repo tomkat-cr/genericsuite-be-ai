@@ -1,6 +1,6 @@
 # The GenericSuite AI for Python (backend version)
 
-![GenericSuite AI Logo](https://github.com/tomkat-cr/genericsuite-fe-ai/blob/main/src/lib/images/gs_ai_logo_circle.png)
+![GenericSuite AI Logo](https://genericsuite.carlosjramirez.com/images/gs_ai_logo_circle.svg)
 
 [GenericSuite AI](https://www.carlosjramirez.com/genericsuite/) is a versatile backend solution, designed to provide a comprehensive suite of features, tools and functionalities for AI oriented Python APIs.
 
@@ -148,10 +148,10 @@ HUGGINGFACE_ENDPOINT_URL=huggingface_endpoint_url
 
 6. AWS Configuration
 ```
-AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_DEV=aws-s3-bucket-name
-AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_QA=aws-s3-bucket-name
-AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_STAGING=aws-s3-bucket-name
-AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_PROD=aws-s3-bucket-name
+AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_DEV=exampleapp-chatbot-attachments-dev
+AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_QA=exampleapp-chatbot-attachments-qa
+AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_STAGING=exampleapp-chatbot-attachments-staging
+AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_PROD=exampleapp-chatbot-attachments-prod
 ```
 
 7. Other AI configurations<br/>(not included in the original AWS Lambda deployment. Configurable via Configuration Parameters)
