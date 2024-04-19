@@ -1,6 +1,6 @@
 [project]
 name = "genericsuite_ai"
-version = "0.1.3"
+version = "0.1.4"
 authors = [
     { name="Carlos J. Ramirez", email="<tomkat_cr@yahoo.com>" }
 ]
@@ -14,12 +14,12 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/tomkat-cr/genericsuite-be-ai"
+Homepage = "https://genericsuite.carlosjramirez.com/Backend-Development/GenericSuite-AI/"
 Issues = "https://github.com/tomkat-cr/genericsuite-be-ai/issues"
 
 [tool.poetry]
 name = "genericsuite_ai"
-version = "0.1.3"
+version = "0.1.4"
 description = "The GenericSuite AI for Python (backend version)"
 authors = ["Carlos J. Ramirez <tomkat_cr@yahoo.com>"]
 license = "MIT"
