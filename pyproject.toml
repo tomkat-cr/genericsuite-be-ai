@@ -25,6 +25,7 @@ authors = ["Carlos J. Ramirez <tomkat_cr@yahoo.com>"]
 license = "ISC"
 readme = "README.md"
 repository = "https://github.com/tomkat-cr/genericsuite-be-ai.git"
+homepage = "https://genericsuite.carlosjramirez.com/Backend-Development/GenericSuite-AI/"
 packages = [
     { include = "genericsuite_ai" }
 ]
