@@ -17,6 +17,13 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.5 (2024-04-20)
+---
+
+### Changes
+Updated genericsuite = "0.1.5" with "mangum" to make FastAPI work on AWS Lambda [FA-246].
+
+
 ## 0.1.4 (2024-04-20)
 ---
 
