@@ -196,7 +196,7 @@ class Config(ConfigSuperClass):
 
         # Anthropic credentials and other parameters
 
-        self.ANTHROPIC_MODEL = self.get_env('ANTHROPIC_MODEL', 'claude-2')
+        self.ANTHROPIC_MODEL = self.get_env('ANTHROPIC_MODEL', 'claude-3-sonnet')
         self.ANTHROPIC_API_KEY = self.get_env('ANTHROPIC_API_KEY', '')
 
         # AWS credentials and other parameters
