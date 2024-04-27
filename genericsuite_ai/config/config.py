@@ -184,8 +184,8 @@ class Config(ConfigSuperClass):
         self.OPENAI_EMBEDDINGS_MODEL = self.get_env(
             # # TODO: 2024-02-11 | Warning: model not found. Using cl100k_base encoding.
             # In: GVI2_3) GET_VECTOR_INDEX | get Vectorstore from a list of documents...
-            # 'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-3-small'
-            'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-ada-002'
+            'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-3-small'
+            # 'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-ada-002'
         )
         self.OPENAI_EMBEDDINGS_MODEL_PREMIUM = self.get_env(
             'OPENAI_EMBEDDINGS_MODEL_PREMIUM', 'text-embedding-3-large'   # TODO implement this param
