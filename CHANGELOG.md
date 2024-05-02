@@ -17,6 +17,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.6 (2024-04-29)
+---
+
+### Changes
+Document the API Keys URLs for each configuration.
+ANTHROPIC_MODEL defaults to 'claude-3-sonnet'.
+
+
 ## 0.1.5 (2024-04-20)
 ---
 
