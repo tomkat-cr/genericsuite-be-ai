@@ -17,12 +17,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## 0.1.6 (2024-04-29)
+## 0.1.6 (2024-05-04)
 ---
 
 ### Changes
-Document the API Keys URLs for each configuration.
+Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as default OPENAI_EMBEDDINGS_MODEL [GS-65].
 ANTHROPIC_MODEL defaults to 'claude-3-sonnet'.
+Remove the GenericSuite AI lib dependency from GenericSuite Core [GS-74].
+Redirect README instructions to the GenericSuite Documentation [GS-73].
 
 
 ## 0.1.5 (2024-04-20)

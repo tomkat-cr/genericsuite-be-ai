@@ -8,6 +8,10 @@ lock:
 update:
 	poetry update
 
+lock-rebuild:
+	poetry lock --no-update
+	poetry install --sync
+
 build:
 	# Build 'dist' directory needed for the Pypi publish
 	poetry lock --no-update

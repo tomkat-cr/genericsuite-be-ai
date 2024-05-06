@@ -1,6 +1,6 @@
 [project]
 name = "genericsuite_ai"
-version = "0.1.5"
+version = "0.1.6"
 authors = [
     { name="Carlos J. Ramirez", email="<tomkat_cr@yahoo.com>" }
 ]
@@ -53,7 +53,6 @@ langchainhub = "^0.1.14"
 jq = "^1.6.0"
 transformers = "^4.38.2"
 text-generation = "^0.6.1"
-genericsuite = "^0.1.5"
 
 [tool.poetry.group.dev.dependencies]
 changelog-cli = "^0.7.1"
@@ -63,6 +62,7 @@ pytest = "^7.0.1"
 pytest-cov = "^3.0.0"
 yapf = "^0.32.0"
 coverage = "^7.2.7"
+genericsuite = "^0.1.5"
 
 [build-system]
 requires = ["poetry-core"]
