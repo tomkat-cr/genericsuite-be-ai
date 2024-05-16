@@ -18,10 +18,22 @@ build:
 	rm -rf dist
 	python3 -m build
 
-publish-test: build
+publish-test: dev-prepare-publish build
 	# Pypi Test publish
 	python3 -m twine upload --repository testpypi dist/*
 
-publish: build
+publish: dev-prepare-publish build
 	# Production Pypi publish
 	python3 -m twine upload dist/*
+
+dev-prepare-local:
+	poetry add --group dev ../genericsuite-be
+
+dev-prepare-git:
+	poetry add --group dev git+https://github.com/tomkat-cr/genericsuite-be
+
+dev-prepare-pypi:
+	poetry add --group dev genericsuite
+
+dev-prepare-publish:
+	poetry remove genericsuite

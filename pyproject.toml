@@ -33,7 +33,7 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
 openai = "^1.7.2"
-langchain = "^0.1.1"
+langchain = "^0.1.20"
 click = "^8.1.7"
 jmespath = "^1.0.1"
 pyyaml = "^6.0.1"
@@ -45,11 +45,11 @@ requests-toolbelt = "^1.0.0"
 tiktoken = "0.6"
 faiss-cpu = "^1.7.4"
 google-api-python-client = "^2.111.0"
-langchain-google-genai = "^0.0.5"
+langchain-google-genai = {version = "^1.0.3", extras = ["images"]}
 pillow = "^10.1.0"
 clarifai = "^10.1.0"
-langchain-openai = "0.1.4"
-langchainhub = "^0.1.14"
+langchain-openai = "^0.1.6"
+langchainhub = "^0.1.15"
 jq = "^1.6.0"
 transformers = "^4.38.2"
 text-generation = "^0.6.1"
@@ -62,7 +62,7 @@ pytest = "^7.0.1"
 pytest-cov = "^3.0.0"
 yapf = "^0.32.0"
 coverage = "^7.2.7"
-genericsuite = "^0.1.5"
+genericsuite = {path = "../genericsuite-be"}
 
 [build-system]
 requires = ["poetry-core"]

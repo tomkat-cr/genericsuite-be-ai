@@ -1,5 +1,5 @@
 """AI Audio Library"""
-from typing import Any, Optional
+from typing import Any, Optional, Dict
 import os
 from uuid import uuid4
 
@@ -136,23 +136,26 @@ def process_audio_url(sound_filespec: str, call_to: callable,
             resultset["error"] = True
             resultset["error_message"] = "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
         else:
-            public_url, final_filename, error = upload_nodup_file_to_s3(
+            upload_result = upload_nodup_file_to_s3(
                 file_path=sound_filespec,
                 original_filename=os.path.basename(sound_filespec),
                 bucket_name=bucket_name,
                 sub_dir=user_id,
             )
-            if error:
+            if upload_result['error']:
                 resultset["error"] = True
-                resultset["error_message"] = error
+                resultset["error_message"] = upload_result["error_message"]
             else:
-                params[url_par_name] = public_url
+                params[url_par_name] = upload_result['public_url']
                 resultset = call_to(**params)
                 if rm_after_proc:
-                    remove_from_s3(
+                    remove_result = remove_from_s3(
                         bucket_name=bucket_name,
-                        key=f"{user_id}/{final_filename}",
+                        key=f"{user_id}/{upload_result['final_filename']}",
                     )
+                    if remove_result['error']:
+                        resultset["error"] = True
+                        resultset["error_message"] = remove_result["error_message"]
     return resultset
 
 
@@ -194,7 +197,7 @@ def get_att_response(
               f" {settings.AI_AUDIO_TO_TEXT_TECHNOLOGY}")
     try:
         if settings.AI_AUDIO_TO_TEXT_TECHNOLOGY == "clarifai":
-            audio_proc_par = {}
+            audio_proc_par: Dict[str, Any] = {}
             transcript = process_audio_url(
                 sound_filespec=sound_filespec,
                 call_to=clarifai_audio_to_text,

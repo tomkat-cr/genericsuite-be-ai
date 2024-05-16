@@ -13,10 +13,10 @@ from httpx._exceptions import HTTPError
 from duckduckgo_search import DDGS
 
 from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchResults
+from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
+from langchain_community.utilities import GoogleSearchAPIWrapper
 from langchain.agents import tool
 from langchain.pydantic_v1 import BaseModel, Field
-from langchain.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
-from langchain.utilities.google_search import GoogleSearchAPIWrapper
 
 from genericsuite.util.app_logger import log_debug
 from genericsuite.util.app_context import CommonAppContext

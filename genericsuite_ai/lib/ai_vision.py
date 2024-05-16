@@ -13,7 +13,10 @@ from langchain.pydantic_v1 import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from genericsuite.util.aws import upload_nodup_file_to_s3
+from genericsuite.util.aws import (
+    upload_nodup_file_to_s3,
+    prepare_asset_url,
+)
 from genericsuite.util.utilities import (
     get_default_resultset,
     get_file_size,
@@ -42,7 +45,7 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-DEBUG = False
+DEBUG = True
 cac = CommonAppContext()
 
 
@@ -74,7 +77,7 @@ def get_vision_image_url(
     original_filename: str = None,
     use_s3: bool = False,
     user_id: str = None,
-):
+) -> dict:
     """
     Get the URL for the specified image for the GPT4 vision message content.
 
@@ -86,14 +89,16 @@ def get_vision_image_url(
         Defaults to None.
 
     Returns:
-        attachment_url (str): URL for the image.
-        final_filename (str): file name of the image with date/time added.
-        error (str): the eventual error message or None if no errors
+        dict = A dictionary with the following elements:
+            attachment_url (str): URL for the image.
+            final_filename (str): file name of the image with date/time added.
+            error (bool): True if an error occurred.
+            error_message (str): the eventual error message or None if no errors
     """
+    result = get_default_resultset()
     settings = Config(cac.get())
     attachment_url = None
     final_filename = None
-    error = None
     # Check if the image path is a URL
     if is_an_url(image_path):
         attachment_url = image_path
@@ -105,21 +110,28 @@ def get_vision_image_url(
             log_debug('get_vision_image_url | ' +
                       f'AWS_S3_CHATBOT_ATTACHMENTS_BUCKET: {str(bucket_name)}')
         if not bucket_name:
-            error = "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
+            result['error'] = True
+            result['error_message'] = "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
         else:
-            public_url, final_filename, error = upload_nodup_file_to_s3(
+            upload_result = upload_nodup_file_to_s3(
                 file_path=image_path,
                 original_filename=original_filename,
                 bucket_name=bucket_name,
                 sub_dir=user_id,
             )
-            attachment_url = public_url
+            attachment_url = upload_result['public_url']
+            final_filename = upload_result['final_filename']
+            result['error'] = upload_result['error']
+            result['error_message'] = upload_result['error_message']
     else:
         # Get the base64 string
         base64_image = encode_image(image_path)
         attachment_url = f"data:{get_mime_type(image_path)};" + \
                          f"base64,{base64_image}"
-    return attachment_url, final_filename, error
+    result['attachment_url'] = attachment_url
+    result['final_filename'] = final_filename
+    return result
+    # return attachment_url, final_filename, error
 
 
 def get_vision_name() -> str:
@@ -132,9 +144,10 @@ def get_vision_name() -> str:
             f"{settings.AI_CLARIFAI_DEFAULT_VISION_MODEL}"
     else:
         model_name = "OpenAI GPT4 Vision"
-    log_debug("get_vision_name | AI_VISION_TECHNOLOGY:" +
-              f" {settings.AI_VISION_TECHNOLOGY}"
-              f" | model_name: {model_name}")
+    if DEBUG:
+        log_debug("get_vision_name | AI_VISION_TECHNOLOGY:" +
+            f" {settings.AI_VISION_TECHNOLOGY}"
+            f" | model_name: {model_name}")
     return model_name
 
 
@@ -295,15 +308,15 @@ def vision_image_analyzer(params: dict) -> dict:
         # so the question received is None
         question = "" if not question else question
 
-        attachment_url, final_filename, error = get_vision_image_url(
+        image_url_result = get_vision_image_url(
             image_path,
             original_filename,
             use_s3,
             cac.app_context.get_user_id(),
         )
-        if error:
+        if image_url_result['error']:
             response['error'] = True
-            response['error_message'] = error
+            response['error_message'] = image_url_result['error_message']
             return response
         response["question"] = [
             {
@@ -312,7 +325,8 @@ def vision_image_analyzer(params: dict) -> dict:
             },
             {
                 "type": "image_url",
-                "image_url": attachment_url
+                "image_url": prepare_asset_url(
+                    image_url_result['attachment_url'])
             },
         ]
 
@@ -341,16 +355,16 @@ def vision_image_analyzer(params: dict) -> dict:
                     "role": "user",
                     "type": "file_name",
                     "sub_type": (
-                        get_mime_type(final_filename)
-                        if get_mime_type(final_filename)
+                        get_mime_type(image_url_result['final_filename'])
+                        if get_mime_type(image_url_result['final_filename'])
                         else "image"
                     ),
                     "file_name": (
                         f'"{original_filename}" (' +
                         f'{get_file_size(file_size, "mb")})'
                     ),
-                    "attachment_url": attachment_url,
-                    "final_filename": final_filename,
+                    "attachment_url": image_url_result['attachment_url'],
+                    "final_filename": image_url_result['final_filename'],
                 }
             ]
             if DEBUG:

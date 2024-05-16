@@ -20,12 +20,17 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ## 0.1.6 (2024-05-04)
 ---
 
+### New
+Add file upload on FastAPI [GS-68].
+Add STORAGE_URL_SEED and APP_HOST_NAME env. vars. to mask the S3 URL and avoid AWS over-billing attacks [GS-72].
+Conversations conversion [GS-72].
+
 ### Changes
 Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as default OPENAI_EMBEDDINGS_MODEL [GS-65].
 ANTHROPIC_MODEL defaults to 'claude-3-sonnet'.
-Remove the GenericSuite AI lib dependency from GenericSuite Core [GS-74].
+Remove the GenericSuite AI library dependency from GenericSuite Core [GS-74].
 Redirect README instructions to the GenericSuite Documentation [GS-73].
-
+"blueprint" as mandatory parameter to GenericDbHelper, AppContext and app_context_and_set_env(), to make posible the specific functions to GenericDbHelper [GS-79].
 
 ## 0.1.5 (2024-04-20)
 ---

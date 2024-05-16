@@ -4,9 +4,10 @@ AI Endpoints
 from typing import Optional
 
 # from chalice.app import Response
-from genericsuite.util.framework_abs_layer import Response
 
-from genericsuite.util.blueprint_one import BlueprintOne
+# from genericsuite.util.blueprint_one import BlueprintOne
+from genericsuite.util.framework_abs_layer import Response, BlueprintOne
+
 from genericsuite.util.jwt import (
     request_authentication,
     AuthorizedRequest
@@ -41,7 +42,8 @@ def ai_chatbot_endpoint(
     :param other_params: Other parameters that may be needed.
     :return: The response from the AI chatbot.
     """
-    return ai_chatbot_endpoint_model(request, other_params)
+    return ai_chatbot_endpoint_model(request=request, blueprint=bp,
+        other_params=other_params)
 
 
 @bp.route(
@@ -62,7 +64,8 @@ def vision_image_analyzer_endpoint(
     :param request: The request containing the image file.
     :return: The text with the image analysis.
     """
-    return vision_image_analyzer_endpoint_model(request, other_params)
+    return vision_image_analyzer_endpoint_model(request=request, blueprint=bp,
+        other_params=other_params)
 
 
 @bp.route(
@@ -83,4 +86,5 @@ def transcribe_audio_endpoint(
     :param request: The request containing the audio file.
     :return: The transcription result.
     """
-    return transcribe_audio_endpoint_model(request, other_params)
+    return transcribe_audio_endpoint_model(request=request, blueprint=bp,
+        other_params=other_params)
