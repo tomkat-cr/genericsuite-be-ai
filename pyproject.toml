@@ -62,7 +62,6 @@ pytest = "^7.0.1"
 pytest-cov = "^3.0.0"
 yapf = "^0.32.0"
 coverage = "^7.2.7"
-genericsuite = {path = "../genericsuite-be"}
 
 [build-system]
 requires = ["poetry-core"]
