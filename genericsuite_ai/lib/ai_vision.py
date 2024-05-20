@@ -143,7 +143,8 @@ def get_vision_name() -> str:
         model_name = "Clarifai Vision: " + \
             f"{settings.AI_CLARIFAI_DEFAULT_VISION_MODEL}"
     else:
-        model_name = "OpenAI GPT4 Vision"
+        model_name = "OpenAI GPT4 Vision: " + \
+            f"{settings.OPENAI_VISION_MODEL}"
     if DEBUG:
         log_debug("get_vision_name | AI_VISION_TECHNOLOGY:" +
             f" {settings.AI_VISION_TECHNOLOGY}"
@@ -158,7 +159,7 @@ def get_vision_response(response: dict, other: dict) -> dict:
     billing = BillingUtilities(cac.get())
     # Maximun tokens to be used by the model. Defaults to 500.
     max_tokens = get_default_value("max_tokens", other,
-                                   settings.OPENAI_MAX_TOKENS)
+                                   int(settings.OPENAI_MAX_TOKENS))
     log_debug("get_vision_response | AI_VISION_TECHNOLOGY:" +
               f" {settings.AI_VISION_TECHNOLOGY}")
     try:
@@ -235,6 +236,7 @@ def vision_image_analyzer(params: dict) -> dict:
     # Reference:
     # https://platform.openai.com/docs/guides/vision
 
+    settings = Config(cac.get())
     if DEBUG:
         log_debug("vision_image_analyzer | params: " +
                   str(params))
@@ -318,17 +320,38 @@ def vision_image_analyzer(params: dict) -> dict:
             response['error'] = True
             response['error_message'] = image_url_result['error_message']
             return response
+
         response["question"] = [
             {
                 "type": "text",
                 "text": question,
             },
-            {
-                "type": "image_url",
-                "image_url": prepare_asset_url(
-                    image_url_result['attachment_url'])
-            },
         ]
+
+        # GPT-4-turbo vision API recognizes image_url as base64 encoded image data
+        # https://community.openai.com/t/gpt-4-turbo-vision-api-recognizes-image-url-as-base64-encoded-image-data/734243
+        resolution = "auto"  # "auto" | "low" | "high"
+        if settings.AI_VISION_TECHNOLOGY == "openai":
+            if settings.OPENAI_VISION_MODEL == "gpt-4o":
+                response["question"].append(
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": prepare_asset_url(
+                                image_url_result['attachment_url']),
+                            "detail": resolution,
+                        }
+                    },
+                )
+            else:
+                # For legacy model "gpt-4-vision-preview"
+                response["question"].append(
+                    {
+                        "type": "image_url",
+                        "image_url": prepare_asset_url(
+                            image_url_result['attachment_url'])
+                    },
+                )
 
         if DEBUG:
             log_debug(f"\nQuestion for {get_vision_name()}:" +

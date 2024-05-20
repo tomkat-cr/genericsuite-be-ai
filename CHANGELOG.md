@@ -17,10 +17,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## Unreleased
 ## 0.1.6 (2024-05-04)
 ---
 
 ### New
+Implement new OpenAI model gpt-4o [GS-78].
 Add file upload on FastAPI [GS-68].
 Add STORAGE_URL_SEED and APP_HOST_NAME env. vars. to mask the S3 URL and avoid AWS over-billing attacks [GS-72].
 Conversations conversion [GS-72].
