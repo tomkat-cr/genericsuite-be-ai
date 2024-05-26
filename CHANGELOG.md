@@ -34,6 +34,11 @@ Remove the GenericSuite AI library dependency from GenericSuite Core [GS-74].
 Redirect README instructions to the GenericSuite Documentation [GS-73].
 "blueprint" as mandatory parameter to GenericDbHelper, AppContext and app_context_and_set_env(), to make posible the specific functions to GenericDbHelper [GS-79].
 
+### Fixes
+Fix DuckDuckGo & Google Search issues [GS-87].
+Implement non-agent LCEL chains to solve issue getting AI assistant responses in deployed environments [GS-66].
+
+
 ## 0.1.5 (2024-04-20)
 ---
 

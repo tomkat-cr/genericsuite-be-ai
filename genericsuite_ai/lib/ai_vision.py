@@ -403,7 +403,7 @@ def vision_image_analyzer(params: dict) -> dict:
 @tool
 def vision_image_analyzer_text_response(params: Any) -> str:
     """
-Usefull to process an specified image and answer a question about it. There must be an explitcit image URL specified by the Human or in the conversation.
+Useful to process an specified image and answer a question about it. There must be an explitcit image URL specified by the Human or in the conversation.
 Args: params (dict): Tool parameters. Must contain:
 "image_path" (str): image URL.
 "question" (str): question about the image.

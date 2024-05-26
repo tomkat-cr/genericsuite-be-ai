@@ -111,6 +111,7 @@ def get_conversation_buffer(messages: list) -> ConversationBufferMemory:
     chat_memory = ExistingChatMessageHistory(
         messages=messages_to_langchain_fmt(messages)
     )
+    # https://python.langchain.com/v0.1/docs/modules/memory/
     memory = ConversationBufferMemory(
         memory_key="chat_history",
         chat_memory=chat_memory,
@@ -179,7 +180,9 @@ def interpret_tool_params(
     Returns:
         dict: The interpreted tool params.
     """
+
     self_debug = DEBUG or is_under_test()
+    # self_debug = True
     _ = self_debug and \
         log_debug("INTERPRET_TOOL_PARAMS" +
             f"\n | tool_params: {tool_params}" + 
@@ -188,13 +191,16 @@ def interpret_tool_params(
             f"\n | first_param_name: {first_param_name}")
     if not tool_params:
         return tool_params
+    if isinstance(tool_params, dict) and 'params' in tool_params:
+        tool_params = tool_params['params'].copy()
     if isinstance(tool_params, str):
         # if tool_params has a "\n" and a additional line with anything
         # like "```" or "Observation", apart the last } and \n,
         # that extra info must be removed...
         for _ in range(3):
             if "\n" in tool_params:
-                tool_params = tool_params.rsplit("\n", 1)[0]  # Remove last line if it exists after a newline
+                # Remove last line if it exists after a newline
+                tool_params = tool_params.rsplit("\n", 1)[0]
         if tool_params.endswith("```"):
             tool_params = tool_params[:-3]  # Remove the trailing characters
         if tool_params.endswith("Observation"):

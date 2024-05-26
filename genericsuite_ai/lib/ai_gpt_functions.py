@@ -435,7 +435,7 @@ def get_function_specs(
         "required": ["input_text"],
     }, {
         "name": "webpage_analyzer",
-        "description": "Usefull to answer a question about a" +
+        "description": "Useful to answer a question about a" +
         " given webpage URL.",
         "parameters": {
             "type": "object",

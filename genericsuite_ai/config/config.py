@@ -91,6 +91,13 @@ class Config(ConfigSuperClass):
             'AI_ADDITIONAL_MODELS', '0'
         )
 
+        self.WEBSEARCH_DEFAULT_PROVIDER = self.get_env(
+            'WEBSEARCH_DEFAULT_PROVIDER', ''    # First try with DDG, if error, try Google
+            # 'WEBSEARCH_DEFAULT_PROVIDER', 'ddg'   # DuckDuckGo
+            # 'WEBSEARCH_DEFAULT_PROVIDER', 'google'   # Google
+        )
+
+
         """
         --------------------------------
         AI general configuration - END
@@ -111,10 +118,16 @@ class Config(ConfigSuperClass):
         # Agent configuration
 
         self.LANGCHAIN_AGENT_TYPE = self.get_env(
-            'LANGCHAIN_AGENT_TYPE', "react_chat_agent"
+            'LANGCHAIN_AGENT_TYPE', "lcel"
+            # 'LANGCHAIN_AGENT_TYPE', "react_chat_agent"
             # 'LANGCHAIN_AGENT_TYPE', "react_agent"
             # 'LANGCHAIN_AGENT_TYPE', "structured_chat_agent"
             # 'LANGCHAIN_AGENT_TYPE', "LLMSingleActionAgent"
+        )
+
+        self.LANGCHAIN_MAX_CONV_MESSAGES = self.get_env(
+            'LANGCHAIN_MAX_CONV_MESSAGES', '30'     # Default: preserve all
+            # 'LANGCHAIN_MAX_CONV_MESSAGES', '-1'     # Default: preserve all
         )
 
         self.LANGCHAIN_MAX_ITERATIONS = self.get_env(
