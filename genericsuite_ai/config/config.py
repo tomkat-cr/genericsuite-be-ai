@@ -180,9 +180,9 @@ class Config(ConfigSuperClass):
             'OPENAI_MODEL_INSTRUCT', 'gpt-3.5-turbo-instruct'
         )
         self.OPENAI_VISION_MODEL = self.get_env(
-            # 'OPENAI_VISION_MODEL', 'gpt-4o'
+            'OPENAI_VISION_MODEL', 'gpt-4o'
             # 'OPENAI_VISION_MODEL', 'gpt-4-turbo'
-            'OPENAI_VISION_MODEL', 'gpt-4-vision-preview'
+            # 'OPENAI_VISION_MODEL', 'gpt-4-vision-preview'
         )
         self.OPENAI_IMAGE_GEN_MODEL = self.get_env(
             'OPENAI_IMAGE_GEN_MODEL', 'dall-e-3'

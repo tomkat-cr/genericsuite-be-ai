@@ -30,6 +30,7 @@ Conversations conversion [GS-72].
 ### Changes
 Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as default OPENAI_EMBEDDINGS_MODEL [GS-65].
 ANTHROPIC_MODEL defaults to 'claude-3-sonnet'.
+OpenAI vision model defaults to 'gpt-4o' [GS-78].
 Remove the GenericSuite AI library dependency from GenericSuite Core [GS-74].
 Redirect README instructions to the GenericSuite Documentation [GS-73].
 "blueprint" as mandatory parameter to GenericDbHelper, AppContext and app_context_and_set_env(), to make posible the specific functions to GenericDbHelper [GS-79].
