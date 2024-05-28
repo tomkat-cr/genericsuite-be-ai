@@ -17,6 +17,19 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## Unreleased
+## 0.1.7 (2024-05-28)
+
+### New
+Add setup.cfg and setup.py.
+
+### Changes
+Remove the "dist" from the git repo.
+
+### Fixes
+Downgrade duckduckgo-search==5.3.1b1 to remove "pyreqwest_impersonate" and fix the error building the docker image.
+
+
 ## 0.1.6 (2024-05-04)
 ---
 
