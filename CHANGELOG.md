@@ -26,6 +26,8 @@ Implement new OpenAI model gpt-4o [GS-78].
 Add file upload on FastAPI [GS-68].
 Add STORAGE_URL_SEED and APP_HOST_NAME env. vars. to mask the S3 URL and avoid AWS over-billing attacks [GS-72].
 Conversations conversion [GS-72].
+Add requirements.txt generation to Makefile on publish.
+Add ".PHONY" entries for all labels in Makefile.
 
 ### Changes
 Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as default OPENAI_EMBEDDINGS_MODEL [GS-65].

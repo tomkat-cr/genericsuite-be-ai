@@ -1,5 +1,5 @@
 # .DEFAULT_GOAL := local
-# .PHONY: tests
+.PHONY: lock update requirements lock-rebuild build publish-test publish dev-prepare-local dev-prepare-git dev-prepare-pypi dev-prepare-publish
 SHELL := /bin/bash
 
 lock:
@@ -7,6 +7,9 @@ lock:
 
 update:
 	poetry update
+
+requirements:
+	poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 lock-rebuild:
 	poetry lock --no-update
@@ -18,11 +21,11 @@ build:
 	rm -rf dist
 	python3 -m build
 
-publish-test: dev-prepare-publish build
+publish-test: dev-prepare-publish requirements build
 	# Pypi Test publish
 	python3 -m twine upload --repository testpypi dist/*
 
-publish: dev-prepare-publish build
+publish: dev-prepare-publish requirements build
 	# Production Pypi publish
 	python3 -m twine upload dist/*
 
@@ -36,4 +39,4 @@ dev-prepare-pypi:
 	poetry add --group dev genericsuite
 
 dev-prepare-publish:
-	poetry remove genericsuite
+	if ! poetry remove genericsuite; then echo "'genericsuite' was not removed..."; else "'genericsuite' removed successfully..."; fi;
