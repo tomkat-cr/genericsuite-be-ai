@@ -2,7 +2,7 @@
 name = "genericsuite_ai"
 version = "0.1.7"
 authors = [
-    { name="Carlos J. Ramirez", email="<tomkat_cr@yahoo.com>" }
+    { name="Carlos J. Ramirez", email="tomkat_cr@yahoo.com" }
 ]
 description = "The GenericSuite AI for Python (backend version)"
 readme = "README.md"
