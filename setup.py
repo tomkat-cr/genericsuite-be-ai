@@ -28,7 +28,7 @@ classifiers = [
 
 setup(
     name='genericsuite_ai',
-    python_requires='>=3.10',
+    python_requires='>=3.9,<4.0',
     version=version,
     description=description,
     long_description=long_description,
