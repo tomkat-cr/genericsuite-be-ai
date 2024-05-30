@@ -22,7 +22,6 @@ classifiers = [
 ]
 dynamic = [
     "license",
-    "py_modules",
 ]
 
 [project.urls]
