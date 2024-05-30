@@ -20,7 +20,10 @@ classifiers = [
     "Operating System :: OS Independent",
     'Topic :: Software Development',
 ]
-license = "ISC"
+dynamic = [
+    "license",
+    "py_modules",
+]
 
 [project.urls]
 Homepage = "https://genericsuite.carlosjramirez.com/Backend-Development/GenericSuite-AI/"
