@@ -12,6 +12,7 @@ AI oriented Python APIs.
 '''.lstrip()
 
 # https://pypi.org/classifiers/
+
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Environment :: Console',
@@ -32,8 +33,6 @@ setup(
     version=version,
     description=description,
     long_description=long_description,
-    author='Carlos J. Ramirez',
-    author_email='tomkat_cr@yahoo.com',
     url='https://github.com/tomkat-cr/genericsuite-be-ai',
     license='ISC License',
     py_modules=['genericsuite_ai'],
