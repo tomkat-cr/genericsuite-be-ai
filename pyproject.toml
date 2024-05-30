@@ -21,9 +21,6 @@ classifiers = [
     'Topic :: Software Development',
 ]
 license = "ISC"
-dynamic = [
-    "py_modules",
-]
 
 [project.urls]
 Homepage = "https://genericsuite.carlosjramirez.com/Backend-Development/GenericSuite-AI/"
