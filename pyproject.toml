@@ -64,7 +64,7 @@ langchainhub = "^0.1.15"
 jq = "^1.6.0"
 transformers = "^4.38.2"
 text-generation = "^0.6.1"
-grpcio = "1.63.0"
+grpcio = "1.62.2"
 
 [tool.poetry.group.dev.dependencies]
 changelog-cli = "^0.7.1"
