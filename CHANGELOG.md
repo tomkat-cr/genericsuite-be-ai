@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 
 ## Unreleased
-## 0.1.7 (2024-05-28)
+## 0.1.7 (2024-06-02)
 
 ### New
 Add setup.cfg and setup.py.
@@ -28,9 +28,10 @@ Remove the "dist" from the git repo.
 
 ### Fixes
 Downgrade duckduckgo-search==5.3.1b1 to remove "pyreqwest_impersonate" and fix the error building the docker image.
+Downgrade grpcio==1.63.0 because latest 1.64.0 has incompatibilities with 'sam local build' [GS-90]
 
 
-## 0.1.6 (2024-05-04)
+## 0.1.6 (2024-05-28)
 ---
 
 ### New
