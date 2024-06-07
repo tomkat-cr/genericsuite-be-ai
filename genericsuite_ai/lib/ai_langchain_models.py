@@ -6,13 +6,10 @@ from typing import Union, Optional
 
 from langchain_openai import OpenAI
 from langchain_openai import ChatOpenAI
-from langchain.llms.clarifai import Clarifai
+from langchain_community.llms import Clarifai
 
-from langchain.chat_models.anthropic import ChatAnthropic
-# from langchain.chat_models.cohere import ChatCohere
-# from langchain.chat_models.google_palm import ChatGooglePalm
-# from langchain.chat_models.vertexai import ChatVertexAI
-from langchain.chat_models.ollama import ChatOllama
+from langchain_community.chat_models.anthropic import ChatAnthropic
+from langchain_community.chat_models.ollama import ChatOllama
 
 from langchain_community.llms.huggingface_text_gen_inference import (
     HuggingFaceTextGenInference

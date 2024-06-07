@@ -1,5 +1,5 @@
 """
-Implementation of the AI Chatbot API using Langchain.
+Implementation of the AI Chatbot API using Langchain - Custom Agent (_ca).
 """
 import re
 import json

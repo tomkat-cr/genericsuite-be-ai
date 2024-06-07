@@ -23,7 +23,7 @@ from genericsuite_ai.lib.ai_gpt_fn_conversations import (
     get_current_date_time
 )
 
-DEBUG = False
+DEBUG = True
 
 
 def get_role(v):
@@ -153,7 +153,7 @@ def start_run_conversation(app_context: AppContext,
     # conversation is a json string comes from the frontend
     # must be converted with json to a list of strings
     # before sending to the endpoint
-    if 'conversation' not in query_params:
+    if not query_params.get('conversation'):
         conv_response["error"] = True
         conv_response["error_message"] = "No conversation provided" + \
                                          f" [AICC-E010] Stack: {lld['code']}"
@@ -233,7 +233,7 @@ def finish_run_conversation(
         messages (list): message list for debuggin purposes.
 
     Returns:
-        dict: returs a dict ith these entries:
+        dict: returs a dict with these entries:
             question (str): the usre's question.
             response (str): the message answered by the model
             error (bool): True if there was a error

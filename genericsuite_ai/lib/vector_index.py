@@ -13,13 +13,13 @@ from langchain.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain.schema import Document
 from langchain.text_splitter import CharacterTextSplitter
 
-from langchain.vectorstores.mongodb_atlas import MongoDBAtlasVectorSearch
-from langchain.vectorstores.chroma import Chroma
-from langchain.vectorstores.clarifai import Clarifai
-# from langchain.vectorstores.pinecone import Pinecone
-from langchain.vectorstores.vectara import Vectara
-from langchain.vectorstores.weaviate import Weaviate
-from langchain.vectorstores.faiss import FAISS
+from langchain_community.vectorstores import MongoDBAtlasVectorSearch
+from langchain_community.vectorstores import Chroma
+from langchain_community.vectorstores import Clarifai
+# from langchain_community.vectorstores import Pinecone
+from langchain_community.vectorstores import Vectara
+from langchain_community.vectorstores import Weaviate
+from langchain_community.vectorstores import FAISS
 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.vectorstores import (

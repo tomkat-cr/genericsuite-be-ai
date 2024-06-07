@@ -91,6 +91,13 @@ class Config(ConfigSuperClass):
             'AI_ADDITIONAL_MODELS', '0'
         )
 
+        self.WEBSEARCH_DEFAULT_PROVIDER = self.get_env(
+            'WEBSEARCH_DEFAULT_PROVIDER', ''    # First try with DDG, if error, try Google
+            # 'WEBSEARCH_DEFAULT_PROVIDER', 'ddg'   # DuckDuckGo
+            # 'WEBSEARCH_DEFAULT_PROVIDER', 'google'   # Google
+        )
+
+
         """
         --------------------------------
         AI general configuration - END
@@ -111,10 +118,16 @@ class Config(ConfigSuperClass):
         # Agent configuration
 
         self.LANGCHAIN_AGENT_TYPE = self.get_env(
-            'LANGCHAIN_AGENT_TYPE', "react_chat_agent"
+            'LANGCHAIN_AGENT_TYPE', "lcel"
+            # 'LANGCHAIN_AGENT_TYPE', "react_chat_agent"
             # 'LANGCHAIN_AGENT_TYPE', "react_agent"
             # 'LANGCHAIN_AGENT_TYPE', "structured_chat_agent"
             # 'LANGCHAIN_AGENT_TYPE', "LLMSingleActionAgent"
+        )
+
+        self.LANGCHAIN_MAX_CONV_MESSAGES = self.get_env(
+            'LANGCHAIN_MAX_CONV_MESSAGES', '30'     # Default: preserve all
+            # 'LANGCHAIN_MAX_CONV_MESSAGES', '-1'     # Default: preserve all
         )
 
         self.LANGCHAIN_MAX_ITERATIONS = self.get_env(
@@ -160,13 +173,16 @@ class Config(ConfigSuperClass):
             'OPENAI_MODEL', 'gpt-3.5-turbo'
         )
         self.OPENAI_MODEL_PREMIUM = self.get_env(
-            'OPENAI_MODEL_PREMIUM', 'gpt-4-turbo-preview'   # TODO implement this param
+            'OPENAI_MODEL_PREMIUM', 'gpt-4o'
+            # 'OPENAI_MODEL_PREMIUM', 'gpt-4-turbo'
         )
         self.OPENAI_MODEL_INSTRUCT = self.get_env(
             'OPENAI_MODEL_INSTRUCT', 'gpt-3.5-turbo-instruct'
         )
         self.OPENAI_VISION_MODEL = self.get_env(
-            'OPENAI_VISION_MODEL', 'gpt-4-vision-preview'
+            'OPENAI_VISION_MODEL', 'gpt-4o'
+            # 'OPENAI_VISION_MODEL', 'gpt-4-turbo'
+            # 'OPENAI_VISION_MODEL', 'gpt-4-vision-preview'
         )
         self.OPENAI_IMAGE_GEN_MODEL = self.get_env(
             'OPENAI_IMAGE_GEN_MODEL', 'dall-e-3'
@@ -182,10 +198,8 @@ class Config(ConfigSuperClass):
             # 'OPENAI_TEXT_TO_AUDIO_VOICE', 'alloy' | 'echo', 'fable', 'onyx', 'nova', 'shimmer'
         )
         self.OPENAI_EMBEDDINGS_MODEL = self.get_env(
-            # # TODO: 2024-02-11 | Warning: model not found. Using cl100k_base encoding.
-            # In: GVI2_3) GET_VECTOR_INDEX | get Vectorstore from a list of documents...
-            # 'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-3-small'
-            'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-ada-002'
+            'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-3-small'
+            # 'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-ada-002'
         )
         self.OPENAI_EMBEDDINGS_MODEL_PREMIUM = self.get_env(
             'OPENAI_EMBEDDINGS_MODEL_PREMIUM', 'text-embedding-3-large'   # TODO implement this param
@@ -196,7 +210,7 @@ class Config(ConfigSuperClass):
 
         # Anthropic credentials and other parameters
 
-        self.ANTHROPIC_MODEL = self.get_env('ANTHROPIC_MODEL', 'claude-2')
+        self.ANTHROPIC_MODEL = self.get_env('ANTHROPIC_MODEL', 'claude-3-sonnet')
         self.ANTHROPIC_API_KEY = self.get_env('ANTHROPIC_API_KEY', '')
 
         # AWS credentials and other parameters

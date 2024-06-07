@@ -4,11 +4,11 @@ Embeddings engine
 from typing import List
 
 from langchain_openai import OpenAIEmbeddings
-from langchain.embeddings.huggingface import HuggingFaceEmbeddings
-from langchain.embeddings.clarifai import ClarifaiEmbeddings
-from langchain.embeddings.bedrock import BedrockEmbeddings
-from langchain.embeddings.cohere import CohereEmbeddings
-from langchain.embeddings.ollama import OllamaEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import ClarifaiEmbeddings
+from langchain_community.embeddings import BedrockEmbeddings
+from langchain_community.embeddings import CohereEmbeddings
+from langchain_community.embeddings import OllamaEmbeddings
 
 from genericsuite.util.app_context import AppContext
 from genericsuite.util.utilities import log_debug
@@ -101,6 +101,8 @@ def get_embeddings_engine(
             openai_api_key=openai_api_key,
             model=settings.OPENAI_EMBEDDINGS_MODEL,
         )
+    log_debug("GET_EMBEDDINGS_ENGINE |" +
+              f" response: {response}")
     return response
 
 

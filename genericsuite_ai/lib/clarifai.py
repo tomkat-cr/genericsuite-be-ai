@@ -388,16 +388,16 @@ def clarifai_img_gen_raw(
     with open(image_filename, 'wb') as f:
         f.write(output)
 
-    public_url, final_filename, error = upload_nodup_file_to_s3(
+    upload_result = upload_nodup_file_to_s3(
         file_path=image_filename,
         original_filename=original_filename,
         bucket_name=bucket_name,
         sub_dir=sub_dir,
     )
-    if error:
-        raise Exception("AWS S3 upload error:: " + error)
+    if upload_result['error']:
+        raise Exception("AWS S3 upload error:: " + upload_result['error'])
 
-    result = public_url
+    result = upload_result['public_url']
     os.remove(image_filename)  # Clean up the temporary file
 
     if DEBUG:

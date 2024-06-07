@@ -17,6 +17,67 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.7 (2024-06-06)
+
+### New
+Add AI Endpoints and create_app for FastAPI [FA-246].
+Add 'setup.cfg' and 'setup.py' to enable 'sam build' and 'sam local start-api' [GS-90].
+
+### Changes
+Change 'OPENAI_VISION_MODEL' default value to 'gpt-4o'. Previously was 'gpt-4-vision-preview' [GS-78].
+Remove the "dist" from the git repo.
+Separate "messages_to_langchain_fmt_text" and "messages_to_langchain_fmt" so the latter always returns list [GS-78].
+get_functions_dict() returns the exact function name when LanchChain Tools are required [GS-78].
+Image generator save_image() returns "public_url" instead of "attachment_url", to be aligned to AWS save_file_from_url().
+Add "sendfile_callable" and "background_tasks" parameters to ai_chatbot_endpoint() to allow FastAPI send file back [GS-66].
+
+### Fixes
+Downgrade duckduckgo-search==5.3.1b1 to remove "pyreqwest_impersonate" and fix the error building the docker image.
+Fix "Cannot instantiate typing.Union, <class 'TypeError'>" error in messages_to_langchain_fmt() avoiding AnyMessage use.
+Fix LCEL non-agent compatibility by removing "args_schema" from text_to_audio_response() Tool decorator [GS-66].
+
+
+## 0.1.6 (2024-05-28)
+---
+
+### New
+Implement new OpenAI model gpt-4o [GS-78].
+Add file upload on FastAPI [GS-68].
+Add STORAGE_URL_SEED and APP_HOST_NAME env. vars. to mask the S3 URL and avoid AWS over-billing attacks [GS-72].
+Conversations conversion [GS-72].
+Add requirements.txt generation to Makefile on publish.
+Add ".PHONY" entries for all labels in Makefile.
+
+### Changes
+Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as default OPENAI_EMBEDDINGS_MODEL [GS-65].
+ANTHROPIC_MODEL defaults to 'claude-3-sonnet'.
+OpenAI vision model defaults to 'gpt-4o' [GS-78].
+Remove the GenericSuite AI library dependency from GenericSuite Core [GS-74].
+Redirect README instructions to the GenericSuite Documentation [GS-73].
+"blueprint" as mandatory parameter to GenericDbHelper, AppContext and app_context_and_set_env(), to make posible the specific functions to GenericDbHelper [GS-79].
+
+### Fixes
+Fix DuckDuckGo & Google Search issues [GS-87].
+Implement non-agent LCEL chains to solve issue getting AI assistant responses in deployed environments [GS-66].
+
+
+## 0.1.5 (2024-04-20)
+---
+
+### Changes
+Updated genericsuite = "0.1.5" with "mangum" to make FastAPI work on AWS Lambda [FA-246].
+
+
+## 0.1.4 (2024-04-20)
+---
+
+### Changes
+Updated genericsuite = "0.1.4" with FastAPI enhanced support [FA-246].
+Change: README with clearer AWS_S3_CHATBOT_ATTACHMENTS_BUCKET_* example values and main image taken from the official documentation site [FA-246].
+Change: Homepage pointed to "https://genericsuite.carlosjramirez.com/Backend-Development/GenericSuite-AI/" [FA-257].
+License changed to ISC in "pyproject.toml" [FA-244].
+
+
 ## 0.1.3 (2024-04-09)
 ---
 

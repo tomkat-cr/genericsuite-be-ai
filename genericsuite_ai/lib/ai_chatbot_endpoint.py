@@ -1,10 +1,10 @@
 """
-AI Endpoints
+AI Endpoints (generic)
 """
-from typing import Optional
+from typing import Optional, Callable, Any
 
 # from chalice.app import Response
-from genericsuite.util.framework_abs_layer import Response
+from genericsuite.util.framework_abs_layer import Response, BlueprintOne
 
 from genericsuite.util.app_logger import log_debug
 from genericsuite.util.jwt import AuthorizedRequest
@@ -42,14 +42,17 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-DEBUG = False
+DEBUG = True
 
 
 def ai_chatbot_endpoint(
     request: AuthorizedRequest,
+    blueprint: BlueprintOne,
     other_params: Optional[dict] = None,
-    additional_callable: Optional[callable] = None,
-) -> Response:
+    additional_callable: Optional[Callable] = None,
+    sendfile_callable: Optional[Callable] = None,
+    background_tasks: Optional[Any] = None,
+) -> Any:
     """
     This function is the endpoint for the AI chatbot.
     It takes in a request and other parameters,
@@ -63,13 +66,12 @@ def ai_chatbot_endpoint(
     """
     if DEBUG:
         log_debug(f'AICBEP-1) AI_CHATBOT - request: {request.to_dict()}')
-        # log_debug(f'3) bp.current_app.api.binary_types: {bp.get_current_app().api.binary_types}')
 
     if other_params is None:
         other_params = {}
 
     # Set environment variables from the database configurations.
-    app_context = app_context_and_set_env(request)
+    app_context = app_context_and_set_env(request=request, blueprint=blueprint)
     if app_context.has_error():
         return return_resultset_jsonified_or_exception(
             app_context.get_error_resultset()
@@ -137,6 +139,11 @@ def ai_chatbot_endpoint(
         file_to_send = ai_chatbot_response['response'].split('=')[1]
         _ = DEBUG and log_debug('AICBEP-3) AI_CHATBOT_ENDPOINT' +
             f' - Sending file: {file_to_send}')
+        if sendfile_callable:
+            return sendfile_callable(
+                file_to_send=file_to_send,
+                background_tasks=background_tasks,
+            )
         return send_file(
             file_to_send=file_to_send,
         )
@@ -148,8 +155,10 @@ def ai_chatbot_endpoint(
 
 def vision_image_analyzer_endpoint(
     request: AuthorizedRequest,
+    blueprint: BlueprintOne,
     other_params: Optional[dict] = None,
-    additional_callable: Optional[callable] = None,
+    additional_callable: Optional[Callable] = None,
+    uploaded_file_path: Optional[str] = None,
 ) -> Response:
     """
     This endpoint receives an image file, saves it to a temporary directory
@@ -161,7 +170,7 @@ def vision_image_analyzer_endpoint(
     """
 
     # Set environment variables from the database configurations.
-    app_context = app_context_and_set_env(request)
+    app_context = app_context_and_set_env(request=request, blueprint=blueprint)
     if app_context.has_error():
         return return_resultset_jsonified_or_exception(
             app_context.get_error_resultset()
@@ -223,6 +232,7 @@ def vision_image_analyzer_endpoint(
     return file_upload_handler(
         app_context=app_context,
         p={
+            "uploaded_file_path": uploaded_file_path,
             "extension": get_file_extension(query_params["file_name"]),
             "handler_function": vision_image_analyzer,
             "unique_param_name": "params",
@@ -242,8 +252,10 @@ def vision_image_analyzer_endpoint(
 
 def transcribe_audio_endpoint(
     request: AuthorizedRequest,
+    blueprint: BlueprintOne,
     other_params: Optional[dict] = None,
-    additional_callable: Optional[callable] = None,
+    additional_callable: Optional[Callable] = None,
+    uploaded_file_path: Optional[str] = None,
 ) -> Response:
     """
     This endpoint receives an audio file, saves it to a temporary directory
@@ -255,7 +267,7 @@ def transcribe_audio_endpoint(
     """
 
     # Set environment variables from the database configurations.
-    app_context = app_context_and_set_env(request)
+    app_context = app_context_and_set_env(request=request, blueprint=blueprint)
     if app_context.has_error():
         return return_resultset_jsonified_or_exception(
             app_context.get_error_resultset()
@@ -309,6 +321,7 @@ def transcribe_audio_endpoint(
     return file_upload_handler(
         app_context=app_context,
         p={
+            "uploaded_file_path": uploaded_file_path,
             "extension": file_extension,
             "handler_function": audio_to_text_transcript,
             "unique_param_name": "params",

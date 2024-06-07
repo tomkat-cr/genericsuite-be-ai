@@ -94,7 +94,7 @@ def get_qa_chain(
                 app_context=cac.app_context,
                 error_code="WS_GQC-E010"))
 
-    qa_chain = None
+    result["qa_chain"] = None
     if not result["error"]:
         # Build a QA chain
         vectorstore = get_vectorstore["vector_store"]
@@ -195,7 +195,7 @@ def webpage_analyzer(
 @tool
 def webpage_analyzer_text_response(params: Any) -> str:
     """
-Usefull to answer a question about a given webpage URL.
+Useful to answer a question about a given webpage URL.
 Args: params (dict): Tool parameters. Must contain:
 "url" (str): webpage URL.
 "question" (str): question about the webpage.
