@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## 0.1.7 (2024-06-02)
+## 0.1.7 (2024-06-06)
 
 ### New
 Add AI Endpoints and create_app for FastAPI [FA-246].
