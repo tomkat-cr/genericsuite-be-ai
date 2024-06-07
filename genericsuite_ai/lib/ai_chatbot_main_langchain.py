@@ -55,6 +55,7 @@ from genericsuite_ai.lib.ai_gpt_functions import (
 )
 from genericsuite_ai.lib.ai_langchain_tools import (
     messages_to_langchain_fmt,
+    messages_to_langchain_fmt_text,
     ExistingChatMessageHistory,
 )
 from genericsuite_ai.lib.ai_langchain_models import (
@@ -380,7 +381,7 @@ def get_agent_executor(
             prompt = get_agent_prompt("hwchase17/react-chat")
             # Notice that chat_history is a string, since this prompt is aimed at LLMs,
             # not chat models.
-            memory = messages_to_langchain_fmt(messages, "text")
+            memory = messages_to_langchain_fmt_text(messages)
         agent = create_react_agent(llm, tools, prompt)
     else:
         raise Exception(f"[AI_GAE-E010] Invalid agent_type {agent_type}")
@@ -470,6 +471,9 @@ def run_lcel_chain(
     Run the LCEL chain and returns the .invoke() results.
     """
     tools_dict = get_functions_dict(cac.app_context)
+    _ = DEBUG and \
+        log_debug('>>> 3.0) RUN_ASSISTANT | LCEL | tools_dict:' +
+                    f' {tools_dict}')
 
     session_id = cac.app_context.get_other_data("cid")
     config = RunnableConfig({

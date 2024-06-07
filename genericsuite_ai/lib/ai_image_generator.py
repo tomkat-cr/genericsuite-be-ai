@@ -93,7 +93,7 @@ def save_image(
 
     Returns:
         dict: A dictionary with the following elements:
-            attachment_url (str): URL for the image.
+            public_url (str): URL for the image.
             final_filename (str): file name of the image with date/time added.
             file_size (int): the file size in bytes.
             error (bool): True if there was an error, False otherwise.
@@ -101,7 +101,7 @@ def save_image(
     """
     settings = Config(cac.get())
     result = get_default_resultset()
-    result['attachment_url'] = None
+    result['public_url'] = None
     result['final_filename'] = None
     result['file_size'] = None
     bucket_name = settings.AWS_S3_CHATBOT_ATTACHMENTS_BUCKET
@@ -116,10 +116,10 @@ def save_image(
             sub_dir=user_id,
             original_filename=original_filename,
         )
-        # attachment_url = ublic_url
+        # attachment_url = public_url
         result['error'] = save_result['error']
         result['error_message'] = save_result['error_message']
-        result['attachment_url'] = save_result['public_url']
+        result['public_url'] = save_result['public_url']
         result['final_filename'] = save_result['final_filename']
         result['file_size'] = save_result['file_size']
     return result

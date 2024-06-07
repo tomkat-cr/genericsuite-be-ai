@@ -66,13 +66,20 @@ def get_functions_dict(
     if is_lc:
         # Langchain Tools
         result = {
-            "vision_image_analyzer": vision_image_analyzer_text_response,
-            "image_generator": image_generator_text_response,
+            # "vision_image_analyzer": vision_image_analyzer_text_response,
+            # "image_generator": image_generator_text_response,
+            # "web_search": web_search,
+            # "conversation_summary": conversation_summary_tool,
+            # "audio_processing": audio_processing_text_response,
+            # "text_to_audio_response": text_to_audio_response,
+            # "webpage_analyzer": webpage_analyzer_text_response,
+            "vision_image_analyzer_text_response": vision_image_analyzer_text_response,
+            "image_generator_text_response": image_generator_text_response,
             "web_search": web_search,
-            "conversation_summary": conversation_summary_tool,
-            "audio_processing": audio_processing_text_response,
+            "conversation_summary_tool": conversation_summary_tool,
+            "audio_processing_text_response": audio_processing_text_response,
             "text_to_audio_response": text_to_audio_response,
-            "webpage_analyzer": webpage_analyzer_text_response,
+            "webpage_analyzer_text_response": webpage_analyzer_text_response,
             # "get_current_date_time": get_current_date_time,
         }
     else:

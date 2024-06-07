@@ -1,7 +1,7 @@
 """
-AI Endpoints
+AI Endpoints (generic)
 """
-from typing import Optional
+from typing import Optional, Callable, Any
 
 # from chalice.app import Response
 from genericsuite.util.framework_abs_layer import Response, BlueprintOne
@@ -42,15 +42,17 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-DEBUG = False
+DEBUG = True
 
 
 def ai_chatbot_endpoint(
     request: AuthorizedRequest,
     blueprint: BlueprintOne,
     other_params: Optional[dict] = None,
-    additional_callable: Optional[callable] = None,
-) -> Response:
+    additional_callable: Optional[Callable] = None,
+    sendfile_callable: Optional[Callable] = None,
+    background_tasks: Optional[Any] = None,
+) -> Any:
     """
     This function is the endpoint for the AI chatbot.
     It takes in a request and other parameters,
@@ -137,6 +139,11 @@ def ai_chatbot_endpoint(
         file_to_send = ai_chatbot_response['response'].split('=')[1]
         _ = DEBUG and log_debug('AICBEP-3) AI_CHATBOT_ENDPOINT' +
             f' - Sending file: {file_to_send}')
+        if sendfile_callable:
+            return sendfile_callable(
+                file_to_send=file_to_send,
+                background_tasks=background_tasks,
+            )
         return send_file(
             file_to_send=file_to_send,
         )
@@ -150,7 +157,7 @@ def vision_image_analyzer_endpoint(
     request: AuthorizedRequest,
     blueprint: BlueprintOne,
     other_params: Optional[dict] = None,
-    additional_callable: Optional[callable] = None,
+    additional_callable: Optional[Callable] = None,
     uploaded_file_path: Optional[str] = None,
 ) -> Response:
     """
@@ -247,7 +254,7 @@ def transcribe_audio_endpoint(
     request: AuthorizedRequest,
     blueprint: BlueprintOne,
     other_params: Optional[dict] = None,
-    additional_callable: Optional[callable] = None,
+    additional_callable: Optional[Callable] = None,
     uploaded_file_path: Optional[str] = None,
 ) -> Response:
     """

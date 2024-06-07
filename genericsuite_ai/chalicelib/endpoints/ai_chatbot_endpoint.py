@@ -1,5 +1,5 @@
 """
-AI Endpoints
+AI Endpoints for Chalice
 """
 from typing import Optional
 

@@ -17,17 +17,24 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## Unreleased
 ## 0.1.7 (2024-06-02)
 
 ### New
-Add setup.cfg and setup.py.
+Add AI Endpoints and create_app for FastAPI [FA-246].
+Add 'setup.cfg' and 'setup.py' to enable 'sam build' and 'sam local start-api' [GS-90].
 
 ### Changes
+Change 'OPENAI_VISION_MODEL' default value to 'gpt-4o'. Previously was 'gpt-4-vision-preview' [GS-78].
 Remove the "dist" from the git repo.
+Separate "messages_to_langchain_fmt_text" and "messages_to_langchain_fmt" so the latter always returns list [GS-78].
+get_functions_dict() returns the exact function name when LanchChain Tools are required [GS-78].
+Image generator save_image() returns "public_url" instead of "attachment_url", to be aligned to AWS save_file_from_url().
+Add "sendfile_callable" and "background_tasks" parameters to ai_chatbot_endpoint() to allow FastAPI send file back [GS-66].
 
 ### Fixes
 Downgrade duckduckgo-search==5.3.1b1 to remove "pyreqwest_impersonate" and fix the error building the docker image.
+Fix "Cannot instantiate typing.Union, <class 'TypeError'>" error in messages_to_langchain_fmt() avoiding AnyMessage use.
+Fix LCEL non-agent compatibility by removing "args_schema" from text_to_audio_response() Tool decorator [GS-66].
 
 
 ## 0.1.6 (2024-05-28)

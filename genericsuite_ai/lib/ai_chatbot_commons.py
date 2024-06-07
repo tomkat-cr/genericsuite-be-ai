@@ -233,7 +233,7 @@ def finish_run_conversation(
         messages (list): message list for debuggin purposes.
 
     Returns:
-        dict: returs a dict ith these entries:
+        dict: returs a dict with these entries:
             question (str): the usre's question.
             response (str): the message answered by the model
             error (bool): True if there was a error

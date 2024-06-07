@@ -5,7 +5,7 @@ from typing import Union, Any
 import json
 
 from langchain.schema.messages import (
-    HumanMessage, SystemMessage, AIMessage, AnyMessage
+    HumanMessage, SystemMessage, AIMessage   #  AnyMessage
 )
 from langchain.memory import ConversationBufferMemory
 from langchain_core.chat_history import BaseChatMessageHistory
@@ -52,7 +52,7 @@ class ExistingChatMessageHistory(BaseChatMessageHistory):
 
 
 def messages_to_langchain_fmt(messages: list, message_format: str = None
-                              ) -> Union[list, str]:
+                              ) -> list:
     """
     Prepare messages for LangChain, converting messages from ChatGPT to
     Langchain format. Example:
@@ -64,27 +64,24 @@ def messages_to_langchain_fmt(messages: list, message_format: str = None
             Options: "class", "tuple", "text". Defaults to "class".
 
     Returns:
-        list or str: The messages converted to the message format.
+        list: The messages converted to the desired message format.
     """
-    if not message_format:
-        message_format = "class"
+    message_format = message_format or "class"
     if message_format == "class":
         messages = [
             HumanMessage(content=v["content"]) if v["role"] == "user" else
             SystemMessage(content=v["content"]) if v["role"] == "system" else
             AIMessage(content=v["content"]) if v["role"] == "assistant" else
-            AnyMessage(content=v["content"])
+            (
+                HumanMessage(content=v["attachment_url"])
+                if v.get("fix_role", "user") else
+                AIMessage(content=v["attachment_url"])
+            ) if v["role"] == 'attachment' else
+            None
+            # Throws Cannot instantiate typing.Union, <class 'TypeError'> [AIRCLC-E020]
+            # AnyMessage(content=v["content"])
             for v in messages
         ]
-    elif message_format == "text":
-        # String chat_history, suitable for LLM's prompt, not Chat Models
-        messages = "\n".join([
-            f'Human: {v["content"]}' if v["role"] == "user" else
-            f'System: {v["content"]}' if v["role"] == "system" else
-            f'AI: {v["content"]}' if v["role"] == "assistant" else
-            None
-            for v in messages
-        ])
     else:
         # message_format == "tuple"
         messages = [
@@ -94,6 +91,27 @@ def messages_to_langchain_fmt(messages: list, message_format: str = None
             None
             for v in messages
         ]
+    return messages
+
+
+def messages_to_langchain_fmt_text(messages: list) -> str:
+    """
+    Prepare string chat_history, suitable for LLM's prompt, not Chat Models.
+
+    Args:
+        messages (list): The messages to prepare in ChatGTP format.
+
+    Returns:
+        str: The messages converted to text.
+    """
+    # String chat_history, suitable for LLM's prompt, not Chat Models
+    messages = "\n".join([
+        f'Human: {v["content"]}' if v["role"] == "user" else
+        f'System: {v["content"]}' if v["role"] == "system" else
+        f'AI: {v["content"]}' if v["role"] == "assistant" else
+        None
+        for v in messages
+    ])
     return messages
 
 
