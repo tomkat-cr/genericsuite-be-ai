@@ -17,6 +17,17 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## Unreleased
+## 0.1.8 (2024-06-08)
+
+### New
+Add "langchain-google-community" due to a deprecation notice about GoogleSearchAPIWrapper [GS-66].
+Add Langchain Tools description lenght validation, to avoid descriptions > 1024 chars.
+
+### Changes
+Update dependecies "langchain", "langchain-core", "langchain-openai", "tiktoken" to be able to add "langchain-google-community" [GS-66].
+
+
 ## 0.1.7 (2024-06-06)
 
 ### New
