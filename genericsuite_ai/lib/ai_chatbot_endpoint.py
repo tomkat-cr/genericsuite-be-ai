@@ -92,6 +92,7 @@ def ai_chatbot_endpoint(
     # after the app_context_and_set_env(request)
     settings = Config(app_context)
     billing = BillingUtilities(app_context)
+
     def get_model_engine():
         model_engine = \
             f'\n | AI_TECHNOLOGY: {settings.AI_TECHNOLOGY}'
@@ -137,7 +138,8 @@ def ai_chatbot_endpoint(
 
     if '[SEND_FILE_BACK]' in ai_chatbot_response.get('response'):
         file_to_send = ai_chatbot_response['response'].split('=')[1]
-        _ = DEBUG and log_debug('AICBEP-3) AI_CHATBOT_ENDPOINT' +
+        _ = DEBUG and log_debug(
+            'AICBEP-3) AI_CHATBOT_ENDPOINT' +
             f' - Sending file: {file_to_send}')
         if sendfile_callable:
             return sendfile_callable(

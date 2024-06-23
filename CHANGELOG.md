@@ -27,6 +27,10 @@ Add Langchain Tools description lenght validation, to avoid descriptions > 1024 
 ### Changes
 Update dependecies "langchain", "langchain-core", "langchain-openai", "tiktoken" to be able to add "langchain-google-community" [GS-66].
 
+### Fixes
+Fix audio processing issues in FastAPI because AWS API Gateway limitations, sending the base64 encoded files back [GS-95].
+Change: minor linting changes.
+
 
 ## 0.1.7 (2024-06-06)
 

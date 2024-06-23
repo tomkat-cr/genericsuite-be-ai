@@ -14,8 +14,14 @@ from fastapi.responses import FileResponse
 from fastapi.security import HTTPBasic
 
 # from genericsuite.util.framework_abs_layer import Response, BlueprintOne
-from genericsuite.fastapilib.framework_abstraction import Response, BlueprintOne
+from genericsuite.fastapilib.framework_abstraction import (
+    Response,
+    BlueprintOne,
+)
 from genericsuite.util.app_logger import log_debug
+from genericsuite.util.utilities import (
+    send_file_text_text,
+)
 
 from genericsuite.fastapilib.util.parse_multipart import download_file_fa
 from genericsuite.fastapilib.util.dependencies import (
@@ -32,6 +38,7 @@ from genericsuite_ai.lib.ai_chatbot_endpoint import (
 # from app.internal.ai_gpt_fn_index import (
 #     assign_app_gpt_functions
 # )
+
 
 class VisionImageAnalyzerRequest(BaseModel):
     """
@@ -55,6 +62,9 @@ class TranscribeAudioRequest(BaseModel):
 
 DEBUG = True
 
+# send_file_fa() mode
+SEND_FILE_AS_BINARY = False
+
 # Set FastAPI router
 # router = APIRouter()
 router = BlueprintOne()
@@ -75,6 +85,18 @@ def remove_temp_file(file_path: str) -> None:
 def send_file_fa(
     file_to_send: str,
     background_tasks: BackgroundTasks,
+) -> Any:
+    """
+    Send the file back, the FastAPI way
+    """
+    if SEND_FILE_AS_BINARY:
+        return send_binary_file_fa(file_to_send, background_tasks)
+    return send_base64_file_fa(file_to_send, background_tasks)
+
+
+def send_binary_file_fa(
+    file_to_send: str,
+    background_tasks: BackgroundTasks,
 ) -> FileResponse:
     """
     Send the file back, the FastAPI way
@@ -85,6 +107,19 @@ def send_file_fa(
     # https://fastapi.tiangolo.com/advanced/custom-response/#fileresponse
     _ = DEBUG and log_debug("Returning file content as FileResponse")
     return FileResponse(file_to_send)
+
+
+def send_base64_file_fa(
+    file_to_send: str,
+    background_tasks: BackgroundTasks,
+) -> Any:
+    """
+    Return the file content as GenericSuite way, Base64 encoded.
+    This approach worked for audio file and the ai_chatbot in Chalice
+    because AWS API Gateway won't allow binary responses.
+    """
+    _ = DEBUG and log_debug("Returning file content the Genericsuite way")
+    return send_file_text_text(file_to_send)
 
 
 @router.post('/chatbot', tags='chatbot')
@@ -129,7 +164,7 @@ async def ai_chatbot_endpoint(
 async def vision_image_analyzer_endpoint(
     request: FaRequest,
     file: UploadFile = File(...),
-        # file: Annotated[UploadFile, File(...)] = None,
+    # file: Annotated[UploadFile, File(...)] = None,
     current_user: str = Depends(get_current_user),
     query_params: VisionImageAnalyzerRequest = Depends(),
 ) -> Response:
@@ -142,7 +177,8 @@ async def vision_image_analyzer_endpoint(
     :return: The text with the image analysis.
     """
     _ = DEBUG and \
-        log_debug('1) vision_image_analyzer_endpoint | query_params:' +
+        log_debug(
+            '1) vision_image_analyzer_endpoint | query_params:' +
             f' {request.query_params}')
     gs_request, other_params = get_default_fa_request(
         current_user=current_user, query_params=query_params.dict(),
@@ -150,7 +186,8 @@ async def vision_image_analyzer_endpoint(
     router.set_current_request(request, gs_request)
     uploaded_file_path = await download_file_fa(file)
     _ = DEBUG and \
-        log_debug('2) vision_image_analyzer_endpoint | uploaded_file_path:' +
+        log_debug(
+            '2) vision_image_analyzer_endpoint | uploaded_file_path:' +
             f' {uploaded_file_path} | request: {request}')
     return vision_image_analyzer_endpoint_model(
         request=gs_request,
@@ -165,7 +202,7 @@ async def vision_image_analyzer_endpoint(
 async def transcribe_audio_endpoint(
     request: FaRequest,
     file: UploadFile = File(...),
-       # file: Annotated[UploadFile, File()] = None,
+    # file: Annotated[UploadFile, File()] = None,
     current_user: str = Depends(get_current_user),
     query_params: TranscribeAudioRequest = Depends(),
 ) -> Response:
@@ -178,7 +215,8 @@ async def transcribe_audio_endpoint(
     :return: The transcription result.
     """
     _ = DEBUG and \
-        log_debug('transcribe_audio_endpoint | query_params:' +
+        log_debug(
+            'transcribe_audio_endpoint | query_params:' +
             f' {request.query_params}')
     gs_request, other_params = get_default_fa_request(
         current_user=current_user, query_params=query_params.dict(),
