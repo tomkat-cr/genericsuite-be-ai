@@ -60,7 +60,7 @@ class TranscribeAudioRequest(BaseModel):
     other: str
 
 
-DEBUG = True
+DEBUG = False
 
 # send_file_fa() mode
 SEND_FILE_AS_BINARY = False

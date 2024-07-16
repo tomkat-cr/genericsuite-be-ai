@@ -23,7 +23,7 @@ from genericsuite_ai.lib.ai_gpt_fn_conversations import (
     get_current_date_time
 )
 
-DEBUG = True
+DEBUG = False
 
 
 def get_role(v):
