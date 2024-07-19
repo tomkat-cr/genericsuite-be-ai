@@ -17,6 +17,23 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.8 (2024-07-18)
+
+### New
+Add "langchain-google-community" due to a deprecation notice about GoogleSearchAPIWrapper [GS-66].
+Add Langchain Tools description length validation, to avoid descriptions > 1024 chars.
+
+### Changes
+Update dependecies "langchain" (from ^0.1.20 to ^0.2.3), "langchain-core", "langchain-openai" (from ^0.1.6 to ^0.1.8), "tiktoken" (from 0.6 to ^0.7.0) to be able to add "langchain-google-community" [GS-66].
+Update env.example. to have the GS BE Core latest updates.
+AWS_API_GATEWAY_STAGE env. var. removed from env.example.
+All DEBUGs turned off to save logs/AWS Cloudwatch space.
+
+### Fixes
+Fix audio processing issues in FastAPI due to AWS API Gateway limitations, sending the base64 encoded files back [GS-95].
+Change: minor linting changes.
+
+
 ## 0.1.7 (2024-06-06)
 
 ### New

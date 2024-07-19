@@ -1,6 +1,6 @@
 [project]
 name = "genericsuite_ai"
-version = "0.1.7"
+version = "0.1.8"
 authors = [
     { name="Carlos J. Ramirez", email="tomkat_cr@yahoo.com" }
 ]
@@ -30,7 +30,7 @@ Issues = "https://github.com/tomkat-cr/genericsuite-be-ai/issues"
 
 [tool.poetry]
 name = "genericsuite_ai"
-version = "0.1.7"
+version = "0.1.8"
 description = "The GenericSuite AI for Python (backend version)"
 authors = ["Carlos J. Ramirez <tomkat_cr@yahoo.com>"]
 license = "ISC"
@@ -44,7 +44,7 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
 openai = "^1.7.2"
-langchain = "^0.1.20"
+langchain = "^0.2.3"
 click = "^8.1.7"
 jmespath = "^1.0.1"
 pyyaml = "^6.0.1"
@@ -53,17 +53,19 @@ six = "^1.16.0"
 typing-extensions = "^4.8.0"
 duckduckgo-search = "5.3.1b1"
 requests-toolbelt = "^1.0.0"
-tiktoken = "0.6"
+tiktoken = "^0.7.0"
 faiss-cpu = "^1.7.4"
 google-api-python-client = "^2.111.0"
 langchain-google-genai = {version = "^1.0.3", extras = ["images"]}
 pillow = "^10.1.0"
 clarifai = "^10.1.0"
-langchain-openai = "^0.1.6"
+langchain-openai = "^0.1.8"
 langchainhub = "^0.1.15"
 jq = "^1.6.0"
 transformers = "^4.38.2"
 text-generation = "^0.6.1"
+langchain-core = "^0.2.5"
+langchain-google-community = "^1.0.5"
 
 [tool.poetry.group.dev.dependencies]
 changelog-cli = "^0.7.1"

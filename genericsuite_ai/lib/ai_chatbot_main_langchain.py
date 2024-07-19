@@ -70,7 +70,7 @@ from genericsuite_ai.lib.translator import translate
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
 
-DEBUG = True
+DEBUG = False
 
 NON_AI_TRANSLATOR = 'google_translate'
 NON_AGENT_PROMPT = 'mediabros/gs_non_agent_lcel'
@@ -532,6 +532,30 @@ def run_lcel_chain(
     return exec_result
 
 
+def verify_tools(tools, conv_response):
+    """
+    Verify if the tools are valid, checking the Tool description lenght.
+    """
+    if conv_response["error"]:
+        return conv_response
+    bad_tools = [
+        (tuple(
+            [index, f"Lenght: {len(tools[index].description)}", tools[index]]
+        ))
+        for index in range(len(tools))
+        if len(tools[index].description) > 1024
+    ]
+    _ = DEBUG and \
+        log_debug('>>> VERIFY_TOOLS | LONG DESC tools[list]:' +
+            f' {bad_tools}')
+    if len(bad_tools) > 0:
+        conv_response["error"] = True
+        conv_response["error_message"] = \
+            "ERROR: Too long Tool description(s): " + \
+            ', '.join([f'{v[2].name} ({v[1]})' for v in bad_tools])
+    return conv_response
+
+
 def run_assistant(
     conv_response: dict,
     llm: Any,
@@ -547,6 +571,7 @@ def run_assistant(
         log_debug('>>> 1) RUN_ASSISTANT | LANGCHAIN_AGENT_TYPE:' +
             f' {settings.LANGCHAIN_AGENT_TYPE}')
 
+    conv_response = verify_tools(tools, conv_response)
     if conv_response["error"]:
         return conv_response
 
