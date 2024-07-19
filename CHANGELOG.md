@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## 0.1.8 (2024-06-08)
+## 0.1.8 (2024-07-18)
 
 ### New
 Add "langchain-google-community" due to a deprecation notice about GoogleSearchAPIWrapper [GS-66].
