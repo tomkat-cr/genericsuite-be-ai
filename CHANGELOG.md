@@ -25,6 +25,8 @@ Add Langchain Tools description length validation, to avoid descriptions > 1024 
 
 ### Changes
 Update dependecies "langchain", "langchain-core", "langchain-openai", "tiktoken" to be able to add "langchain-google-community" [GS-66].
+Update env.example. to have the GS BE Core latest updates.
+AWS_API_GATEWAY_STAGE env. var. removed from env.example.
 
 ### Fixes
 Fix audio processing issues in FastAPI because AWS API Gateway limitations, sending the base64 encoded files back [GS-95].
