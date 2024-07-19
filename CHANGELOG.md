@@ -24,12 +24,13 @@ Add "langchain-google-community" due to a deprecation notice about GoogleSearchA
 Add Langchain Tools description length validation, to avoid descriptions > 1024 chars.
 
 ### Changes
-Update dependecies "langchain", "langchain-core", "langchain-openai", "tiktoken" to be able to add "langchain-google-community" [GS-66].
+Update dependecies "langchain" (from ^0.1.20 to ^0.2.3), "langchain-core", "langchain-openai" (from ^0.1.6 to ^0.1.8), "tiktoken" (from 0.6 to ^0.7.0) to be able to add "langchain-google-community" [GS-66].
 Update env.example. to have the GS BE Core latest updates.
 AWS_API_GATEWAY_STAGE env. var. removed from env.example.
+All DEBUGs turned off to save logs/AWS Cloudwatch space.
 
 ### Fixes
-Fix audio processing issues in FastAPI because AWS API Gateway limitations, sending the base64 encoded files back [GS-95].
+Fix audio processing issues in FastAPI due to AWS API Gateway limitations, sending the base64 encoded files back [GS-95].
 Change: minor linting changes.
 
 
