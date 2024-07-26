@@ -17,6 +17,15 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.9 (2024-07-26)
+
+### New
+Add: ".nvmrc" file to set the repo default node version.
+
+### Fixes
+Fix: typing in create_app parameters.
+
+
 ## 0.1.8 (2024-07-18)
 
 ### New

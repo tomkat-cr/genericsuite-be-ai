@@ -1,6 +1,6 @@
 from setuptools import setup
 
-version = '0.1.8'
+version = '0.1.9'
 description = 'The GenericSuite AI for Python (backend version).'
 long_description = '''
 The GenericSuite AI

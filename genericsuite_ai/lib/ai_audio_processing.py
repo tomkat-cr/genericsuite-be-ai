@@ -523,9 +523,9 @@ def text_to_audio_generator(params: Any) -> dict:
 
     if not other_options:
         other_options = {}
+        mock_file_example = None
         # mock_file_example = '/tmp/9acd5e877ac44980b3604069e9b0d8df.wav'
         # mock_file_example = "/tmp/openai_tts_8ed041f4e2044ed093cb1231141a5f5b.mp3"
-        mock_file_example = None
         if mock_file_example and os.path.isfile(mock_file_example):
             other_options["mock_response"] = mock_file_example
 
