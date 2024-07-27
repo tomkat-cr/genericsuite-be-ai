@@ -15,7 +15,7 @@ from genericsuite_ai.fastapilib.endpoints import ai_chatbot_endpoint
 DEBUG = False
 
 
-def create_app(app_name: str, settings = None) -> Any:
+def create_app(app_name: str, settings: Config = None) -> Any:
     """ Create the FastAPI App """
 
     if settings is None:

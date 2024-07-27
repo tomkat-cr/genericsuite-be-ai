@@ -1,6 +1,6 @@
 [project]
 name = "genericsuite_ai"
-version = "0.1.8"
+version = "0.1.9"
 authors = [
     { name="Carlos J. Ramirez", email="tomkat_cr@yahoo.com" }
 ]
@@ -30,7 +30,7 @@ Issues = "https://github.com/tomkat-cr/genericsuite-be-ai/issues"
 
 [tool.poetry]
 name = "genericsuite_ai"
-version = "0.1.8"
+version = "0.1.9"
 description = "The GenericSuite AI for Python (backend version)"
 authors = ["Carlos J. Ramirez <tomkat_cr@yahoo.com>"]
 license = "ISC"
