@@ -17,15 +17,16 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## Unreleased
-## 0.1.10 (2024-09-01)
+## 0.1.10 (2024-09-03)
 ---
 
 ### New
-Implement HuggingFace image generator [GS-117].
+Implement HF (HuggingFace) local pipelines [GS-59].
+Implement Falcon Mamba with HF [GS-118].
+Implement Meta Llama 3.1 with HF [GS-119].
+Implement HF (HuggingFace) image generator [GS-117].
 Implement Flux.1 image generator [GS-117].
 Implement Anthropic Claude 3.5 Sonnet [GS-33].
-Implement HuggingFace local pipelines [GS-59].
 Implement Groq chat model [GS-92].
 
 ### Changes

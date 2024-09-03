@@ -304,6 +304,7 @@ class Config(ConfigSuperClass):
         self.GROQ_MAX_TOKENS = self.get_env('GROQ_MAX_TOKENS', '')
         self.GROQ_TIMEOUT = self.get_env('GROQ_TIMEOUT', '')
         self.GROQ_MAX_RETRIES = self.get_env('GROQ_MAX_RETRIES', '2')
+        # https://console.groq.com/docs/models
         self.GROQ_MODEL = self.get_env(
             'GROQ_MODEL',
             'mixtral-8x7b-32768'
