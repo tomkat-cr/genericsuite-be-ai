@@ -17,7 +17,7 @@ from genericsuite.util.aws import upload_nodup_file_to_s3
 
 from genericsuite_ai.config.config import Config
 
-DEBUG = True
+DEBUG = False
 cac = CommonAppContext()
 
 
