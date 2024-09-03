@@ -29,7 +29,7 @@ from genericsuite.util.app_context import (
     AppContext,
     CommonAppContext,
 )
-from genericsuite.util.app_logger import log_debug
+from genericsuite.util.app_logger import log_debug, log_error
 from genericsuite.util.utilities import (
     get_standard_base_exception_msg,
     get_default_resultset,
@@ -74,7 +74,8 @@ DEBUG = False
 
 NON_AI_TRANSLATOR = 'google_translate'
 NON_AGENT_PROMPT = 'mediabros/gs_non_agent_lcel'
-START_PHRASE_PROMPT_TOKEN = "Assistant is a large language model trained by OpenAI"
+START_PHRASE_PROMPT_TOKEN = \
+    "Assistant is a large language model trained by OpenAI"
 BEGIN_PROMPT_TOKEN = "Begin!"
 
 cac = CommonAppContext()
@@ -135,7 +136,8 @@ def translate_using(input_text: str, llm: Any) -> dict:
         resultset["error_message"] = \
             f"ERROR: Unknown translation method: {trans_method}" + \
             " [TA-E020]"
-    _ = DEBUG and log_debug('TRANSLATE_USING |' +
+    _ = DEBUG and log_debug(
+        'TRANSLATE_USING |' +
         f' trans_method: {trans_method}' + 
         f'\n | target "lang": {lang}' +
         f'\n | target "lang_code": {lang_code}' +
@@ -158,13 +160,14 @@ def needs_answer_translation() -> bool:
 
 def get_self_base_prompt(prompt_code: str) -> str:
     """
-    Get the "self" (not from langsmith hub) base template text according to prompt_code.
+    Get the "self" (not from langsmith hub) base template text according
+    to prompt_code.
     """
-    _ = DEBUG and log_debug(f'>>> GET_SELF_BASE_PROMPT | prompt_code: {prompt_code}')
+    _ = DEBUG and log_debug(
+        f'>>> GET_SELF_BASE_PROMPT | prompt_code: {prompt_code}')
     if prompt_code == NON_AGENT_PROMPT:
         # Non-agent prompt
-        base_prompt = \
-"""
+        base_prompt = """
 Assistant is a large language model trained by OpenAI.
 
 Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
@@ -176,8 +179,7 @@ Overall, Assistant is a powerful tool that can help with a wide range of tasks a
 Begin!
 """
     else:
-        base_prompt = \
-"""
+        base_prompt = """
 Assistant is a large language model trained by OpenAI.
 
 Assistant is designed to be able to assist with a wide range of tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. As a language model, Assistant is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
@@ -224,7 +226,8 @@ def build_gs_prompt(base_prompt: str) -> str:
     """
     Prepare the base prompt for the agent
     """
-    _ = DEBUG and log_debug(f'>>> BUILD_GS_PROMPT | base_prompt: {base_prompt}')
+    _ = DEBUG and log_debug(
+        f'>>> BUILD_GS_PROMPT | base_prompt: {base_prompt}')
     settings = Config(cac.app_context)
 
     parent_model = cac.app_context.get_other_data("model_type")
@@ -286,7 +289,8 @@ def build_gs_prompt(base_prompt: str) -> str:
     else:
         prefix += "\n" + model_desc
 
-    new_prompt = prefix + new_prompt.replace(BEGIN_PROMPT_TOKEN,
+    new_prompt = prefix + new_prompt.replace(
+        BEGIN_PROMPT_TOKEN,
         suffix + BEGIN_PROMPT_TOKEN)
     _ = DEBUG and log_debug(f'>>> BUILD_GS_PROMPT | new_prompt: {new_prompt}')
     return new_prompt
@@ -296,7 +300,8 @@ def get_agent_prompt(prompt_code: str) -> Any:
     """
     Set up the base template
     """
-    _ = DEBUG and log_debug(f'>>> 1) GET_AGENT_PROMPT | prompt_code: {prompt_code}')
+    _ = DEBUG and log_debug(
+        f'>>> 1) GET_AGENT_PROMPT | prompt_code: {prompt_code}')
     settings = Config(cac.app_context)
     use_langsmith_hub = settings.LANGCHAIN_USE_LANGSMITH_HUB == "1"
     if use_langsmith_hub:
@@ -309,7 +314,8 @@ def get_agent_prompt(prompt_code: str) -> Any:
         except Exception as err:
             raise Exception(f"[AI_GP-E010] Error: {err}") from err
     if not use_langsmith_hub:
-        input_variables = ['agent_scratchpad', 'chat_history', 'input', 'tool_names', 'tools']
+        input_variables = ['agent_scratchpad', 'chat_history', 'input',
+                           'tool_names', 'tools']
         base_prompt = get_self_base_prompt(prompt_code)
     new_prompt = build_gs_prompt(base_prompt)
     prompt = PromptTemplate(
@@ -343,10 +349,7 @@ def get_agent_executor(
     # Agent types
     # https://python.langchain.com/docs/modules/agents/agent_types/
 
-    # Call pipe example (LCEL):
-    # https://python.langchain.com/v0.1/docs/modules/agents/how_to/custom_agent/#create-the-agent
-
-    elif agent_type == "structured_chat_agent":
+    if agent_type == "structured_chat_agent":
         # Structured Chat Agent
         # https://python.langchain.com/docs/modules/agents/agent_types/structured_chat
         prompt = get_agent_prompt("hwchase17/structured-chat-agent")
@@ -379,15 +382,17 @@ def get_agent_executor(
             prompt = get_agent_prompt("hwchase17/react")
         else:
             prompt = get_agent_prompt("hwchase17/react-chat")
-            # Notice that chat_history is a string, since this prompt is aimed at LLMs,
-            # not chat models.
+            # Notice that chat_history is a string, since this prompt is
+            # aimed at LLMs, not chat models.
             memory = messages_to_langchain_fmt_text(messages)
         agent = create_react_agent(llm, tools, prompt)
     else:
         raise Exception(f"[AI_GAE-E010] Invalid agent_type {agent_type}")
+
     if not memory:
         # Prepare memory
         memory = messages_to_langchain_fmt(messages)
+
     if not agent_executor:
         # Create an agent executor by passing in the agent and tools
         agent_executor = AgentExecutor(
@@ -421,17 +426,19 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
     """
     Get the session history for the given session_id.
     """
-    _ = DEBUG and log_debug(f'>>> 1) GET_SESSION_HISTORY | session_id: {session_id}')
+    _ = DEBUG and log_debug(
+        f'>>> 1) GET_SESSION_HISTORY | session_id: {session_id}')
     if session_id not in session_history_store:
         # session_history_store[session_id] = ChatMessageHistory()
         # https://python.langchain.com/v0.1/docs/modules/memory/
         messages = cac.app_context.get_other_data("conv_data")["messages"]
         _ = DEBUG and log_debug('>>> 2) GET_SESSION_HISTORY' +
-            f'\n| messages: {messages}')
+                                f'\n| messages: {messages}')
         session_history_store[session_id] = ExistingChatMessageHistory(
             messages=messages_to_langchain_fmt(filter_messages(messages))
         )
-    _ = DEBUG and log_debug('>>> 3) GET_SESSION_HISTORY' +
+    _ = DEBUG and log_debug(
+        '>>> 3) GET_SESSION_HISTORY' +
         f'\n| Result: {session_history_store[session_id]}')
     return session_history_store[session_id]
 
@@ -443,12 +450,28 @@ def get_lcel_chain(
     """
     Get the prompt to use and construct the LCEL chain
     """
+    settings = Config(cac.app_context)
     _ = DEBUG and log_debug('>>> GET_LCEL_CHAIN')
     _ = DEBUG and log_debug(f'Tools: {tools}')
 
     # 2024-05-21 | For LCEL:
     # https://python.langchain.com/v0.2/docs/how_to/tool_calling/
-    llm_with_tools = llm.bind_tools(tools)
+
+    # Check if the LLM supports binding tools or functions
+    if hasattr(llm, 'bind_tools'):
+        llm_with_tools = llm.bind_tools(tools)
+    elif hasattr(llm, 'bind_functions'):
+        llm_with_tools = llm.bind_functions(functions=tools)
+    else:
+        if settings.AI_ALLOW_INFERENCE_WITH_NO_TOOLS == '0':
+            raise AttributeError("[AI_GLCELCH-E005] LLM does not" +
+                                 " support binding tools or functions")
+        model_type = cac.app_context.get_other_data("model_type")
+        log_error('get_lcel_chain: [AI_GLCELCH-E010]' +
+                  ' LLM does not support binding tools or functions.' +
+                  f' Model: {model_type}')
+        llm_with_tools = llm
+
     new_prompt = build_gs_prompt(get_self_base_prompt(NON_AGENT_PROMPT))
     _ = DEBUG and log_debug('Start call to ChatPromptTemplate.from_messages()')
     prompt = ChatPromptTemplate.from_messages([
@@ -473,7 +496,7 @@ def run_lcel_chain(
     tools_dict = get_functions_dict(cac.app_context)
     _ = DEBUG and \
         log_debug('>>> 3.0) RUN_ASSISTANT | LCEL | tools_dict:' +
-                    f' {tools_dict}')
+                  f' {tools_dict}')
 
     session_id = cac.app_context.get_other_data("cid")
     config = RunnableConfig({
@@ -486,13 +509,14 @@ def run_lcel_chain(
         lcel_messages,
         config=config,
     )
-    _ = DEBUG and \
-        log_debug('>>> 3.1) RUN_ASSISTANT | LCEL | exec_result.tool_calls:' +
-                    f' {exec_result.tool_calls}')
+    # _ = DEBUG and \
+    log_debug(
+        '>>> 3.1) RUN_ASSISTANT | LCEL | exec_result:' +
+        f' {exec_result}')
 
-    if exec_result.tool_calls:
-        _ = DEBUG and \
-            log_debug('>>> 3.3) RUN_ASSISTANT | Calling exec_result.tool_calls...')
+    if hasattr(exec_result, 'tool_calls') and exec_result.tool_calls:
+        _ = DEBUG and log_debug(
+            '>>> 3.3) RUN_ASSISTANT | Calling exec_result.tool_calls...')
 
         # https://python.langchain.com/v0.2/docs/how_to/tool_calling/#passing-tool-outputs-to-the-model
         lcel_messages.append(exec_result)
@@ -506,7 +530,8 @@ def run_lcel_chain(
             else:
                 tool_args = tool_call["args"].copy()
             _ = DEBUG and \
-                log_debug('>>> 3.3) RUN_ASSISTANT | LCEL' +
+                log_debug(
+                    '>>> 3.3) RUN_ASSISTANT | LCEL' +
                     f' | tool_name: {tool_call["name"].lower()}' +
                     f'\n| tool_call["args"]: {tool_call["args"]}' +
                     f'\n| tool_call["args"] TYPE: {type(tool_call["args"])}' +
@@ -515,11 +540,13 @@ def run_lcel_chain(
                     f'\n| selected_tool: {selected_tool}')
             tool_output = selected_tool.invoke(tool_args)
             lcel_messages.append(ToolMessage(tool_output,
-                tool_call_id=tool_call["id"]))
-            session_history_store[session_id].add_message(ToolMessage(tool_output,
-                tool_call_id=tool_call["id"]))
+                                             tool_call_id=tool_call["id"]))
+            session_history_store[session_id].add_message(
+                ToolMessage(tool_output,
+                            tool_call_id=tool_call["id"]))
             _ = DEBUG and \
-                log_debug('>>> 3.4) RUN_ASSISTANT | LCEL' +
+                log_debug(
+                    '>>> 3.4) RUN_ASSISTANT | LCEL' +
                     f'\n| tool_output:\n{tool_output}' +
                     '\n| session_history_store[session_id]:' +
                     f'\n{session_history_store[session_id]}')
@@ -547,7 +574,7 @@ def verify_tools(tools, conv_response):
     ]
     _ = DEBUG and \
         log_debug('>>> VERIFY_TOOLS | LONG DESC tools[list]:' +
-            f' {bad_tools}')
+                  f' {bad_tools}')
     if len(bad_tools) > 0:
         conv_response["error"] = True
         conv_response["error_message"] = \
@@ -567,16 +594,21 @@ def run_assistant(
     Run the assistant
     """
     settings = Config(cac.app_context)
+    agent_type = settings.LANGCHAIN_AGENT_TYPE
     _ = DEBUG and \
         log_debug('>>> 1) RUN_ASSISTANT | LANGCHAIN_AGENT_TYPE:' +
-            f' {settings.LANGCHAIN_AGENT_TYPE}')
+                  f' {agent_type}')
 
     conv_response = verify_tools(tools, conv_response)
     if conv_response["error"]:
         return conv_response
 
-    if settings.LANGCHAIN_AGENT_TYPE == 'lcel':
+    pref_agent_type = cac.app_context.get_other_data("pref_agent_type")
+    if agent_type == 'lcel' and pref_agent_type == 'lcel':
         # LCEL implementation (no agent, just a LLM call)
+
+        # Call pipe example (LCEL):
+        # https://python.langchain.com/v0.1/docs/modules/agents/how_to/custom_agent/#create-the-agent
         agent_executor = RunnableWithMessageHistory(
             get_lcel_chain(llm=llm, tools=tools),
             # Build a Chatbot
@@ -584,9 +616,14 @@ def run_assistant(
             get_session_history
         )
     else:
+        # If the Model's preferred agent type is not LCEL,
+        # use the Model's preference, otherwise use
+        # the configured default agent type...
+        if pref_agent_type != 'lcel':
+            agent_type = pref_agent_type
         # Get the prompt to use and construct the agent
         agent_executor, memory = get_agent_executor(
-            agent_type=settings.LANGCHAIN_AGENT_TYPE,
+            agent_type=agent_type,
             llm=llm,
             tools=tools,
             messages=messages,
@@ -596,12 +633,16 @@ def run_assistant(
     _ = DEBUG and \
         log_debug('>>> 2) RUN_ASSISTANT | Start chain/agent execution...')
     try:
-        if settings.LANGCHAIN_AGENT_TYPE == 'lcel':
+        if agent_type == 'lcel' and pref_agent_type == 'lcel':
             # LCEL implementation (no agent, just a LLM call)
             exec_result = run_lcel_chain(agent_executor, question)
-            conv_response["response"] = exec_result.content \
-                if hasattr(exec_result, 'content') else \
-                "ERROR - Empty response from Assistant [AIRCLC-E030]"
+            if hasattr(exec_result, 'content'):
+                conv_response["response"] = exec_result.content
+            elif isinstance(exec_result, str):
+                conv_response["response"] = exec_result
+            else:
+                conv_response["response"] = \
+                    "ERROR - Empty response from Assistant [AIRCLC-E030]"
         else:
             # Chat Agent implementation
             exec_result = agent_executor.invoke({
@@ -613,8 +654,9 @@ def run_assistant(
                 "ERROR - Empty response from Agent [AIRCLC-E035]"
             )
         _ = DEBUG and \
-            log_debug('>>> 4) RUN_ASSISTANT | LANGCHAIN_AGENT_TYPE:' +
-                f' {settings.LANGCHAIN_AGENT_TYPE} |' +
+            log_debug(
+                '>>> 4) RUN_ASSISTANT | LANGCHAIN_AGENT_TYPE:' +
+                f' {agent_type} |' +
                 f' exec_result: {exec_result}')
     except Exception as error:
         conv_response["error"] = True
@@ -681,7 +723,8 @@ def run_conversation(app_context: AppContext) -> dict:
         if not billing.get_openai_api_key():
             # No API key found
             conv_response["error"] = True
-            conv_response["error_message"] = "You must specify your OPENAI_API_KEY in your" + \
+            conv_response["error_message"] = \
+                "You must specify your OPENAI_API_KEY in your" + \
                 " profile or upgrade to a paid plan [AIRCOA-E010]"
             # Cancels the translation method
             translate_method = NON_AI_TRANSLATOR
@@ -703,20 +746,21 @@ def run_conversation(app_context: AppContext) -> dict:
             # Cancels the translation method
             translate_method = NON_AI_TRANSLATOR
 
-    conv_response = run_assistant(
-        conv_response=conv_response,
-        llm=llm,
-        tools=tools,
-        messages=messages,
-        question=question,
-    )
+    if not conv_response["error"]:
+        conv_response = run_assistant(
+            conv_response=conv_response,
+            llm=llm,
+            tools=tools,
+            messages=messages,
+            question=question,
+        )
 
     if not conv_response["error"] and \
        needs_answer_translation() and \
        translate_method in [NON_AI_TRANSLATOR, 'same_model']:
         # Translate response to the user's preferred language
         trans_response = translate_using(conv_response["response"],
-                                          llm=llm)
+                                         llm=llm)
         if trans_response["error"]:
             conv_response["response"] += \
                 "\n\nNOTE: translation to " + \

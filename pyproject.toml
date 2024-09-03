@@ -1,6 +1,6 @@
 [project]
 name = "genericsuite_ai"
-version = "0.1.9"
+version = "0.1.10"
 authors = [
     { name="Carlos J. Ramirez", email="tomkat_cr@yahoo.com" }
 ]
@@ -30,7 +30,7 @@ Issues = "https://github.com/tomkat-cr/genericsuite-be-ai/issues"
 
 [tool.poetry]
 name = "genericsuite_ai"
-version = "0.1.9"
+version = "0.1.10"
 description = "The GenericSuite AI for Python (backend version)"
 authors = ["Carlos J. Ramirez <tomkat_cr@yahoo.com>"]
 license = "ISC"
@@ -62,10 +62,13 @@ clarifai = "^10.1.0"
 langchain-openai = "^0.1.8"
 langchainhub = "^0.1.15"
 jq = "^1.6.0"
-transformers = "^4.38.2"
+transformers = {git = "https://github.com/huggingface/transformers.git"}
 text-generation = "^0.6.1"
 langchain-core = "^0.2.5"
 langchain-google-community = "^1.0.5"
+langchain-anthropic = "^0.1.23"
+langchain-huggingface = "^0.0.3"
+langchain-groq = "^0.1.9"
 
 [tool.poetry.group.dev.dependencies]
 changelog-cli = "^0.7.1"

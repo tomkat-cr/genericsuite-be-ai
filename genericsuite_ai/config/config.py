@@ -40,8 +40,8 @@ class Config(ConfigSuperClass):
                                                 'AI BOT')
 
         self.AI_TECHNOLOGY = self.get_env(
-            # 'AI_TECHNOLOGY', 'openai'
             'AI_TECHNOLOGY', 'langchain'
+            # 'AI_TECHNOLOGY', 'openai'
         )
 
         self.EMBEDDINGS_ENGINE = self.get_env(
@@ -58,8 +58,11 @@ class Config(ConfigSuperClass):
 
         self.LANGCHAIN_DEFAULT_MODEL = self.get_env(
             'LANGCHAIN_DEFAULT_MODEL', 'chat_openai'
-            # 'LANGCHAIN_DEFAULT_MODEL', 'gemini'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'anthropic'
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_pipeline'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'groq'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'gemini'
             # 'LANGCHAIN_DEFAULT_MODEL', 'clarifai'
         )
 
@@ -70,15 +73,16 @@ class Config(ConfigSuperClass):
         )
 
         self.AI_IMG_GEN_TECHNOLOGY = self.get_env(
-            'AI_IMG_GEN_TECHNOLOGY', 'openai'
-            # 'AI_IMG_GEN_TECHNOLOGY', 'gemini'     # TODO implement this param
-            # 'AI_IMG_GEN_TECHNOLOGY', 'clarifai'   # TODO implement this param
+            # 'AI_IMG_GEN_TECHNOLOGY', 'openai'
+            'AI_IMG_GEN_TECHNOLOGY', 'huggingface'
+            # 'AI_IMG_GEN_TECHNOLOGY', 'gemini'
+            # 'AI_IMG_GEN_TECHNOLOGY', 'clarifai'
         )
 
         self.AI_AUDIO_TO_TEXT_TECHNOLOGY = self.get_env(
-            'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'openai'       # TODO implement this param
-            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'google'     # TODO implement this param... 'google' or 'gemini' ???
-            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'clarifai'   # TODO implement this param
+            'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'openai'
+            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'clarifai'
+            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'google'     # TODO implement... 'google' or 'gemini' ???
         )
 
         self.AI_TEXT_TO_AUDIO_TECHNOLOGY = self.get_env(
@@ -92,11 +96,17 @@ class Config(ConfigSuperClass):
         )
 
         self.WEBSEARCH_DEFAULT_PROVIDER = self.get_env(
-            'WEBSEARCH_DEFAULT_PROVIDER', ''    # First try with DDG, if error, try Google
+            'WEBSEARCH_DEFAULT_PROVIDER', ''    # First DDG, if error, Google
             # 'WEBSEARCH_DEFAULT_PROVIDER', 'ddg'   # DuckDuckGo
             # 'WEBSEARCH_DEFAULT_PROVIDER', 'google'   # Google
         )
 
+        # Allows run the Assistant withhout Tools calling in case the LLM
+        # model doesn't sopport bind_tools / bind_functions methods.
+        self.AI_ALLOW_INFERENCE_WITH_NO_TOOLS = self.get_env(
+            'AI_ALLOW_INFERENCE_WITH_NO_TOOLS', '0'
+            # 'AI_ALLOW_INFERENCE_WITH_NO_TOOLS', '1'
+        )
 
         """
         --------------------------------
@@ -126,7 +136,7 @@ class Config(ConfigSuperClass):
         )
 
         self.LANGCHAIN_MAX_CONV_MESSAGES = self.get_env(
-            'LANGCHAIN_MAX_CONV_MESSAGES', '30'     # Default: preserve all
+            'LANGCHAIN_MAX_CONV_MESSAGES', '30'
             # 'LANGCHAIN_MAX_CONV_MESSAGES', '-1'     # Default: preserve all
         )
 
@@ -142,8 +152,8 @@ class Config(ConfigSuperClass):
         )
 
         self.LANGCHAIN_TRANSLATE_USING = self.get_env(
-            # 'LANGCHAIN_TRANSLATE_USING', 'initial_prompt'
             'LANGCHAIN_TRANSLATE_USING', 'google_translate'
+            # 'LANGCHAIN_TRANSLATE_USING', 'initial_prompt'
             # 'LANGCHAIN_TRANSLATE_USING', 'same_model'
             # 'LANGCHAIN_TRANSLATE_USING', ''
         )
@@ -170,7 +180,8 @@ class Config(ConfigSuperClass):
         self.OPENAI_API_KEY = self.get_env('OPENAI_API_KEY', '')
 
         self.OPENAI_MODEL = self.get_env(
-            'OPENAI_MODEL', 'gpt-3.5-turbo'
+            'OPENAI_MODEL', 'gpt-4o-mini'
+            # 'OPENAI_MODEL', 'gpt-3.5-turbo'
         )
         self.OPENAI_MODEL_PREMIUM = self.get_env(
             'OPENAI_MODEL_PREMIUM', 'gpt-4o'
@@ -210,7 +221,10 @@ class Config(ConfigSuperClass):
 
         # Anthropic credentials and other parameters
 
-        self.ANTHROPIC_MODEL = self.get_env('ANTHROPIC_MODEL', 'claude-3-sonnet')
+        self.ANTHROPIC_MODEL = self.get_env(
+            'ANTHROPIC_MODEL', 'claude-3-5-sonnet-20240620'
+            # 'ANTHROPIC_MODEL', 'claude-3-sonnet'
+        )
         self.ANTHROPIC_API_KEY = self.get_env('ANTHROPIC_API_KEY', '')
 
         # AWS credentials and other parameters
@@ -228,12 +242,9 @@ class Config(ConfigSuperClass):
             'AWS_BEDROCK_EMBEDDINGS_PROFILE', "bedrock-admin"
         )
 
-        # HuggingFace credentials and other parameters
+        # HuggingFace (HF) credentials and other parameters
 
         self.HUGGINGFACE_API_KEY = self.get_env('HUGGINGFACE_API_KEY', "")
-        self.HUGGINGFACE_ENDPOINT_URL = self.get_env(
-            'HUGGINGFACE_ENDPOINT_URL', ""
-        )
 
         self.HUGGINGFACE_MAX_NEW_TOKENS = self.get_env(
             "HUGGINGFACE_MAX_NEW_TOKENS", "512")
@@ -263,6 +274,41 @@ class Config(ConfigSuperClass):
             text_to_dict('{"normalize_embeddings": true}')
         )
 
+        self.HUGGINGFACE_ENDPOINT_URL = self.get_env(
+            'HUGGINGFACE_ENDPOINT_URL',
+            "https://api-inference.huggingface.co/models"
+        )
+
+        # HF Models
+
+        self.HUGGINGFACE_DEFAULT_CHAT_MODEL = self.get_env(
+            'HUGGINGFACE_DEFAULT_CHAT_MODEL',
+            "mistralai/Mistral-7B-Instruct-v0.2"
+            # "meta-llama/Meta-Llama-3.1-8B-Instruct"
+            # "meta-llama/Llama-2-7b-chat-hf"
+            # NOTE: Big models work with huggingface_pipeline only
+            # "meta-llama/Meta-Llama-3.1-405B-Instruct"
+            # "tiiuae/falcon-mamba-7b"
+        )
+
+        self.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL = self.get_env(
+            'HUGGINGFACE_DEFAULT_IMG_GEN_MODEL',
+            # "black-forest-labs/FLUX.1-schnell"
+            "black-forest-labs/FLUX.1-dev"
+        )
+
+        # Groq
+
+        self.GROQ_API_KEY = self.get_env('GROQ_API_KEY', '')
+        self.GROQ_TEMPERATURE = self.get_env('GROQ_TEMPERATURE', '0')
+        self.GROQ_MAX_TOKENS = self.get_env('GROQ_MAX_TOKENS', '')
+        self.GROQ_TIMEOUT = self.get_env('GROQ_TIMEOUT', '')
+        self.GROQ_MAX_RETRIES = self.get_env('GROQ_MAX_RETRIES', '2')
+        self.GROQ_MODEL = self.get_env(
+            'GROQ_MODEL',
+            'mixtral-8x7b-32768'
+        )
+
         # Clarifai credentials and other parameters
 
         # PAT (Personal API Token): https://clarifai.com/settings/security
@@ -272,37 +318,38 @@ class Config(ConfigSuperClass):
 
         self.AI_CLARIFAI_DEFAULT_CHAT_MODEL = self.get_env(
             'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'GPT-4'
-            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'claude-v2'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'mixtral-8x7B-Instruct-v0_1'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'llama2-70b-chat'    # TODO implement this param
+            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'claude-v2'
+            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'mixtral-8x7B-Instruct-v0_1'
+            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'llama2-70b-chat'
         )
 
         self.AI_CLARIFAI_DEFAULT_TEXT_EMBEDDING_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_TEXT_EMBEDDING_MODEL', 'text-embedding-ada'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_TEXT_EMBEDDING_MODEL', 'BAAI-bge-base-en-v15'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_TEXT_EMBEDDING_MODEL',
+            'text-embedding-ada'
+            # 'BAAI-bge-base-en-v15'
         )
 
         self.AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL', 'whisper'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL', 'whisper-large-v2'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL', 'whisper'
+            # 'AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL', 'whisper-large-v2'
         )
 
         self.AI_CLARIFAI_DEFAULT_TEXT_TO_AUDIO_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_TEXT_TO_AUDIO_MODEL', 'speech-synthesis'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_TEXT_TO_AUDIO_MODEL', 'speech-synthesis'
         )
 
         self.AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE = self.get_env(
-            'AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE', 'python_sdk'    # TODO implement this param
-            # 'AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE', 'clarifai_grpc'    # TODO implement this param
+            'AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE', 'python_sdk'
+            # 'AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE', 'clarifai_grpc'
         )
 
         self.AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL', 'stable-diffusion-xl'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL', 'dall-e-3'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL', 'stable-diffusion-xl'
+            # 'AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL', 'dall-e-3'
         )
 
         self.AI_CLARIFAI_DEFAULT_VISION_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_VISION_MODEL', 'openai-gpt-4-vision'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_VISION_MODEL', 'openai-gpt-4-vision'
             # 'AI_CLARIFAI_DEFAULT_VISION_MODEL', 'food-item-recognition'
         )
 
@@ -310,17 +357,22 @@ class Config(ConfigSuperClass):
 
         self.ELEVENLABS_API_KEY = self.get_env('ELEVENLABS_API_KEY', "")
 
-        self.ELEVENLABS_VOICE_ID_FEMALE = self.get_env('ELEVENLABS_VOICE_ID_FEMALE',
-                                                       "EXAVITQu4vr4xnSDxMaL")  # Sarah
-        self.ELEVENLABS_VOICE_ID_MALE = self.get_env('ELEVENLABS_VOICE_ID_FEMALE',
-                                                     "29vD33N1CtxCmqQRPOHJ")  # Drew
+        self.ELEVENLABS_VOICE_ID_FEMALE = self.get_env(
+            'ELEVENLABS_VOICE_ID_FEMALE',
+            "EXAVITQu4vr4xnSDxMaL")  # Sarah
+        self.ELEVENLABS_VOICE_ID_MALE = self.get_env(
+            'ELEVENLABS_VOICE_ID_FEMALE',
+            "29vD33N1CtxCmqQRPOHJ")  # Drew
 
-        self.ELEVENLABS_MODEL_ID = self.get_env('ELEVENLABS_MODEL_ID', "eleven_multilingual_v2")
+        self.ELEVENLABS_MODEL_ID = self.get_env(
+            'ELEVENLABS_MODEL_ID',
+            "eleven_multilingual_v2")
         self.ELEVENLABS_STABILITY = self.get_env('ELEVENLABS_STABILITY', "0.5")
-        self.ELEVENLABS_SIMILARITY_BOOST = self.get_env('ELEVENLABS_SIMILARITY_BOOST', "0.5")
+        self.ELEVENLABS_SIMILARITY_BOOST = self.get_env(
+            'ELEVENLABS_SIMILARITY_BOOST', "0.5")
         self.ELEVENLABS_STYLE = self.get_env('ELEVENLABS_STYLE', "0")
-        self.ELEVENLABS_USE_SPEAKER_BOOST = self.get_env('ELEVENLABS_USE_SPEAKER_BOOST', "1")
-
+        self.ELEVENLABS_USE_SPEAKER_BOOST = self.get_env(
+            'ELEVENLABS_USE_SPEAKER_BOOST', "1")
 
         # Cohere credentials and other parameters
 

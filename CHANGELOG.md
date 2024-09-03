@@ -17,7 +17,28 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## Unreleased
+## 0.1.10 (2024-09-01)
+---
+
+### New
+Implement HuggingFace image generator [GS-117].
+Implement Flux.1 image generator [GS-117].
+Implement Anthropic Claude 3.5 Sonnet [GS-33].
+Implement HuggingFace local pipelines [GS-59].
+Implement Groq chat model [GS-92].
+
+### Changes
+Replace "gpt-3.5-turbo" with "gpt-4o-mini" as default OpenAI model [GS-109].
+HUGGINGFACE_ENDPOINT_URL replaced by HUGGINGFACE_DEFAULT_CHAT_MODEL [GS-59].
+
+### Fixes
+Fix Anthropic Claude2 API Error since large prompt change, replacing Claude2 with Claude 3.5 Sonnet [GS-33].
+Fix the "Warning: deprecated HuggingFaceTextGenInference-use HuggingFaceEnpoint instead" [GS-59].
+
+
 ## 0.1.9 (2024-07-27)
+---
 
 ### New
 Add: ".nvmrc" file to set the repo default node version.
@@ -27,6 +48,7 @@ Fix: typing in create_app() parameters.
 
 
 ## 0.1.8 (2024-07-18)
+---
 
 ### New
 Add "langchain-google-community" due to a deprecation notice about GoogleSearchAPIWrapper [GS-66].
@@ -44,6 +66,7 @@ Change: minor linting changes.
 
 
 ## 0.1.7 (2024-06-06)
+---
 
 ### New
 Add AI Endpoints and create_app for FastAPI [FA-246].
