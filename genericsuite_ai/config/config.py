@@ -246,14 +246,26 @@ class Config(ConfigSuperClass):
 
         self.HUGGINGFACE_API_KEY = self.get_env('HUGGINGFACE_API_KEY', "")
 
-        self.HUGGINGFACE_MAX_NEW_TOKENS = self.get_env(
-            "HUGGINGFACE_MAX_NEW_TOKENS", "512")
-        self.HUGGINGFACE_TOP_K = self.get_env(
-            "HUGGINGFACE_TOP_K", "50")
-        self.HUGGINGFACE_TEMPERATURE = self.get_env(
-            "HUGGINGFACE_TEMPERATURE", "0.1")
-        self.HUGGINGFACE_REPETITION_PENALTY = self.get_env(
-            "HUGGINGFACE_REPETITION_PENALTY", "1.03")
+        # HF Models
+
+        self.HUGGINGFACE_DEFAULT_CHAT_MODEL = self.get_env(
+            'HUGGINGFACE_DEFAULT_CHAT_MODEL',
+            "mistralai/Mistral-7B-Instruct-v0.2"
+            # "meta-llama/Meta-Llama-3.1-8B-Instruct"
+            # "meta-llama/Llama-2-7b-chat-hf"
+            # NOTE: Big models work with huggingface_pipeline only
+            # mattshumer/Reflection-Llama-3.1-70B
+            # "meta-llama/Meta-Llama-3.1-405B-Instruct"
+            # "tiiuae/falcon-mamba-7b"
+        )
+
+        self.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL = self.get_env(
+            'HUGGINGFACE_DEFAULT_IMG_GEN_MODEL',
+            # "black-forest-labs/FLUX.1-schnell"
+            "black-forest-labs/FLUX.1-dev"
+        )
+
+        # HF Embeddings
 
         # IMPORTANT: about "sentence-transformers" lib. Be careful, because
         # when it's included, the package size increase by 5 Gb. and if the
@@ -274,28 +286,20 @@ class Config(ConfigSuperClass):
             text_to_dict('{"normalize_embeddings": true}')
         )
 
+        # HF Options and general parameters
+
         self.HUGGINGFACE_ENDPOINT_URL = self.get_env(
             'HUGGINGFACE_ENDPOINT_URL',
             "https://api-inference.huggingface.co/models"
         )
-
-        # HF Models
-
-        self.HUGGINGFACE_DEFAULT_CHAT_MODEL = self.get_env(
-            'HUGGINGFACE_DEFAULT_CHAT_MODEL',
-            "mistralai/Mistral-7B-Instruct-v0.2"
-            # "meta-llama/Meta-Llama-3.1-8B-Instruct"
-            # "meta-llama/Llama-2-7b-chat-hf"
-            # NOTE: Big models work with huggingface_pipeline only
-            # "meta-llama/Meta-Llama-3.1-405B-Instruct"
-            # "tiiuae/falcon-mamba-7b"
-        )
-
-        self.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL = self.get_env(
-            'HUGGINGFACE_DEFAULT_IMG_GEN_MODEL',
-            # "black-forest-labs/FLUX.1-schnell"
-            "black-forest-labs/FLUX.1-dev"
-        )
+        self.HUGGINGFACE_MAX_NEW_TOKENS = self.get_env(
+            "HUGGINGFACE_MAX_NEW_TOKENS", "512")
+        self.HUGGINGFACE_TOP_K = self.get_env(
+            "HUGGINGFACE_TOP_K", "50")
+        self.HUGGINGFACE_TEMPERATURE = self.get_env(
+            "HUGGINGFACE_TEMPERATURE", "0.1")
+        self.HUGGINGFACE_REPETITION_PENALTY = self.get_env(
+            "HUGGINGFACE_REPETITION_PENALTY", "1.03")
 
         # Groq
 
