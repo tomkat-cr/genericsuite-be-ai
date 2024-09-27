@@ -7,7 +7,7 @@ from openai import OpenAI
 from openai.resources.images import ImagesResponse
 
 from langchain.agents import tool
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -40,6 +40,9 @@ from genericsuite_ai.lib.clarifai import (
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 from genericsuite_ai.lib.huggingface import (
     huggingface_img_gen,
+)
+from genericsuite_ai.lib.amazon_bedrock import (
+    aws_bedrock_img_gen,
 )
 
 
@@ -136,15 +139,18 @@ def get_img_gen_name() -> str:
     """ Returns the Image Generator configured technology name """
     settings = Config(cac.get())
     if settings.AI_IMG_GEN_TECHNOLOGY == "gemini":
-        model_name = "Google Gemini"
+        model_name = f"Google Gemini: f{settings.GOOGLE_IMG_GEN_MODEL}"
     elif settings.AI_IMG_GEN_TECHNOLOGY == "huggingface":
         model_name = "HuggingFace Image Generator: " + \
             f"{settings.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL}"
+    elif settings.AI_IMG_GEN_TECHNOLOGY == "bedrock":
+        model_name = "Amazon Bedrok Image Generator: " + \
+            f"{settings.AWS_BEDROCK_IMAGE_GEN_MODEL_ID}"
     elif settings.AI_IMG_GEN_TECHNOLOGY == "clarifai":
         model_name = "Clarifai Image Generator: " + \
             f"{settings.AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL}"
     else:
-        model_name = "OpenAI Dall-e"
+        model_name = f"OpenAI: {settings.OPENAI_IMAGE_GEN_MODEL}"
     log_debug("get_img_gen_name | AI_IMG_GEN_TECHNOLOGY:" +
               f" {settings.AI_IMG_GEN_TECHNOLOGY}"
               f" | model_name: {model_name}")
@@ -179,6 +185,7 @@ def get_img_gen_response(response: dict, other: dict) -> dict:
             ])
             log_debug(f"Google Gemini Image Generator response: {ig_response}")
             response['response'] = ig_response.content
+
         elif settings.AI_IMG_GEN_TECHNOLOGY == "huggingface":
             ig_response = huggingface_img_gen(
                 question=response["question"],
@@ -190,6 +197,19 @@ def get_img_gen_response(response: dict, other: dict) -> dict:
                 response['error_message'] = ig_response["error_message"]
             else:
                 response['response'] = ig_response["resultset"]
+
+        elif settings.AI_IMG_GEN_TECHNOLOGY == "bedrock":
+            ig_response = aws_bedrock_img_gen(
+                question=response["question"],
+            )
+            log_debug(f"get_img_gen_response | {get_img_gen_name()}" +
+                      f" response: {ig_response}")
+            if ig_response["error"]:
+                response['error'] = True
+                response['error_message'] = ig_response["error_message"]
+            else:
+                response['response'] = ig_response["resultset"]
+
         elif settings.AI_IMG_GEN_TECHNOLOGY == "clarifai":
             ig_response = clarifai_img_gen(
                 question=response["question"],
@@ -201,6 +221,7 @@ def get_img_gen_response(response: dict, other: dict) -> dict:
                 response['error_message'] = ig_response["error_message"]
             else:
                 response['response'] = ig_response["resultset"]
+
         else:
             # Open the client
             openai_api_key = billing.get_openai_api_key()

@@ -17,6 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## Unreleased
 ## 0.1.10 (2024-09-16)
 ---
 
@@ -28,10 +29,15 @@ Implement HF (HuggingFace) image generator [GS-117].
 Implement Flux.1 image generator [GS-117].
 Implement Anthropic Claude 3.5 Sonnet [GS-33].
 Implement Groq chat model [GS-92].
+Implement Amazon Bedrock chat and image generator [GS-131].
 
 ### Changes
 Replace "gpt-3.5-turbo" with "gpt-4o-mini" as default OpenAI model [GS-109].
 HUGGINGFACE_ENDPOINT_URL replaced by HUGGINGFACE_DEFAULT_CHAT_MODEL [GS-59].
+Config class accepts both OPENAI_MODEL_NAME and OPENAI_MODEL envvars [GS-128].
+get_model() "billing" verification moved to get_model_middleware() [GS-128].
+Langchain upgraded to "^0.3.0" [GS-131].
+urllib3 fixed to "1.26" (and clarifai fixed "^10.1.0" in consecuence) to make sure it's dependency compatible with GS BE Core.
 
 ### Fixes
 Fix Anthropic Claude2 API Error since large prompt change, replacing Claude2 with Claude 3.5 Sonnet [GS-33].

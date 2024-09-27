@@ -16,7 +16,7 @@ from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchResults
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 from langchain_google_community import GoogleSearchAPIWrapper
 from langchain.agents import tool
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 from genericsuite.util.app_logger import log_debug
 from genericsuite.util.app_context import CommonAppContext
@@ -57,7 +57,9 @@ class WebSearch(BaseModel):
     Web search parameters structure
     """
     query: str = Field(description="The search query")
-    num_results: Optional[int] = Field(default=20, description="The number of results to return.")
+    num_results: Optional[int] = Field(
+        default=20,
+        description="The number of results to return.")
 
 
 @tool
@@ -73,8 +75,8 @@ Args: params (dict): Tool parameter. Must contain:
 
 def web_search_func(params: Any) -> str:
     """
-    Performs a web search to have access to real-time information, and/or answer
-    questions about recent events.
+    Performs a web search to have access to real-time information,
+    and/or answer questions about recent events.
 
     Args:
         params (dict): Tool parameter. Must contain:
@@ -120,7 +122,8 @@ def web_search_google(query: str, num_results: int = 20) -> str:
     """
     settings = Config(cac.get())
     if DEBUG:
-        log_debug(f">> 1) WEB_SEARCH_GOOGLE | query: {query}" +
+        log_debug(
+            f">> 1) WEB_SEARCH_GOOGLE | query: {query}" +
             f"\ngoogle_api_key: {settings.GOOGLE_API_KEY}" +
             f"\ngoogle_cse_id: {settings.GOOGLE_CSE_ID}")
 
@@ -205,7 +208,8 @@ def web_search_ddg(query: str, num_results: int = 20) -> str:
             if not query:
                 return json.dumps(search_results)
             with DDGS() as ddgs:
-                search_results = list(ddgs.text(query, max_results=num_results))
+                search_results = list(ddgs.text(query,
+                                      max_results=num_results))
             if search_results:
                 break
             time.sleep(1)
@@ -238,11 +242,15 @@ def safe_google_results(results: Union[str, list]) -> str:
             # "results": [result.encode("utf-8", "ignore").decode("utf-8")
             #             for result in results],
             "results": [{
-                'Result': result.get('Result', '').encode("utf-8", "ignore").decode("utf-8"),
+                'Result': result.get('Result', '').encode(
+                    "utf-8", "ignore").decode("utf-8"),
             } if 'Result' in result else {
-                'snippet': result.get('snippet', '').encode("utf-8", "ignore").decode("utf-8"),
-                'title': result.get('title', '').encode("utf-8", "ignore").decode("utf-8"),
-                'link': result.get('link', '').encode("utf-8", "ignore").decode("utf-8"),
+                'snippet': result.get('snippet', '').encode(
+                    "utf-8", "ignore").decode("utf-8"),
+                'title': result.get('title', '').encode(
+                    "utf-8", "ignore").decode("utf-8"),
+                'link': result.get('link', '').encode(
+                    "utf-8", "ignore").decode("utf-8"),
             } for result in results],
         })
     else:
@@ -263,23 +271,29 @@ def safe_ddg_results(results: Union[str, list]) -> str:
         str: The results of the search.
     """
     _ = DEBUG and \
-        log_debug(">> 1) SAFE_DDG_RESULTS" +
+        log_debug(
+            ">> 1) SAFE_DDG_RESULTS" +
             f"\n | results TYPE: {type(results)}" +
             f"\n | results: {results}")
     if isinstance(results, list):
         safe_message = json.dumps({
             "results": [{
-                'Result': result.Result.encode("utf-8", "ignore").decode("utf-8"),
+                'Result': result.Result.encode(
+                    "utf-8", "ignore").decode("utf-8"),
             } if hasattr(result, 'Result') else {
-                'snippet': result.snippet.encode("utf-8", "ignore").decode("utf-8"),
-                'title': result.title.encode("utf-8", "ignore").decode("utf-8"),
-                'link': result.link.encode("utf-8", "ignore").decode("utf-8"),
+                'snippet': result.snippet.encode(
+                    "utf-8", "ignore").decode("utf-8"),
+                'title': result.title.encode(
+                    "utf-8", "ignore").decode("utf-8"),
+                'link': result.link.encode(
+                    "utf-8", "ignore").decode("utf-8"),
             } for result in results],
         })
     else:
         safe_message = results.encode("utf-8", "ignore").decode("utf-8")
     _ = DEBUG and \
-        log_debug(">> 2) SAFE_DDG_RESULTS" +
+        log_debug(
+            ">> 2) SAFE_DDG_RESULTS" +
             f"\n | results TYPE: {type(results)}" +
             f"\n | results: {results}")
     return safe_message

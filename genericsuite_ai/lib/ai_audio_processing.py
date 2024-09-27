@@ -10,7 +10,7 @@ from openai import OpenAI
 from openai.types.audio.transcription import Transcription
 
 from langchain.agents import tool
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 from genericsuite.util.aws import upload_nodup_file_to_s3, remove_from_s3
 from genericsuite.util.utilities import (
@@ -54,8 +54,10 @@ class TextToAudio(BaseModel):
     Text-to-audio parameters structure
     """
     input_text: str = Field(description="text to speech out")
-    target_lang: Optional[str] = Field(description="target language. Defaults to user's preferred language")
-    other_options: Optional[dict] = Field(description="Other options for the model")
+    target_lang: Optional[str] = Field(
+        description="target language. Defaults to user's preferred language")
+    other_options: Optional[dict] = Field(
+        description="Other options for the model")
 
 
 # Audio-to-text / Speech-to-text
@@ -134,7 +136,8 @@ def process_audio_url(sound_filespec: str, call_to: callable,
                       f'AWS_S3_CHATBOT_ATTACHMENTS_BUCKET: {str(bucket_name)}')
         if not bucket_name:
             resultset["error"] = True
-            resultset["error_message"] = "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
+            resultset["error_message"] = \
+                "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
         else:
             upload_result = upload_nodup_file_to_s3(
                 file_path=sound_filespec,
@@ -155,7 +158,8 @@ def process_audio_url(sound_filespec: str, call_to: callable,
                     )
                     if remove_result['error']:
                         resultset["error"] = True
-                        resultset["error_message"] = remove_result["error_message"]
+                        resultset["error_message"] = \
+                            remove_result["error_message"]
     return resultset
 
 
@@ -187,7 +191,7 @@ def get_att_response(
         source_lang (str): source language
         other_options (str): other options
         response (dict): response dict
-    
+
     Returns:
         dict: standard resultset
     """
@@ -216,7 +220,8 @@ def get_att_response(
             openai_api_key = billing.get_openai_api_key()
             if not openai_api_key:
                 response['error'] = True
-                response['error_message'] = "OpenAI API key is not configured [AI-ATTT-020]"
+                response['error_message'] = \
+                    "OpenAI API key is not configured [AI-ATTT-020]"
                 return response
             client = OpenAI(
                 api_key=openai_api_key
@@ -379,9 +384,10 @@ def openai_text_to_audio(
             If it's an error, sets "error" and "error_message".
     """
 
-    _ = DEBUG and log_debug('OAI_TTA_1) OPENAI_TEXT_TO_AUDIO' +
-        f' | text_source: {text_source}' + 
-        f' | target_lang: {target_lang}' + 
+    _ = DEBUG and log_debug(
+        'OAI_TTA_1) OPENAI_TEXT_TO_AUDIO' +
+        f' | text_source: {text_source}' +
+        f' | target_lang: {target_lang}' +
         f' | other_options: {other_options}')
 
     settings = Config(cac.get())
@@ -397,7 +403,8 @@ def openai_text_to_audio(
         speech_file_path = f'/tmp/openai_tts_{uuid4().hex}.mp3'
         openai_api_key = billing.get_openai_api_key()
         if not openai_api_key:
-            return error_resultset("OpenAI API key is not configured",
+            return error_resultset(
+                "OpenAI API key is not configured",
                 "OAI_TTA_E020")
         client = OpenAI(
             api_key=openai_api_key
@@ -437,16 +444,17 @@ def get_tta_response(
 
     Args:
         input_text (str): text to speech out.
-        target_lang (str): target language. Defaults to user's preferred language.
+        target_lang (str): target language. Defaults to user's
+            preferred language.
         other_options (dict): other options.
         response (dict): response dict
-    
+
     Returns:
         dict: standard resultset
     """
     settings = Config(cac.get())
     log_debug("get_tta_response | AI_TEXT_TO_AUDIO_TECHNOLOGY:" +
-              f" {settings.AI_TEXT_TO_AUDIO_TECHNOLOGY}" + 
+              f" {settings.AI_TEXT_TO_AUDIO_TECHNOLOGY}" +
               f"\n | input_text: {input_text}" +
               f"\n | target_lang: {target_lang}" +
               f"\n | other_options: {other_options}")
@@ -462,7 +470,8 @@ def get_tta_response(
             log_debug(f"get_tta_response (1) | {get_tta_name()}" +
                       f" response: {audio_file}")
             # audio_file={'error': False, 'error_message': None,
-            # 'totalPages': None, 'resultset': '/tmp/0f051624e0074b4aaecf2402911c2c86.wav'}
+            # 'totalPages': None,
+            # 'resultset': '/tmp/0f051624e0074b4aaecf2402911c2c86.wav'}
             if audio_file["error"]:
                 response['error'] = True
                 response['error_message'] = audio_file['error_message']
@@ -524,8 +533,8 @@ def text_to_audio_generator(params: Any) -> dict:
     if not other_options:
         other_options = {}
         mock_file_example = None
-        # mock_file_example = '/tmp/9acd5e877ac44980b3604069e9b0d8df.wav'
-        # mock_file_example = "/tmp/openai_tts_8ed041f4e2044ed093cb1231141a5f5b.mp3"
+        # mock_file_example = '/tmp/xxx.wav'
+        # mock_file_example = "/tmp/openai_tts_xxxxx.mp3"
         if mock_file_example and os.path.isfile(mock_file_example):
             other_options["mock_response"] = mock_file_example
 
@@ -540,7 +549,7 @@ def text_to_audio_generator(params: Any) -> dict:
         return response
     if DEBUG:
         log_debug("1) TTAG | text_to_audio_generator" +
-                  " | Generate an audio file from text." + 
+                  " | Generate an audio file from text." +
                   f"\ninput_text: {input_text}" +
                   f"\ntarget_lang: {target_lang}" +
                   f"\nother_options: {other_options}")

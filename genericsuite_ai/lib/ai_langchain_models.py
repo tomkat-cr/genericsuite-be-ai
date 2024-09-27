@@ -2,20 +2,25 @@
 """
 Langchain models
 """
-from typing import Union, Optional
+from typing import Union, Optional, Any
 
 from langchain_anthropic import ChatAnthropic
+from langchain_aws import ChatBedrock
 from langchain_groq import ChatGroq
 from langchain_huggingface import HuggingFaceEndpoint
-# from langchain_huggingface import ChatHuggingFace
+from langchain_huggingface import ChatHuggingFace
 from langchain_huggingface.llms import HuggingFacePipeline
 from langchain_openai import OpenAI
 from langchain_openai import ChatOpenAI
+
 from langchain_community.chat_models.ollama import ChatOllama
 from langchain_community.llms import Clarifai
+
+from langchain_core.callbacks import AsyncCallbackHandler
 from langchain_core.runnables.utils import ConfigurableField
 from langchain_core.runnables.base import RunnableSerializable
 from langchain_google_genai import ChatGoogleGenerativeAI
+
 from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 
 from genericsuite.util.app_context import AppContext
@@ -28,13 +33,25 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-DEBUG = False
+DEBUG = True
+
+
+class BedrockAsyncCallbackHandler(AsyncCallbackHandler):
+    """
+    Async callback handler that can be used to handle callbacks from langchain.
+    """
+
+    async def on_llm_error(self, error: BaseException, **kwargs: Any) -> Any:
+        reason = kwargs.get("reason")
+        if reason == "GUARDRAIL_INTERVENED":
+            log_error(f"Guardrails: {kwargs}")
 
 
 def get_model(
     app_context: AppContext,
     model_type: str,
     model_params: Optional[dict] = None,
+    billing: bool = True,
 ) -> dict:
     """
     Get model object.
@@ -43,6 +60,8 @@ def get_model(
         app_context (AppContext): application context.
         model_type (str): the model type. e.g. "chat_openai",
             "gemini", "ollama", "anthropic", "clarifai"
+        model_params (dict, optional): model parameters. Defaults to None.
+        billing (bool): Use billing parameters. Defaults to True.
 
     Returns:
         dict: a resultset with the attributes:
@@ -68,18 +87,25 @@ def get_model(
     manufacturer = None
     model_name = None
     pref_agent_type = 'lcel'
+    other_data = {}
     try:
         # OpenAI ChatGPT
         if model_type == "chat_openai":
             manufacturer = "OpenAI"
-            openai_api_key = billing.get_openai_api_key()
-            model_name = billing.get_openai_chat_model()
+            if billing:
+                openai_api_key = billing.get_openai_api_key()
+                model_name = billing.get_openai_chat_model()
+            else:
+                openai_api_key = settings.OPENAI_API_KEY
+                model_name = settings.OPENAI_MODEL
             if not openai_api_key:
                 error = "ERROR [GET_MODEL-OAI-010] Missing OpenAI API Key"
                 _ = DEBUG and \
-                    log_debug('GM-E1: Error getting model' +
-                              f'\n | error: {error}'
-                              f'\n | user_plan: {billing.get_user_plan()}')
+                    log_debug(
+                        'GM-E1: Error getting model' +
+                        f'\n | error: {error}'
+                        f'\n | user_plan: ' +
+                        f'{billing.get_user_plan() if billing else "--"}')
             else:
                 model_object = ChatOpenAI(
                     # model="gpt-3.5-turbo"
@@ -119,7 +145,6 @@ def get_model(
             # https://python.langchain.com/v0.2/docs/integrations/platforms/huggingface
             # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_endpoint/
             # https://python.langchain.com/v0.2/docs/integrations/chat/huggingface/
-            pref_agent_type = 'react_chat_agent'    # Doesn't work with LCEL
             manufacturer = "Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
             # if 'url' in model_params:
@@ -136,13 +161,25 @@ def get_model(
                 repetition_penalty=float(
                     settings.HUGGINGFACE_REPETITION_PENALTY),
                 huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
+                timeout=float(settings.HUGGINGFACE_TIMEOUT),
             )
-            # model_object = ChatHuggingFace(llm=llm)
+            # 0 = use HuggingFaceEndpoint + LangChain Agent
+            # 1 = use ChatHuggingFace + LangChain LCEL
+            other_data["HUGGINGFACE_USE_CHAT_HF"] = \
+                settings.HUGGINGFACE_USE_CHAT_HF
+
+            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+                model_object = ChatHuggingFace(
+                    llm=model_object,
+                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
+                )
+            else:
+                # Instruct models or pure LLMs Doesn't work with LCEL
+                pref_agent_type = 'react_chat_agent'
 
         # Hugging Face Pipelines
         if model_type == "huggingface_pipeline":
             # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_pipelines/
-            pref_agent_type = 'react_chat_agent'    # Doesn't work with LCEL
             manufacturer = "Hugging Face (Pipeline)"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
             if 'repo_id' in model_params:
@@ -156,7 +193,20 @@ def get_model(
                 max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
                 huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
             )
-            model_object = HuggingFacePipeline(pipeline=pipe)
+            model_object = HuggingFacePipeline(
+                pipeline=pipe,
+                # timeout=float(settings.HUGGINGFACE_TIMEOUT),
+            )
+            other_data["HUGGINGFACE_USE_CHAT_HF"] = \
+                settings.HUGGINGFACE_USE_CHAT_HF
+            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+                model_object = ChatHuggingFace(
+                    llm=model_object,
+                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
+                )
+            else:
+                # Instruct models or pure LLMs Doesn't work with LCEL
+                pref_agent_type = 'react_chat_agent'
 
         # Anthropic Claude
         if model_type == "anthropic":
@@ -191,6 +241,30 @@ def get_model(
                     if settings.GROQ_TIMEOUT else None,
                     max_retries=int(settings.GROQ_MAX_RETRIES),
                 )
+
+        # Amazon Bedrock
+        if model_type == "bedrock":
+            # https://python.langchain.com/docs/integrations/llms/bedrock/
+            # https://python.langchain.com/docs/how_to/response_metadata/#bedrock-anthropic
+            manufacturer = "AWS"
+            model_name = settings.AWS_BEDROCK_MODEL_ID
+            if 'model' in model_params:
+                model_name = model_params['model']
+            model_config = {}
+            model_config["model_id"] = model_name
+            if settings.AWS_BEDROCK_CREDENTIALS_PROFILE:
+                model_config["credentials_profile_name"] = \
+                    settings.AWS_BEDROCK_CREDENTIALS_PROFILE
+            if settings.AWS_BEDROCK_GUARDRAIL_ID:
+                model_config["callbacks"] = [BedrockAsyncCallbackHandler()]
+                model_config["guardrails"] = {
+                    "id": settings.AWS_BEDROCK_GUARDRAIL_ID,
+                    "version": settings.AWS_BEDROCK_GUARDRAIL_VERSION,
+                    "trace": settings.AWS_BEDROCK_GUARDRAIL_TRACE == "1",
+                }
+            model_object = ChatBedrock(
+                **model_config,
+            )
 
         # Clarifai Platform
         if model_type == "clarifai":
@@ -231,6 +305,7 @@ def get_model(
         "manufacturer": manufacturer,
         "model_params": model_params,
         "pref_agent_type": pref_agent_type,
+        "other_data": other_data,
         "error": error,
     }
     _ = self_debug and log_debug(f"GM-2) GET_MODEL: result: {result}")

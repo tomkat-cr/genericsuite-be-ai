@@ -41,7 +41,8 @@ def get_embeddings_engine(
     openai_api_key = billing.get_openai_api_key()
     if billing.is_free_plan():
         if not openai_api_key:
-            response["error"] = "OpenAI API key is not configured [AI-GEE-E010]"
+            response["error"] = \
+                "OpenAI API key is not configured [AI-GEE-E010]"
         response["engine"] = OpenAIEmbeddings(
             openai_api_key=openai_api_key,
             model=settings.OPENAI_EMBEDDINGS_MODEL,
@@ -52,6 +53,7 @@ def get_embeddings_engine(
     if DEBUG:
         log_debug("GET_EMBEDDINGS_ENGINE |" +
                   f" embedding_engine: {embedding_engine}")
+
     if embedding_engine == "huggingface":
         # https://python.langchain.com/docs/integrations/platforms/huggingface
         # https://python.langchain.com/docs/integrations/text_embedding/huggingfacehub
@@ -78,29 +80,35 @@ def get_embeddings_engine(
             )
     elif embedding_engine == "bedrock":
         # https://python.langchain.com/docs/integrations/text_embedding/bedrock
-        response["engine"] = BedrockEmbeddings(
-            credentials_profile_name=settings.AWS_BEDROCK_EMBEDDINGS_PROFILE,
-            region_name=settings.AWS_REGION,
-            model_id=settings.AWS_BEDROCK_EMBEDDINGS_MODEL_ID,
-        )
+        model_config = {}
+        model_config["region_name"] = settings.AWS_REGION
+        model_config["model_id"] = settings.AWS_BEDROCK_EMBEDDINGS_MODEL_ID
+        if settings.AWS_BEDROCK_EMBEDDINGS_PROFILE:
+            model_config["credentials_profile_name"] = \
+                settings.AWS_BEDROCK_EMBEDDINGS_PROFILE
+        response["engine"] = BedrockEmbeddings(**model_config)
+
     elif embedding_engine == "cohere":
         # https://python.langchain.com/docs/integrations/text_embedding/cohere
         response["engine"] = CohereEmbeddings(
             cohere_api_key=settings.COHERE_API_KEY,
             model=settings.COHERE_EMBEDDINGS_MODEL,
         )
+
     elif embedding_engine == "ollama":
         # https://python.langchain.com/docs/integrations/text_embedding/ollama
         response["engine"] = OllamaEmbeddings(
             # https://ollama.ai/library
             model=settings.OLLAMA_EMBEDDINGS_MODEL,
         )
+
     elif embedding_engine == "openai":
         # https://python.langchain.com/docs/integrations/text_embedding/openai
         response["engine"] = OpenAIEmbeddings(
             openai_api_key=openai_api_key,
             model=settings.OPENAI_EMBEDDINGS_MODEL,
         )
+
     log_debug("GET_EMBEDDINGS_ENGINE |" +
               f" response: {response}")
     return response

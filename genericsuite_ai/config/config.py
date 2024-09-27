@@ -47,6 +47,10 @@ class Config(ConfigSuperClass):
         self.EMBEDDINGS_ENGINE = self.get_env(
             'EMBEDDINGS_ENGINE', 'openai'
             # 'EMBEDDINGS_ENGINE', 'clarifai'
+            # 'EMBEDDINGS_ENGINE', 'bedrock'
+            # 'EMBEDDINGS_ENGINE', 'huggingface'
+            # 'EMBEDDINGS_ENGINE', 'cohere'
+            # 'EMBEDDINGS_ENGINE', 'ollama'
         )
 
         self.VECTOR_STORE_ENGINE = self.get_env(
@@ -64,6 +68,7 @@ class Config(ConfigSuperClass):
             # 'LANGCHAIN_DEFAULT_MODEL', 'groq'
             # 'LANGCHAIN_DEFAULT_MODEL', 'gemini'
             # 'LANGCHAIN_DEFAULT_MODEL', 'clarifai'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'bedrock'
         )
 
         self.AI_VISION_TECHNOLOGY = self.get_env(
@@ -77,12 +82,14 @@ class Config(ConfigSuperClass):
             'AI_IMG_GEN_TECHNOLOGY', 'huggingface'
             # 'AI_IMG_GEN_TECHNOLOGY', 'gemini'
             # 'AI_IMG_GEN_TECHNOLOGY', 'clarifai'
+            # 'AI_IMG_GEN_TECHNOLOGY', 'bedrock'
         )
 
         self.AI_AUDIO_TO_TEXT_TECHNOLOGY = self.get_env(
             'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'openai'
             # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'clarifai'
-            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'google'     # TODO implement... 'google' or 'gemini' ???
+            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'google'
+            # # TODO implement... 'google' or 'gemini' ???
         )
 
         self.AI_TEXT_TO_AUDIO_TECHNOLOGY = self.get_env(
@@ -180,7 +187,7 @@ class Config(ConfigSuperClass):
         self.OPENAI_API_KEY = self.get_env('OPENAI_API_KEY', '')
 
         self.OPENAI_MODEL = self.get_env(
-            'OPENAI_MODEL', 'gpt-4o-mini'
+            'OPENAI_MODEL_NAME', self.get_env('OPENAI_MODEL', 'gpt-4o-mini')
             # 'OPENAI_MODEL', 'gpt-3.5-turbo'
         )
         self.OPENAI_MODEL_PREMIUM = self.get_env(
@@ -206,14 +213,16 @@ class Config(ConfigSuperClass):
         )
         self.OPENAI_TEXT_TO_AUDIO_VOICE = self.get_env(
             'OPENAI_TEXT_TO_AUDIO_VOICE', 'onyx'
-            # 'OPENAI_TEXT_TO_AUDIO_VOICE', 'alloy' | 'echo', 'fable', 'onyx', 'nova', 'shimmer'
+            # 'OPENAI_TEXT_TO_AUDIO_VOICE', 'alloy' | 'echo', 'fable', 'onyx',
+            # 'nova', 'shimmer'
         )
         self.OPENAI_EMBEDDINGS_MODEL = self.get_env(
             'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-3-small'
             # 'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-ada-002'
         )
         self.OPENAI_EMBEDDINGS_MODEL_PREMIUM = self.get_env(
-            'OPENAI_EMBEDDINGS_MODEL_PREMIUM', 'text-embedding-3-large'   # TODO implement this param
+            'OPENAI_EMBEDDINGS_MODEL_PREMIUM', 'text-embedding-3-large'
+            # TODO implement this param
         )
 
         self.OPENAI_TEMPERATURE = self.get_env('OPENAI_TEMPERATURE', '0.7')
@@ -235,11 +244,43 @@ class Config(ConfigSuperClass):
 
         # AWS Bedrock credentials and other parameters
 
+        self.AWS_BEDROCK_MODEL_ID = self.get_env(
+            'AWS_BEDROCK_MODEL_ID',
+            "amazon.titan-text-premier-v1:0"
+            "amazon.titan-text-express-v1"
+            "ai21.jamba-instruct-v1:0"
+            "anthropic.claude-3-haiku-20240307-v1:0"
+            "anthropic.claude-3-opus-20240229-v1:0"
+            "anthropic.claude-3-sonnet-20240229-v1:0"
+            "anthropic.claude-3-5-sonnet-20240229-v1:0"
+        )
+
+        self.AWS_BEDROCK_IMAGE_GEN_MODEL_ID = self.get_env(
+            'AWS_BEDROCK_IMAGE_GEN_MODEL_ID',
+            "stability.stable-diffusion-xl-v1"
+        )
+
+        self.AWS_BEDROCK_CREDENTIALS_PROFILE = self.get_env(
+            'AWS_BEDROCK_CREDENTIALS_PROFILE', ""
+            # 'AWS_BEDROCK_CREDENTIALS_PROFILE', "bedrock-admin"
+        )
+
+        self.AWS_BEDROCK_GUARDRAIL_ID = self.get_env(
+            'AWS_BEDROCK_GUARDRAIL_ID', ""
+        )
+        self.AWS_BEDROCK_GUARDRAIL_VERSION = self.get_env(
+            'AWS_BEDROCK_GUARDRAIL_VERSION', ""
+        )
+        self.AWS_BEDROCK_GUARDRAIL_TRACE = self.get_env(
+            'AWS_BEDROCK_GUARDRAIL_TRACE', "1"
+        )
+
         self.AWS_BEDROCK_EMBEDDINGS_MODEL_ID = self.get_env(
             'AWS_BEDROCK_EMBEDDINGS_MODEL_ID', "amazon.titan-embed-text-v1"
         )
         self.AWS_BEDROCK_EMBEDDINGS_PROFILE = self.get_env(
-            'AWS_BEDROCK_EMBEDDINGS_PROFILE', "bedrock-admin"
+            'AWS_BEDROCK_EMBEDDINGS_PROFILE', ""
+            # 'AWS_BEDROCK_EMBEDDINGS_PROFILE', "bedrock-admin"
         )
 
         # HuggingFace (HF) credentials and other parameters
@@ -250,13 +291,23 @@ class Config(ConfigSuperClass):
 
         self.HUGGINGFACE_DEFAULT_CHAT_MODEL = self.get_env(
             'HUGGINGFACE_DEFAULT_CHAT_MODEL',
-            "mistralai/Mistral-7B-Instruct-v0.2"
-            # "meta-llama/Meta-Llama-3.1-8B-Instruct"
+            "mistralai/Mixtral-8x7B-Instruct-v0.1"
             # "meta-llama/Llama-2-7b-chat-hf"
+            # NOTE: instruct models must be configured to run with
+            # the HUGGINGFACE_USE_CHAT_HF = "0"
+            # "meta-llama/Meta-Llama-3.1-8B-Instruct"
             # NOTE: Big models work with huggingface_pipeline only
-            # mattshumer/Reflection-Llama-3.1-70B
+            # "meta-llama/Meta-Llama-3.1-8B"
             # "meta-llama/Meta-Llama-3.1-405B-Instruct"
             # "tiiuae/falcon-mamba-7b"
+        )
+
+        # 0 = use HuggingFaceEndpoint + LangChain Agent
+        # 1 = use ChatHuggingFace + LangChain LCEL
+        # By default, it's set to "0" for instruct models
+        self.HUGGINGFACE_USE_CHAT_HF = self.get_env(
+            'HUGGINGFACE_USE_CHAT_HF',
+            "0" if "-Instruct" in self.HUGGINGFACE_DEFAULT_CHAT_MODEL else "1"
         )
 
         self.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL = self.get_env(
@@ -292,14 +343,23 @@ class Config(ConfigSuperClass):
             'HUGGINGFACE_ENDPOINT_URL',
             "https://api-inference.huggingface.co/models"
         )
+        self.HUGGINGFACE_VERBOSE = self.get_env(
+            "HUGGINGFACE_VERBOSE", "0")
+
         self.HUGGINGFACE_MAX_NEW_TOKENS = self.get_env(
             "HUGGINGFACE_MAX_NEW_TOKENS", "512")
+
         self.HUGGINGFACE_TOP_K = self.get_env(
             "HUGGINGFACE_TOP_K", "50")
+
         self.HUGGINGFACE_TEMPERATURE = self.get_env(
             "HUGGINGFACE_TEMPERATURE", "0.1")
+
         self.HUGGINGFACE_REPETITION_PENALTY = self.get_env(
             "HUGGINGFACE_REPETITION_PENALTY", "1.03")
+
+        self.HUGGINGFACE_TIMEOUT = self.get_env(
+            "HUGGINGFACE_TIMEOUT", "60")
 
         # Groq
 
@@ -312,6 +372,8 @@ class Config(ConfigSuperClass):
         self.GROQ_MODEL = self.get_env(
             'GROQ_MODEL',
             'mixtral-8x7b-32768'
+            # 'llama-3.1-70b-versatile'
+            # 'llama-3.1-8b-instant'
         )
 
         # Clarifai credentials and other parameters

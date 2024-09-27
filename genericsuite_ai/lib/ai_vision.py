@@ -9,7 +9,7 @@ import base64
 from openai import OpenAI
 
 from langchain.agents import tool
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -55,7 +55,8 @@ class VisionParams(BaseModel):
     """
     image_path: str = Field(description="The path to the image.")
     question: str = Field(description="A question about the image specified.")
-    other: Optional[dict] = Field(description="Additional parametes. Defaults to {}")
+    other: Optional[dict] = Field(
+        description="Additional parametes. Defaults to {}")
 
 
 def encode_image(image_path: str) -> str:
@@ -93,7 +94,8 @@ def get_vision_image_url(
             attachment_url (str): URL for the image.
             final_filename (str): file name of the image with date/time added.
             error (bool): True if an error occurred.
-            error_message (str): the eventual error message or None if no errors
+            error_message (str): the eventual error message or None
+                if no errors
     """
     result = get_default_resultset()
     settings = Config(cac.get())
@@ -111,7 +113,8 @@ def get_vision_image_url(
                       f'AWS_S3_CHATBOT_ATTACHMENTS_BUCKET: {str(bucket_name)}')
         if not bucket_name:
             result['error'] = True
-            result['error_message'] = "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
+            result['error_message'] = \
+                "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
         else:
             upload_result = upload_nodup_file_to_s3(
                 file_path=image_path,
@@ -146,7 +149,8 @@ def get_vision_name() -> str:
         model_name = "OpenAI GPT4 Vision: " + \
             f"{settings.OPENAI_VISION_MODEL}"
     if DEBUG:
-        log_debug("get_vision_name | AI_VISION_TECHNOLOGY:" +
+        log_debug(
+            "get_vision_name | AI_VISION_TECHNOLOGY:" +
             f" {settings.AI_VISION_TECHNOLOGY}"
             f" | model_name: {model_name}")
     return model_name
@@ -193,7 +197,8 @@ def get_vision_response(response: dict, other: dict) -> dict:
             openai_api_key = billing.get_openai_api_key()
             if not openai_api_key:
                 response['error'] = True
-                response['error_message'] = "OpenAI API key is not configured [IAIG-E020]"
+                response['error_message'] = \
+                    "OpenAI API key is not configured [IAIG-E020]"
                 return response
             client = OpenAI(
                 api_key=openai_api_key
@@ -277,13 +282,15 @@ def vision_image_analyzer(params: dict) -> dict:
     if os.path.basename(image_path) == image_path and "/" not in image_path:
         # Invalid image name: it's not a path and it's not an URL
         response["error"] = True
-        response["error_message"] = "ERROR [IAVIA-010]: Invalid image name:" + \
-                                    f" it's not a path nor an URL: {image_path}"
+        response["error_message"] = \
+            "ERROR [IAVIA-010]: Invalid image name:" + \
+            f" it's not a path nor an URL: {image_path}"
 
     if not response["error"]:
         try:
-            file_size = (0 if is_an_url(image_path) else
-                        os.path.getsize(image_path))
+            file_size = (
+                0 if is_an_url(image_path) else
+                os.path.getsize(image_path))
         except FileNotFoundError as error:
             response["error"] = True
             response["error_message"] = f"ERROR [IAVIA-020]: {error}"
@@ -297,14 +304,15 @@ def vision_image_analyzer(params: dict) -> dict:
         other["mock_error"] = get_default_value("mock_error", other, "0")
 
         if DEBUG:
-            log_debug("\nAnalize image by " +
-                    get_vision_name() +
-                    ".\n" +
-                    f"Image file path: {image_path} | " +
-                    f'File size: {file_size} bytes ' +
-                    f'({get_file_size(file_size, "mb")})\n' +
-                    f"Question: {question}\n" +
-                    f"Other parameters: {other}\n")
+            log_debug(
+                "\nAnalize image by " +
+                get_vision_name() +
+                ".\n" +
+                f"Image file path: {image_path} | " +
+                f'File size: {file_size} bytes ' +
+                f'({get_file_size(file_size, "mb")})\n' +
+                f"Question: {question}\n" +
+                f"Other parameters: {other}\n")
 
         # Sometimes ChatGPT only needs the image description...
         # so the question received is None
@@ -328,7 +336,8 @@ def vision_image_analyzer(params: dict) -> dict:
             },
         ]
 
-        # GPT-4-turbo vision API recognizes image_url as base64 encoded image data
+        # GPT-4-turbo vision API recognizes image_url as
+        # base64 encoded image data
         # https://community.openai.com/t/gpt-4-turbo-vision-api-recognizes-image-url-as-base64-encoded-image-data/734243
         resolution = "auto"  # "auto" | "low" | "high"
         if settings.AI_VISION_TECHNOLOGY == "openai":
@@ -354,8 +363,9 @@ def vision_image_analyzer(params: dict) -> dict:
                 )
 
         if DEBUG:
-            log_debug(f"\nQuestion for {get_vision_name()}:" +
-                    f'{response["question"]}\n')
+            log_debug(
+                f"\nQuestion for {get_vision_name()}:" +
+                f'{response["question"]}\n')
 
         if other["mock_error"] == "1":
             response["error"] = True
@@ -368,8 +378,9 @@ def vision_image_analyzer(params: dict) -> dict:
             response = get_vision_response(response, other)
 
         if DEBUG:
-            log_debug("\nAnswer from GPT Vision" +
-                    f" ({get_vision_name()}): {response}")
+            log_debug(
+                "\nAnswer from GPT Vision" +
+                f" ({get_vision_name()}): {response}")
 
     if "cid" in other:
         if not response['error']:
@@ -414,7 +425,8 @@ Args: params (dict): Tool parameters. Must contain:
 def vision_image_analyzer_text_response_func(params: Any) -> str:
     """
     Process an specified image and answer a question about it.
-    There must be an explitcit image URL specified by the Human or in the conversation.
+    There must be an explitcit image URL specified by the Human or
+    in the conversation.
 
     Args:
         params (dict): Tool parameters. Must contain:

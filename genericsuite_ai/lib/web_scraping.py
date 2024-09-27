@@ -3,15 +3,16 @@ Web scrapping module
 """
 from typing import Any
 import importlib
-import asyncio
+# import asyncio
 
 from langchain_community.document_loaders.web_base import WebBaseLoader
 
 # from langchain.embeddings import OpenAIEmbeddings
 # from langchain.vectorstores import Chroma
-from langchain.chains.retrieval_qa.base import RetrievalQA, BaseRetrievalQA
+from langchain.chains.retrieval_qa.base import RetrievalQA
+# from langchain.chains.retrieval_qa.base import BaseRetrievalQA
 from langchain.agents import tool
-from langchain.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 from genericsuite.util.app_context import CommonAppContext
 from genericsuite.util.app_logger import log_debug
@@ -62,8 +63,9 @@ def get_qa_chain(
         importlib.import_module("bs4")
     except ImportError:
         # except ImportError as exc:
-        # raise ImportError("The 'bs4' package is required for this operation." +
-        #     " Please install it using 'pip install beautifulsoup4'.") from exc
+        # raise ImportError("The 'bs4' package is required for this" +
+        #     " operation. Please install it using " +
+        #     "'pip install beautifulsoup4'.") from exc
         result = error_resultset(
             "The 'bs4' package is required for this operation." +
             " Please install it using 'pip install beautifulsoup4'.",
@@ -75,16 +77,19 @@ def get_qa_chain(
         data = loader.load()
 
         _ = DEBUG and \
-            log_debug("GET_QA_CHAIN | WebBaseLoader:" +
+            log_debug(
+                "GET_QA_CHAIN | WebBaseLoader:" +
                 f"\n | data: {data}")
         # Embed the webpage content
         get_vectorstore = get_vector_store(
             app_context=cac.app_context,
             documents_list=data)
         # embeddings = OpenAIEmbeddings()
-        # vectorstore = Chroma.from_documents(documents=[data], embedding=embeddings)
+        # vectorstore = Chroma.from_documents(documents=[data],
+        #   embedding=embeddings)
         if get_vectorstore["error"]:
-            result = error_resultset(get_vectorstore["error_message"],
+            result = error_resultset(
+                get_vectorstore["error_message"],
                 "WS_GQC-E020")
 
     if not result["error"]:
@@ -102,15 +107,18 @@ def get_qa_chain(
             # llm="gpt-3.5-turbo",  # Specify the LLM model you want to use
             llm=llm,  # Specify the LLM model you want to use
 
-            chain_type="stuff",  # This should be replaced with the actual chain type you need
-            # chain_type="refine",  # This should be replaced with the actual chain type you need
-            # ValueError: Got unsupported chain type: retrieval_qa. Should be one of dict_keys(['stuff', 'map_reduce', 'refine', 'map_rerank'])
+            # This should be replaced with the actual chain type you need
+            chain_type="stuff",
+            # chain_type="refine",
+            # ValueError: Got unsupported chain type: retrieval_qa. Should be
+            # one of dict_keys(['stuff', 'map_reduce', 'refine', 'map_rerank'])
 
             retriever=vectorstore.as_retriever(),
         )
 
     _ = DEBUG and \
-        log_debug("GET_QA_CHAIN finished:" +
+        log_debug(
+            "GET_QA_CHAIN finished:" +
             f"\n | result: {result}" +
             "\n")
     return result
@@ -154,15 +162,19 @@ def webpage_analyzer(
     question = params.question
 
     # Run the QA chain asynchronously and return the answer.
-    # This is a blocking operation, so we need to run it in an asynchronous context.
+    # This is a blocking operation, so we need to run it in an asynchronous
+    # context.
     # We use asyncio to run the QA chain in an asynchronous context.
     # We use the ask_question function to run the QA chain asynchronously.
     # We pass the QA chain and the question to the ask_question function.
     # The ask_question function returns the answer to the question.
     # We print the answer to the question and return it.
-    # The ask_question function is an asynchronous function, so we need to use the asyncio.get_event_loop() function to get the event loop.
-    # We use the run_until_complete() method of the event loop to run the asynchronous function and wait for it to complete.
-    # The run_until_complete() method returns the result of the asynchronous function.
+    # The ask_question function is an asynchronous function, so we need to use
+    # the asyncio.get_event_loop() function to get the event loop.
+    # We use the run_until_complete() method of the event loop to run the
+    # asynchronous function and wait for it to complete.
+    # The run_until_complete() method returns the result of the asynchronous
+    # function.
     # We print the answer to the question and return it.
     result = get_default_resultset()
 
@@ -174,17 +186,21 @@ def webpage_analyzer(
         qa_chain = qa_chain_result["qa_chain"]
 
         _ = DEBUG and \
-            log_debug("WEBPAGE_ANALYZER" +
+            log_debug(
+                "WEBPAGE_ANALYZER" +
                 f"\n | qa_chain: {qa_chain}"
-                # f'\n | qa_chain_result["qa_chain"]: {qa_chain_result["qa_chain"]}'
+                # f'\n | qa_chain_result["qa_chain"]:
+                # {qa_chain_result["qa_chain"]}'
                 )
 
         # loop = asyncio.get_event_loop()
-        # result["answer"] = loop.run_until_complete(ask_question(qa_chain, question))
+        # result["answer"] = \
+        #     loop.run_until_complete(ask_question(qa_chain, question))
         result["answer"] = qa_chain.run(question)
 
     _ = DEBUG and \
-        log_debug("WEBPAGE_ANALYZER" +
+        log_debug(
+            "WEBPAGE_ANALYZER" +
             f"\n | url: {url}" +
             f"\n | question: {question}" +
             f"\n | result: {result}" +
