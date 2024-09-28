@@ -30,18 +30,20 @@ Implement Flux.1 image generator [GS-117].
 Implement Anthropic Claude 3.5 Sonnet [GS-33].
 Implement Groq chat model [GS-92].
 Implement Amazon Bedrock chat and image generator [GS-131].
+Add HUGGINGFACE_PIPELINE_DEVICE to configura the "device" pipeline() parameter [FA-233].
 
 ### Changes
+Langchain upgraded to "^0.3.0" [GS-131].
 Replace "gpt-3.5-turbo" with "gpt-4o-mini" as default OpenAI model [GS-109].
 HUGGINGFACE_ENDPOINT_URL replaced by HUGGINGFACE_DEFAULT_CHAT_MODEL [GS-59].
 Config class accepts both OPENAI_MODEL_NAME and OPENAI_MODEL envvars [GS-128].
-get_model() "billing" verification moved to get_model_middleware() [GS-128].
-Langchain upgraded to "^0.3.0" [GS-131].
-urllib3 fixed to "1.26" (and clarifai fixed "^10.1.0" in consecuence) to make sure it's dependency compatible with GS BE Core.
+get_model() "billing" verification logic moved to get_model_middleware() [GS-128].
+The user with free plan can only use the "gpt-4o-mini" model with their own API Key, regardless of what is configured in LANGCHAIN_DEFAULT_MODEL [FA-233].
 
 ### Fixes
 Fix Anthropic Claude2 API Error since large prompt change, replacing Claude2 with Claude 3.5 Sonnet [GS-33].
 Fix the "Warning: deprecated HuggingFaceTextGenInference-use HuggingFaceEnpoint instead" [GS-59].
+Fix dependency incompatibility between GS BE Core and GS BE AI fixing the "urllib3" version to "1.26" (and clarifai to "^10.1.0" in consecuence) because GS BE Core's Boto3 use "urllib3" versions less then "<2" [GS-128].
 
 
 ## 0.1.9 (2024-07-27)
@@ -201,10 +203,10 @@ Implement TTS-1 text-to-speech OpenAI Model [FA-210].
 Implement image generator using DALL-E 3 [FA-165].
 Implement Google Gemini models [FA-172].
 Implement Clarifai models and embeddings [FA-182].
-Add web search capability to FynBot [FA-159].
+Add web search capability to the AI Asistant [FA-159].
 Chats stored in the DB [FA-119].
-Add the "plan" attribute to the user profile [FA-200].
-Add the OpenAi API key to allow free plan users to use FynBot at their own expenses [FA-201].
+Add the Billing Plan ("plan" attribute) to the user profile [FA-200].
+Add the OpenAI API key and model name ("openai_api_key" and "openai_model" attributes) to allow free plan users to use the AI Asistant at their own expenses [FA-201].
 Add double version of GPT Functions and LC Tools [FA-211].
 
 

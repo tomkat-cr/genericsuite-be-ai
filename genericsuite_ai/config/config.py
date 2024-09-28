@@ -320,7 +320,7 @@ class Config(ConfigSuperClass):
 
         # IMPORTANT: about "sentence-transformers" lib. Be careful, because
         # when it's included, the package size increase by 5 Gb. and if the
-        # app runs in a AWS Lambda Function, it overpass the package size
+        # app runs in a AWS Lambda Function, it exceeds the package size
         # deployment limit.
 
         self.HUGGINGFACE_EMBEDDINGS_MODEL = self.get_env(
@@ -360,6 +360,17 @@ class Config(ConfigSuperClass):
 
         self.HUGGINGFACE_TIMEOUT = self.get_env(
             "HUGGINGFACE_TIMEOUT", "60")
+
+        # Reference: from python3.xx > transformers > def pipeline() comment:
+        # device (`int` or `str` or `torch.device`):
+        #   Defines the device (*e.g.*, `"cpu"`, `"cuda:1"`, `"mps"`, or a GPU
+        #   ordinal rank like `1`) on which this pipeline will be allocated.
+        self.HUGGINGFACE_PIPELINE_DEVICE = self.get_env(
+            "HUGGINGFACE_PIPELINE_DEVICE",
+            ""
+            # "0"
+            # "cuda"
+        )
 
         # Groq
 

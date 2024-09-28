@@ -51,7 +51,6 @@ def get_model(
     app_context: AppContext,
     model_type: str,
     model_params: Optional[dict] = None,
-    billing: bool = True,
 ) -> dict:
     """
     Get model object.
@@ -61,10 +60,9 @@ def get_model(
         model_type (str): the model type. e.g. "chat_openai",
             "gemini", "ollama", "anthropic", "clarifai"
         model_params (dict, optional): model parameters. Defaults to None.
-        billing (bool): Use billing parameters. Defaults to True.
 
     Returns:
-        dict: a resultset with the attributes:
+        dict: a dictionary with the attributes:
             "model_type" (str): model type
             "model_object" (Any): model object
             "manufacturer" (str): manufacturer name
@@ -83,7 +81,6 @@ def get_model(
         Clarifai,
     ] = None
     error = None
-    billing = BillingUtilities(app_context)
     manufacturer = None
     model_name = None
     pref_agent_type = 'lcel'
@@ -92,30 +89,19 @@ def get_model(
         # OpenAI ChatGPT
         if model_type == "chat_openai":
             manufacturer = "OpenAI"
-            if billing:
-                openai_api_key = billing.get_openai_api_key()
-                model_name = billing.get_openai_chat_model()
-            else:
-                openai_api_key = settings.OPENAI_API_KEY
-                model_name = settings.OPENAI_MODEL
-            if not openai_api_key:
-                error = "ERROR [GET_MODEL-OAI-010] Missing OpenAI API Key"
-                _ = DEBUG and \
-                    log_debug(
-                        'GM-E1: Error getting model' +
-                        f'\n | error: {error}'
-                        f'\n | user_plan: ' +
-                        f'{billing.get_user_plan() if billing else "--"}')
-            else:
-                model_object = ChatOpenAI(
-                    # model="gpt-3.5-turbo"
-                    model=model_name,
-                    temperature=float(settings.OPENAI_TEMPERATURE),
-                    openai_api_key=openai_api_key,
-                )
-                if not model_object:
-                    error = "ERROR [GET_MODEL-OAI-020] - ChatOpenAI cannot" + \
-                            " be initialized"
+            openai_api_key = model_params.get('openai_api_key') \
+                or settings.OPENAI_API_KEY
+            model_name = model_params.get('model_name') \
+                or settings.OPENAI_MODEL
+            model_object = ChatOpenAI(
+                # model="gpt-3.5-turbo"
+                model=model_name,
+                temperature=float(settings.OPENAI_TEMPERATURE),
+                openai_api_key=openai_api_key,
+            )
+            if not model_object:
+                error = "ERROR [GET_MODEL-OAI-020] - ChatOpenAI cannot" + \
+                        " be initialized"
 
         # Google Gemini
         if model_type == "gemini" and settings.GOOGLE_API_KEY:
@@ -186,13 +172,17 @@ def get_model(
                 model_name = model_params['repo_id']
             tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForCausalLM.from_pretrained(model_name)
-            pipe = pipeline(
-                "text-generation",
-                model=model,
-                tokenizer=tokenizer,
-                max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
-                huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
-            )
+            model_config = {
+                'model': model,
+                'tokenizer': tokenizer,
+                'max_new_tokens': int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
+                'huggingfacehub_api_token': settings.HUGGINGFACE_API_KEY,
+            }
+            if settings.HUGGINGFACE_PIPELINE_DEVICE != "":
+                model_config["device"] = settings.HUGGINGFACE_PIPELINE_DEVICE
+            # Pipeline() reference:
+            # https://huggingface.co/transformers/v3.0.2/main_classes/pipelines.html
+            pipe = pipeline("text-generation", **model_config)
             model_object = HuggingFacePipeline(
                 pipeline=pipe,
                 # timeout=float(settings.HUGGINGFACE_TIMEOUT),
@@ -312,6 +302,59 @@ def get_model(
     return result
 
 
+def get_model_middleware(
+    app_context: AppContext,
+    model_type: str,
+    model_params: Optional[dict] = None,
+) -> dict:
+    """
+    Get model object, verifying the billing plan.
+
+    Args:
+        app_context (AppContext): application context.
+        model_type (str): the model type. e.g. "chat_openai",
+            "gemini", "ollama", "anthropic", "clarifai"
+        model_params (dict, optional): model parameters. Defaults to None.
+
+    Returns:
+        dict: a dictionary with the attributes:
+            "model_type" (str): model type
+            "model_object" (Any): model object
+            "manufacturer" (str): manufacturer name
+            "error" (str): error message
+    """
+    billing = BillingUtilities(app_context)
+    if not billing.is_free_plan():
+        return get_model(app_context, model_type, model_params)
+    if not model_params:
+        model_params = {}
+    # Free plan only allows GPT with the user's OpenAI API key and user's
+    # configured model or small GPT
+    model_type == "chat_openai"
+    model_params["openai_api_key"] = billing.get_openai_api_key()
+    model_params["model_name"] = billing.get_openai_chat_model()
+    model_params["user_plan"] = billing.get_user_plan()
+    if not model_params["openai_api_key"]:
+        error = "ERROR [GET_MODEL-OAI-010] Missing OpenAI API Key"
+        result = {
+            "model_type": None,
+            "model_name": None,
+            "model_object": None,
+            "manufacturer": None,
+            "model_params": None,
+            "pref_agent_type": None,
+            "other_data": {},
+            "error": error,
+        }
+        _ = DEBUG and \
+            log_debug(
+                'GM-E1: Error getting model' +
+                f'\n | error: {error}'
+                f'\n | user_plan: {model_params["user_plan"]}')
+        return result
+    return get_model(app_context, model_type, model_params)
+
+
 def get_model_obj(
     app_context: AppContext,
     model_type: Optional[Union[str, None]] = None,
@@ -343,7 +386,7 @@ def get_model_obj(
         log_debug("GET_MODEL_OBJ | Model (selected_model_type): >> " +
                   f'{selected_model_type} <<')
 
-    get_model_response = get_model(app_context, selected_model_type)
+    get_model_response = get_model_middleware(app_context, selected_model_type)
     app_context.set_other_data("model_type",
                                get_model_response["model_type"])
     app_context.set_other_data("model_name",
@@ -377,7 +420,7 @@ def get_model_obj(
     for model_name in add_models:
         if model_name == selected_model_type:
             continue
-        get_model_response = get_model(app_context, model_name)
+        get_model_response = get_model_middleware(app_context, model_name)
         if get_model_response["error"]:
             log_error(f"ERROR [AI-GMO-E020] - {get_model_response}")
             additional_model = None

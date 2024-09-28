@@ -32,7 +32,8 @@ class BillingUtilities(BillingUtilitiesSuperClass):
             oai_model = self.app_context.get_user_data().get("openai_model")
         if not oai_model:
             oai_model = self.settings.OPENAI_MODEL
-        _ = DEBUG and log_debug('get_openai_chat_model' +
+        _ = DEBUG and log_debug(
+            'get_openai_chat_model' +
             f' | user_plan: {self.user_plan}' +
             f' | oai_model: {oai_model}')
         return oai_model
@@ -42,7 +43,8 @@ class BillingUtilities(BillingUtilitiesSuperClass):
         Get OpenAI API from the user profile
         """
         if self.is_free_plan():
-            openai_api_key = self.app_context.get_user_data().get("openai_api_key")
+            openai_api_key = \
+                self.app_context.get_user_data().get("openai_api_key")
         else:
             openai_api_key = self.settings.OPENAI_API_KEY
         # _ = DEBUG and log_debug('get_openai_api_key' +
