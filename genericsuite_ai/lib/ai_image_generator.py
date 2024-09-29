@@ -56,7 +56,8 @@ class ImageGeneratorParams(BaseModel):
     """
     question: str = Field(description="A question about the image specified.")
     other: Optional[dict] = Field(description="Additional parametes." +
-                                  " Defaults to {}")
+                                  " Defaults to {}",
+                                  default={})
 
 
 def get_filename_from_dalle_url(url: str) -> (str, str):

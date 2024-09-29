@@ -88,6 +88,9 @@ def get_model(
     try:
         # OpenAI ChatGPT
         if model_type == "chat_openai":
+            other_data["user_plan"] = model_params.get(
+                "user_plan",
+                "Unknown or N/A")
             manufacturer = "OpenAI"
             openai_api_key = model_params.get('openai_api_key') \
                 or settings.OPENAI_API_KEY
@@ -323,17 +326,22 @@ def get_model_middleware(
             "manufacturer" (str): manufacturer name
             "error" (str): error message
     """
-    billing = BillingUtilities(app_context)
-    if not billing.is_free_plan():
-        return get_model(app_context, model_type, model_params)
     if not model_params:
         model_params = {}
+    billing = BillingUtilities(app_context)
+    model_params["user_plan"] = billing.get_user_plan()
+    if not billing.is_free_plan():
+        if model_type == "chat_openai":
+            model_params["openai_api_key"] = billing.get_openai_api_key()
+            model_params["model_name"] = billing.get_openai_chat_model()
+            _ = DEBUG and log_debug(
+                f"GET_MODEL_MIDDLEWARE | model_params: {model_params}")
+        return get_model(app_context, model_type, model_params)
     # Free plan only allows GPT with the user's OpenAI API key and user's
     # configured model or small GPT
-    model_type == "chat_openai"
+    model_type = "chat_openai"
     model_params["openai_api_key"] = billing.get_openai_api_key()
     model_params["model_name"] = billing.get_openai_chat_model()
-    model_params["user_plan"] = billing.get_user_plan()
     if not model_params["openai_api_key"]:
         error = "ERROR [GET_MODEL-OAI-010] Missing OpenAI API Key"
         result = {
