@@ -60,7 +60,6 @@ langchain-google-genai = {extras = ["images"], version = "^2.0.0"}
 pillow = "^10.1.0"
 langchain-openai = "^0.2.0"
 jq = "^1.6.0"
-transformers = {git = "https://github.com/huggingface/transformers.git"}
 text-generation = "^0.6.1"
 langchain-core = "^0.3.5"
 langchain-google-community = "^2.0.0"
