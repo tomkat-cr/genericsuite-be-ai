@@ -67,7 +67,6 @@ langchain-anthropic = "^0.2.1"
 langchain-huggingface = "^0.1.0"
 langchain-groq = "^0.2.0"
 urllib3 = "1.26"
-clarifai = "^10.1.0"
 langchain-aws = "^0.2.1"
 
 [tool.poetry.group.dev.dependencies]
