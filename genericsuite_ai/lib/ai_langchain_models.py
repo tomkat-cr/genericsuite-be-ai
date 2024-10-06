@@ -18,8 +18,6 @@ from langchain_core.runnables.utils import ConfigurableField
 from langchain_core.runnables.base import RunnableSerializable
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
-
 from genericsuite.util.app_context import AppContext
 from genericsuite.util.app_logger import log_debug, log_error
 from genericsuite.util.utilities import is_under_test
@@ -29,6 +27,12 @@ from genericsuite_ai.lib.clarifai import (
     get_model_config,
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
+from genericsuite_ai.lib.huggingface_endpoint import (
+    GsHuggingFaceEndpoint,
+)
+from genericsuite_ai.lib.huggingface_chat_model import (
+    GsChatHuggingFace,
+)
 
 DEBUG = True
 
@@ -131,14 +135,17 @@ def get_model(
             # https://python.langchain.com/v0.2/docs/integrations/platforms/huggingface
             # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_endpoint/
             # https://python.langchain.com/v0.2/docs/integrations/chat/huggingface/
+            #
+            # from langchain_huggingface import HuggingFaceEndpoint
+            # from langchain_huggingface import ChatHuggingFace
+            #
             manufacturer = "Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
             # if 'url' in model_params:
             #     model_name = model_params['url']
             if 'repo_id' in model_params:
                 model_name = model_params['repo_id']
-            from langchain_huggingface import HuggingFaceEndpoint
-            model_object = HuggingFaceEndpoint(
+            model_object = GsHuggingFaceEndpoint(
                 repo_id=model_name,
                 task="text-generation",
                 do_sample=False,
@@ -156,8 +163,7 @@ def get_model(
                 settings.HUGGINGFACE_USE_CHAT_HF
 
             if settings.HUGGINGFACE_USE_CHAT_HF == "1":
-                from langchain_huggingface import ChatHuggingFace
-                model_object = ChatHuggingFace(
+                model_object = GsChatHuggingFace(
                     llm=model_object,
                     verbose=settings.HUGGINGFACE_VERBOSE == "1",
                 )
@@ -167,6 +173,9 @@ def get_model(
 
         # Hugging Face Pipelines
         if model_type == "huggingface_pipeline":
+            from langchain_huggingface.llms import HuggingFacePipeline
+            from transformers import (
+                AutoModelForCausalLM, AutoTokenizer, pipeline)
             # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_pipelines/
             manufacturer = "Hugging Face (Pipeline)"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
@@ -185,7 +194,6 @@ def get_model(
             # Pipeline() reference:
             # https://huggingface.co/transformers/v3.0.2/main_classes/pipelines.html
             pipe = pipeline("text-generation", **model_config)
-            from langchain_huggingface.llms import HuggingFacePipeline
             model_object = HuggingFacePipeline(
                 pipeline=pipe,
                 # timeout=float(settings.HUGGINGFACE_TIMEOUT),
