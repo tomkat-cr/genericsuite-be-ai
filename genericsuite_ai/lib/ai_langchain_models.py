@@ -130,19 +130,11 @@ def get_model(
                 model=model_name,
             )
 
-        # Hugging Face Inference API
-        if model_type == "huggingface":
-            # https://python.langchain.com/v0.2/docs/integrations/platforms/huggingface
-            # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_endpoint/
-            # https://python.langchain.com/v0.2/docs/integrations/chat/huggingface/
-            #
-            # from langchain_huggingface import HuggingFaceEndpoint
-            # from langchain_huggingface import ChatHuggingFace
-            #
-            manufacturer = "Hugging Face"
+        # Hugging Face Inference API (Genericsuite Huggingface light)
+        if model_type == "huggingface_remote" or \
+           model_type == "gs_huggingface":
+            manufacturer = "GS Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            # if 'url' in model_params:
-            #     model_name = model_params['url']
             if 'repo_id' in model_params:
                 model_name = model_params['repo_id']
             model_object = GsHuggingFaceEndpoint(
@@ -171,11 +163,56 @@ def get_model(
                 # Instruct models or pure LLMs Doesn't work with LCEL
                 pref_agent_type = 'react_chat_agent'
 
+        if model_type == "huggingface":
+            # https://python.langchain.com/v0.2/docs/integrations/platforms/huggingface
+            # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_endpoint/
+            # https://python.langchain.com/v0.2/docs/integrations/chat/huggingface/
+            #
+            from langchain_huggingface import HuggingFaceEndpoint  # type: ignore[import]
+            from langchain_huggingface import ChatHuggingFace  # type: ignore[import]
+            #
+            manufacturer = "Hugging Face"
+            model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
+            # if 'url' in model_params:
+            #     model_name = model_params['url']
+            if 'repo_id' in model_params:
+                model_name = model_params['repo_id']
+            model_object = HuggingFaceEndpoint(
+                repo_id=model_name,
+                task="text-generation",
+                do_sample=False,
+                max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
+                top_k=int(settings.HUGGINGFACE_TOP_K),
+                temperature=float(settings.HUGGINGFACE_TEMPERATURE),
+                repetition_penalty=float(
+                    settings.HUGGINGFACE_REPETITION_PENALTY),
+                huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
+                timeout=float(settings.HUGGINGFACE_TIMEOUT),
+            )
+            # 0 = use HuggingFaceEndpoint + LangChain Agent
+            # 1 = use ChatHuggingFace + LangChain LCEL
+            other_data["HUGGINGFACE_USE_CHAT_HF"] = \
+                settings.HUGGINGFACE_USE_CHAT_HF
+
+            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+                model_object = ChatHuggingFace(
+                    llm=model_object,
+                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
+                )
+            else:
+                # Instruct models or pure LLMs Doesn't work with LCEL
+                pref_agent_type = 'react_chat_agent'
+
         # Hugging Face Pipelines
         if model_type == "huggingface_pipeline":
-            from langchain_huggingface.llms import HuggingFacePipeline
+            from langchain_huggingface.llms import \
+                HuggingFacePipeline  # type: ignore[import]
             from transformers import (
-                AutoModelForCausalLM, AutoTokenizer, pipeline)
+                AutoModelForCausalLM,
+                AutoTokenizer,
+                pipeline)  # type: ignore[import]
+            from langchain_huggingface import \
+                ChatHuggingFace  # type: ignore[import]
             # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_pipelines/
             manufacturer = "Hugging Face (Pipeline)"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
@@ -201,7 +238,6 @@ def get_model(
             other_data["HUGGINGFACE_USE_CHAT_HF"] = \
                 settings.HUGGINGFACE_USE_CHAT_HF
             if settings.HUGGINGFACE_USE_CHAT_HF == "1":
-                from langchain_huggingface import ChatHuggingFace
                 model_object = ChatHuggingFace(
                     llm=model_object,
                     verbose=settings.HUGGINGFACE_VERBOSE == "1",
