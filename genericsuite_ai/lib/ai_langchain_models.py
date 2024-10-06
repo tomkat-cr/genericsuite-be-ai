@@ -7,9 +7,6 @@ from typing import Union, Optional, Any
 from langchain_anthropic import ChatAnthropic
 from langchain_aws import ChatBedrock
 from langchain_groq import ChatGroq
-from langchain_huggingface import HuggingFaceEndpoint
-from langchain_huggingface import ChatHuggingFace
-from langchain_huggingface.llms import HuggingFacePipeline
 from langchain_openai import OpenAI
 from langchain_openai import ChatOpenAI
 
@@ -140,6 +137,7 @@ def get_model(
             #     model_name = model_params['url']
             if 'repo_id' in model_params:
                 model_name = model_params['repo_id']
+            from langchain_huggingface import HuggingFaceEndpoint
             model_object = HuggingFaceEndpoint(
                 repo_id=model_name,
                 task="text-generation",
@@ -158,6 +156,7 @@ def get_model(
                 settings.HUGGINGFACE_USE_CHAT_HF
 
             if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+                from langchain_huggingface import ChatHuggingFace
                 model_object = ChatHuggingFace(
                     llm=model_object,
                     verbose=settings.HUGGINGFACE_VERBOSE == "1",
@@ -186,6 +185,7 @@ def get_model(
             # Pipeline() reference:
             # https://huggingface.co/transformers/v3.0.2/main_classes/pipelines.html
             pipe = pipeline("text-generation", **model_config)
+            from langchain_huggingface.llms import HuggingFacePipeline
             model_object = HuggingFacePipeline(
                 pipeline=pipe,
                 # timeout=float(settings.HUGGINGFACE_TIMEOUT),
@@ -193,6 +193,7 @@ def get_model(
             other_data["HUGGINGFACE_USE_CHAT_HF"] = \
                 settings.HUGGINGFACE_USE_CHAT_HF
             if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+                from langchain_huggingface import ChatHuggingFace
                 model_object = ChatHuggingFace(
                     llm=model_object,
                     verbose=settings.HUGGINGFACE_VERBOSE == "1",
