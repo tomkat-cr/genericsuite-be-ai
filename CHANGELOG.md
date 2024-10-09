@@ -17,7 +17,41 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.10 (2024-10-07)
+---
+
+### New
+Implement HF (HuggingFace) local pipelines [GS-59].
+Implement HF (HuggingFace) image generator [GS-117].
+Implement Flux.1 image generator [GS-117].
+Implement Anthropic Claude 3.5 Sonnet [GS-33].
+Implement Groq chat model [GS-92].
+Implement Amazon Bedrock chat and image generator [GS-131].
+Add HUGGINGFACE_PIPELINE_DEVICE to configure the "device" pipeline() parameter [FA-233].
+Implement o1-mini/o1-preview models use through AI/ML API aimlapi.com [GS-138].
+Implement GS Huggingface lightweight model, identified by model_types "huggingface_remote" or "gs_huggingface". The model_types "huggingface" and "huggingface_pipeline" use the "langchain_hugginface" dependency that required "sentence-transformers", making imposible to deploy the project AWS Lambda Functions [GS-136].
+Implement Falcon Mamba with HF [GS-118].
+Implement Meta Llama 3.1 with HF [GS-119].
+
+### Changes
+Langchain upgraded to "^0.3.0" [GS-131].
+Replace "gpt-3.5-turbo" with "gpt-4o-mini" as default OpenAI model [GS-109].
+HUGGINGFACE_ENDPOINT_URL replaced by HUGGINGFACE_DEFAULT_CHAT_MODEL [GS-59].
+Config class accepts both OPENAI_MODEL_NAME and OPENAI_MODEL envvars [GS-128].
+get_model() "billing" verification logic moved to get_model_middleware() [GS-128].
+The user with free plan can only use the "gpt-4o-mini" model with their own API Key, regardless of what is configured in LANGCHAIN_DEFAULT_MODEL [FA-233].
+
+### Fixes
+Fix Anthropic Claude2 API Error since large prompt change, replacing Claude2 with Claude 3.5 Sonnet [GS-33].
+Fix the "Warning: deprecated HuggingFaceTextGenInference-use HuggingFaceEnpoint instead" [GS-59].
+Fix dependency incompatibility between GS BE Core and GS BE AI fixing the "urllib3" version to "1.26" (and clarifai to "^10.1.0" in consecuence) because GS BE Core's Boto3 use "urllib3" versions less then "<2" [GS-128].
+
+### Breaks
+The "langchain_hugginface" dependency is not longer included in this package. It must be imported in the App's project [GS-136].
+
+
 ## 0.1.9 (2024-07-27)
+---
 
 ### New
 Add: ".nvmrc" file to set the repo default node version.
@@ -27,6 +61,7 @@ Fix: typing in create_app() parameters.
 
 
 ## 0.1.8 (2024-07-18)
+---
 
 ### New
 Add "langchain-google-community" due to a deprecation notice about GoogleSearchAPIWrapper [GS-66].
@@ -44,6 +79,7 @@ Change: minor linting changes.
 
 
 ## 0.1.7 (2024-06-06)
+---
 
 ### New
 Add AI Endpoints and create_app for FastAPI [FA-246].
@@ -171,10 +207,10 @@ Implement TTS-1 text-to-speech OpenAI Model [FA-210].
 Implement image generator using DALL-E 3 [FA-165].
 Implement Google Gemini models [FA-172].
 Implement Clarifai models and embeddings [FA-182].
-Add web search capability to FynBot [FA-159].
+Add web search capability to the AI Asistant [FA-159].
 Chats stored in the DB [FA-119].
-Add the "plan" attribute to the user profile [FA-200].
-Add the OpenAi API key to allow free plan users to use FynBot at their own expenses [FA-201].
+Add the Billing Plan ("plan" attribute) to the user profile [FA-200].
+Add the OpenAI API key and model name ("openai_api_key" and "openai_model" attributes) to allow free plan users to use the AI Asistant at their own expenses [FA-201].
 Add double version of GPT Functions and LC Tools [FA-211].
 
 

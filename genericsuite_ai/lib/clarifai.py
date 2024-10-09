@@ -218,7 +218,6 @@ def clarifai_vision_raw(
             )
         )
 
-
     post_model_outputs_response = stub.PostModelOutputs(
         service_pb2.PostModelOutputsRequest(
             # The userDataObject is created in the overview and is
@@ -248,7 +247,8 @@ def clarifai_vision_raw(
                 # Accessing and rounding the bounding box values
                 top_row = round(region.region_info.bounding_box.top_row, 3)
                 left_col = round(region.region_info.bounding_box.left_col, 3)
-                bottom_row = round(region.region_info.bounding_box.bottom_row, 3)
+                bottom_row = \
+                    round(region.region_info.bounding_box.bottom_row, 3)
                 right_col = round(region.region_info.bounding_box.right_col, 3)
                 for concept in region.data.concepts:
                     # Accessing and rounding the concept value
@@ -425,7 +425,8 @@ def clarifai_embeddings(
             "raw_text" = raw text
             "text_file_url" = text file url
             "text_file_location" = text local file location
-        model_name (str): model name stored in the "clarifai_models" table. Defaults to None.
+        model_name (str): model name stored in the "clarifai_models" table.
+            Defaults to None.
 
     Returns:
         dict: resultset.
@@ -470,9 +471,10 @@ def clarifai_embeddings_raw(
             "raw_text" = raw text
             "text_file_url" = text file url
             "text_file_location" = text local file location
-        model_name (str): model name stored in the "clarifai_models" table. Defaults to None
-        model_config (dict): model configuration as {"user_id", "app_id", "model_id",
-            "model_version_id"}
+        model_name (str): model name stored in the "clarifai_models" table.
+            Defaults to None
+        model_config (dict): model configuration as {"user_id", "app_id",
+            "model_id", "model_version_id"}
 
     Returns:
         Any: model response
@@ -505,13 +507,15 @@ def clarifai_embeddings_raw(
         with open(embed_source["text_file_location"], "rb") as f:
             input_params["raw"] = f.read()  # file_bytes
     else:
-        return "[ERROR-CF-EMRAW-010] Invalid input source: " + str(embed_source)
+        return "[ERROR-CF-EMRAW-010] Invalid input source: " + \
+            str(embed_source)
 
     post_model_outputs_response = stub.PostModelOutputs(
         service_pb2.PostModelOutputsRequest(
-            # The userDataObject is created in the overview and is required when using a PAT
+            # The userDataObject is created in the overview and is required
+            # when using a PAT
             user_app_id=userDataObject,
-            model_id= model_config["model_id"],
+            model_id=model_config["model_id"],
             # This is optional. Defaults to the latest model version
             version_id=model_config["model_version_id"],
             inputs=[
@@ -531,7 +535,8 @@ def clarifai_embeddings_raw(
     )
     if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
         log_error(post_model_outputs_response.status)
-        raise Exception("Post model outputs failed, status: " + post_model_outputs_response.status.description)
+        raise Exception("Post model outputs failed, status: " +
+                        post_model_outputs_response.status.description)
 
     # Since we have one input, one output will exist here
     output = post_model_outputs_response.outputs[0]
@@ -569,7 +574,8 @@ def clarifai_audio_to_text(
 
     Args:
         audio_url (str): audio URL source
-        model_name (str): model name stored in the "clarifai_models" table. Defaults to None.
+        model_name (str): model name stored in the "clarifai_models" table.
+            Defaults to None.
 
     Returns:
         dict: resultset.
@@ -630,9 +636,10 @@ def clarifai_audio_to_text_raw(
 
     post_model_outputs_response = stub.PostModelOutputs(
         service_pb2.PostModelOutputsRequest(
-            # The userDataObject is created in the overview and is required when using a PAT
+            # The userDataObject is created in the overview and is required
+            # when using a PAT
             user_app_id=userDataObject,
-            model_id= model_config["model_id"],
+            model_id=model_config["model_id"],
             # This is optional. Defaults to the latest model version
             version_id=model_config["model_version_id"],
             inputs=[
@@ -649,7 +656,8 @@ def clarifai_audio_to_text_raw(
     )
     if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
         log_error(post_model_outputs_response.status)
-        raise Exception("Post model outputs failed, status: " + post_model_outputs_response.status.description)
+        raise Exception("Post model outputs failed, status: " +
+                        post_model_outputs_response.status.description)
 
     # Since we have one input, one output will exist here
     output = post_model_outputs_response.outputs[0]
@@ -695,7 +703,8 @@ def clarifai_text_to_audio(
             "text_file_location" = text local file location
         target_lang (str): target language. Defaults None.
         other_options (dict): other options. Defaults to None.
-        model_name (str): model name stored in the "clarifai_models" table. Defaults to None.
+        model_name (str): model name stored in the "clarifai_models" table.
+            Defaults to None.
         sdk_type (str): SDK type. Options are:
             "python_sdk" = Python SDK (requires Eleven Labs API Key)
             "clarifai_grpc" = Clarifai GRPC
@@ -763,9 +772,10 @@ def clarifai_text_to_audio_raw(
             "raw_text" = raw text
             "text_file_url" = text file url
             "text_file_location" = text local file location
-        model_name (str): model name stored in the "clarifai_models" table. Defaults to None
-        model_config (dict): model configuration as {"user_id", "app_id", "model_id",
-            "model_version_id"}
+        model_name (str): model name stored in the "clarifai_models" table.
+            Defaults to None
+        model_config (dict): model configuration as {"user_id", "app_id",
+            "model_id", "model_version_id"}
 
     Returns:
         str: model response as audio file path
@@ -800,13 +810,15 @@ def clarifai_text_to_audio_raw(
         with open(text_source["text_file_location"], "rb") as f:
             input_params["raw"] = f.read()  # file_bytes
     else:
-        return "[ERROR-CF-TTARAW-010] Invalid input source: " + str(text_source)
+        return "[ERROR-CF-TTARAW-010] Invalid input source: " + \
+            str(text_source)
 
     post_model_outputs_response = stub.PostModelOutputs(
         service_pb2.PostModelOutputsRequest(
-            # The userDataObject is created in the overview and is required when using a PAT
+            # The userDataObject is created in the overview and is required
+            # when using a PAT
             user_app_id=userDataObject,
-            model_id= model_config["model_id"],
+            model_id=model_config["model_id"],
             # This is optional. Defaults to the latest model version
             version_id=model_config["model_version_id"],
             inputs=[
@@ -826,7 +838,8 @@ def clarifai_text_to_audio_raw(
     )
     if post_model_outputs_response.status.code != status_code_pb2.SUCCESS:
         log_error(post_model_outputs_response.status)
-        raise Exception("Post model outputs failed, status: " + post_model_outputs_response.status.description)
+        raise Exception("Post model outputs failed, status: " +
+                        post_model_outputs_response.status.description)
 
     # Since we have one input, one output will exist here
     output = post_model_outputs_response.outputs[0]
@@ -872,9 +885,9 @@ def clarifai_text_to_audio_python_sdk(
         target_lang (str): target language
         other_options (dict): other options:
             "speaker_voice": "male" or "female". Defaults to female.
-        
-        model_config (dict): model configuration as {"user_id", "app_id", "model_id",
-            "model_version_id"}
+
+        model_config (dict): model configuration as {"user_id", "app_id",
+            "model_id", "model_version_id"}
 
     Returns:
         str: model response as audio file path
@@ -910,7 +923,8 @@ def clarifai_text_to_audio_python_sdk(
         voice_id = settings.ELEVENLABS_VOICE_ID_MALE
 
     inference_params = {
-        # Check https://api.elevenlabs.io/v1/voices to list all the available voices
+        # Check https://api.elevenlabs.io/v1/voices to list all the available
+        # voices
         "voice-id": voice_id,
         "model_id": settings.ELEVENLABS_MODEL_ID,
         "stability": float(settings.ELEVENLABS_STABILITY),

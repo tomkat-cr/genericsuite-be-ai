@@ -19,6 +19,7 @@ import os
 
 from genericsuite.config.config import (
     Config as ConfigSuperClass,
+    # config_log_debug as log_debug,
     text_to_dict,
 )
 
@@ -40,13 +41,17 @@ class Config(ConfigSuperClass):
                                                 'AI BOT')
 
         self.AI_TECHNOLOGY = self.get_env(
-            # 'AI_TECHNOLOGY', 'openai'
             'AI_TECHNOLOGY', 'langchain'
+            # 'AI_TECHNOLOGY', 'openai'
         )
 
         self.EMBEDDINGS_ENGINE = self.get_env(
             'EMBEDDINGS_ENGINE', 'openai'
             # 'EMBEDDINGS_ENGINE', 'clarifai'
+            # 'EMBEDDINGS_ENGINE', 'bedrock'
+            # 'EMBEDDINGS_ENGINE', 'huggingface'
+            # 'EMBEDDINGS_ENGINE', 'cohere'
+            # 'EMBEDDINGS_ENGINE', 'ollama'
         )
 
         self.VECTOR_STORE_ENGINE = self.get_env(
@@ -58,9 +63,14 @@ class Config(ConfigSuperClass):
 
         self.LANGCHAIN_DEFAULT_MODEL = self.get_env(
             'LANGCHAIN_DEFAULT_MODEL', 'chat_openai'
-            # 'LANGCHAIN_DEFAULT_MODEL', 'gemini'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'anthropic'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_remote' # gs_huggingface
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_pipeline'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'groq'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'gemini'
             # 'LANGCHAIN_DEFAULT_MODEL', 'clarifai'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'bedrock'
         )
 
         self.AI_VISION_TECHNOLOGY = self.get_env(
@@ -70,15 +80,18 @@ class Config(ConfigSuperClass):
         )
 
         self.AI_IMG_GEN_TECHNOLOGY = self.get_env(
-            'AI_IMG_GEN_TECHNOLOGY', 'openai'
-            # 'AI_IMG_GEN_TECHNOLOGY', 'gemini'     # TODO implement this param
-            # 'AI_IMG_GEN_TECHNOLOGY', 'clarifai'   # TODO implement this param
+            # 'AI_IMG_GEN_TECHNOLOGY', 'openai'
+            'AI_IMG_GEN_TECHNOLOGY', 'huggingface'
+            # 'AI_IMG_GEN_TECHNOLOGY', 'gemini'
+            # 'AI_IMG_GEN_TECHNOLOGY', 'clarifai'
+            # 'AI_IMG_GEN_TECHNOLOGY', 'bedrock'
         )
 
         self.AI_AUDIO_TO_TEXT_TECHNOLOGY = self.get_env(
-            'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'openai'       # TODO implement this param
-            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'google'     # TODO implement this param... 'google' or 'gemini' ???
-            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'clarifai'   # TODO implement this param
+            'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'openai'
+            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'clarifai'
+            # 'AI_AUDIO_TO_TEXT_TECHNOLOGY', 'google'
+            # # TODO implement... 'google' or 'gemini' ???
         )
 
         self.AI_TEXT_TO_AUDIO_TECHNOLOGY = self.get_env(
@@ -92,11 +105,17 @@ class Config(ConfigSuperClass):
         )
 
         self.WEBSEARCH_DEFAULT_PROVIDER = self.get_env(
-            'WEBSEARCH_DEFAULT_PROVIDER', ''    # First try with DDG, if error, try Google
+            'WEBSEARCH_DEFAULT_PROVIDER', ''    # First DDG, if error, Google
             # 'WEBSEARCH_DEFAULT_PROVIDER', 'ddg'   # DuckDuckGo
             # 'WEBSEARCH_DEFAULT_PROVIDER', 'google'   # Google
         )
 
+        # Allows run the Assistant withhout Tools calling in case the LLM
+        # model doesn't sopport bind_tools / bind_functions methods.
+        self.AI_ALLOW_INFERENCE_WITH_NO_TOOLS = self.get_env(
+            'AI_ALLOW_INFERENCE_WITH_NO_TOOLS', '0'
+            # 'AI_ALLOW_INFERENCE_WITH_NO_TOOLS', '1'
+        )
 
         """
         --------------------------------
@@ -126,7 +145,7 @@ class Config(ConfigSuperClass):
         )
 
         self.LANGCHAIN_MAX_CONV_MESSAGES = self.get_env(
-            'LANGCHAIN_MAX_CONV_MESSAGES', '30'     # Default: preserve all
+            'LANGCHAIN_MAX_CONV_MESSAGES', '30'
             # 'LANGCHAIN_MAX_CONV_MESSAGES', '-1'     # Default: preserve all
         )
 
@@ -142,8 +161,8 @@ class Config(ConfigSuperClass):
         )
 
         self.LANGCHAIN_TRANSLATE_USING = self.get_env(
-            # 'LANGCHAIN_TRANSLATE_USING', 'initial_prompt'
             'LANGCHAIN_TRANSLATE_USING', 'google_translate'
+            # 'LANGCHAIN_TRANSLATE_USING', 'initial_prompt'
             # 'LANGCHAIN_TRANSLATE_USING', 'same_model'
             # 'LANGCHAIN_TRANSLATE_USING', ''
         )
@@ -170,7 +189,8 @@ class Config(ConfigSuperClass):
         self.OPENAI_API_KEY = self.get_env('OPENAI_API_KEY', '')
 
         self.OPENAI_MODEL = self.get_env(
-            'OPENAI_MODEL', 'gpt-3.5-turbo'
+            'OPENAI_MODEL_NAME', self.get_env('OPENAI_MODEL', 'gpt-4o-mini')
+            # 'OPENAI_MODEL', 'gpt-3.5-turbo'
         )
         self.OPENAI_MODEL_PREMIUM = self.get_env(
             'OPENAI_MODEL_PREMIUM', 'gpt-4o'
@@ -195,14 +215,16 @@ class Config(ConfigSuperClass):
         )
         self.OPENAI_TEXT_TO_AUDIO_VOICE = self.get_env(
             'OPENAI_TEXT_TO_AUDIO_VOICE', 'onyx'
-            # 'OPENAI_TEXT_TO_AUDIO_VOICE', 'alloy' | 'echo', 'fable', 'onyx', 'nova', 'shimmer'
+            # 'OPENAI_TEXT_TO_AUDIO_VOICE', 'alloy' | 'echo', 'fable', 'onyx',
+            # 'nova', 'shimmer'
         )
         self.OPENAI_EMBEDDINGS_MODEL = self.get_env(
             'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-3-small'
             # 'OPENAI_EMBEDDINGS_MODEL', 'text-embedding-ada-002'
         )
         self.OPENAI_EMBEDDINGS_MODEL_PREMIUM = self.get_env(
-            'OPENAI_EMBEDDINGS_MODEL_PREMIUM', 'text-embedding-3-large'   # TODO implement this param
+            'OPENAI_EMBEDDINGS_MODEL_PREMIUM', 'text-embedding-3-large'
+            # TODO implement this param
         )
 
         self.OPENAI_TEMPERATURE = self.get_env('OPENAI_TEMPERATURE', '0.7')
@@ -210,7 +232,10 @@ class Config(ConfigSuperClass):
 
         # Anthropic credentials and other parameters
 
-        self.ANTHROPIC_MODEL = self.get_env('ANTHROPIC_MODEL', 'claude-3-sonnet')
+        self.ANTHROPIC_MODEL = self.get_env(
+            'ANTHROPIC_MODEL', 'claude-3-5-sonnet-20240620'
+            # 'ANTHROPIC_MODEL', 'claude-3-sonnet'
+        )
         self.ANTHROPIC_API_KEY = self.get_env('ANTHROPIC_API_KEY', '')
 
         # AWS credentials and other parameters
@@ -221,32 +246,83 @@ class Config(ConfigSuperClass):
 
         # AWS Bedrock credentials and other parameters
 
+        self.AWS_BEDROCK_MODEL_ID = self.get_env(
+            'AWS_BEDROCK_MODEL_ID',
+            "amazon.titan-text-premier-v1:0"
+            "amazon.titan-text-express-v1"
+            "ai21.jamba-instruct-v1:0"
+            "anthropic.claude-3-haiku-20240307-v1:0"
+            "anthropic.claude-3-opus-20240229-v1:0"
+            "anthropic.claude-3-sonnet-20240229-v1:0"
+            "anthropic.claude-3-5-sonnet-20240229-v1:0"
+        )
+
+        self.AWS_BEDROCK_IMAGE_GEN_MODEL_ID = self.get_env(
+            'AWS_BEDROCK_IMAGE_GEN_MODEL_ID',
+            "stability.stable-diffusion-xl-v1"
+        )
+
+        self.AWS_BEDROCK_CREDENTIALS_PROFILE = self.get_env(
+            'AWS_BEDROCK_CREDENTIALS_PROFILE', ""
+            # 'AWS_BEDROCK_CREDENTIALS_PROFILE', "bedrock-admin"
+        )
+
+        self.AWS_BEDROCK_GUARDRAIL_ID = self.get_env(
+            'AWS_BEDROCK_GUARDRAIL_ID', ""
+        )
+        self.AWS_BEDROCK_GUARDRAIL_VERSION = self.get_env(
+            'AWS_BEDROCK_GUARDRAIL_VERSION', ""
+        )
+        self.AWS_BEDROCK_GUARDRAIL_TRACE = self.get_env(
+            'AWS_BEDROCK_GUARDRAIL_TRACE', "1"
+        )
+
         self.AWS_BEDROCK_EMBEDDINGS_MODEL_ID = self.get_env(
             'AWS_BEDROCK_EMBEDDINGS_MODEL_ID', "amazon.titan-embed-text-v1"
         )
         self.AWS_BEDROCK_EMBEDDINGS_PROFILE = self.get_env(
-            'AWS_BEDROCK_EMBEDDINGS_PROFILE', "bedrock-admin"
+            'AWS_BEDROCK_EMBEDDINGS_PROFILE', ""
+            # 'AWS_BEDROCK_EMBEDDINGS_PROFILE', "bedrock-admin"
         )
 
-        # HuggingFace credentials and other parameters
+        # HuggingFace (HF) credentials and other parameters
 
         self.HUGGINGFACE_API_KEY = self.get_env('HUGGINGFACE_API_KEY', "")
-        self.HUGGINGFACE_ENDPOINT_URL = self.get_env(
-            'HUGGINGFACE_ENDPOINT_URL', ""
+
+        # HF Models
+
+        self.HUGGINGFACE_DEFAULT_CHAT_MODEL = self.get_env(
+            'HUGGINGFACE_DEFAULT_CHAT_MODEL',
+            "mistralai/Mixtral-8x7B-Instruct-v0.1"
+            # "meta-llama/Llama-2-7b-chat-hf"
+            # NOTE: instruct models must be configured to run with
+            # the HUGGINGFACE_USE_CHAT_HF = "0"
+            # "meta-llama/Meta-Llama-3.1-8B-Instruct"
+            # NOTE: Big models work with huggingface_pipeline only
+            # "meta-llama/Meta-Llama-3.1-8B"
+            # "meta-llama/Meta-Llama-3.1-405B-Instruct"
+            # "tiiuae/falcon-mamba-7b"
         )
 
-        self.HUGGINGFACE_MAX_NEW_TOKENS = self.get_env(
-            "HUGGINGFACE_MAX_NEW_TOKENS", "512")
-        self.HUGGINGFACE_TOP_K = self.get_env(
-            "HUGGINGFACE_TOP_K", "50")
-        self.HUGGINGFACE_TEMPERATURE = self.get_env(
-            "HUGGINGFACE_TEMPERATURE", "0.1")
-        self.HUGGINGFACE_REPETITION_PENALTY = self.get_env(
-            "HUGGINGFACE_REPETITION_PENALTY", "1.03")
+        # 0 = use HuggingFaceEndpoint + LangChain Agent
+        # 1 = use ChatHuggingFace + LangChain LCEL
+        # By default, it's set to "0" for instruct models
+        self.HUGGINGFACE_USE_CHAT_HF = self.get_env(
+            'HUGGINGFACE_USE_CHAT_HF',
+            "0" if "-Instruct" in self.HUGGINGFACE_DEFAULT_CHAT_MODEL else "1"
+        )
+
+        self.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL = self.get_env(
+            'HUGGINGFACE_DEFAULT_IMG_GEN_MODEL',
+            # "black-forest-labs/FLUX.1-schnell"
+            "black-forest-labs/FLUX.1-dev"
+        )
+
+        # HF Embeddings
 
         # IMPORTANT: about "sentence-transformers" lib. Be careful, because
         # when it's included, the package size increase by 5 Gb. and if the
-        # app runs in a AWS Lambda Function, it overpass the package size
+        # app runs in a AWS Lambda Function, it exceeds the package size
         # deployment limit.
 
         self.HUGGINGFACE_EMBEDDINGS_MODEL = self.get_env(
@@ -263,6 +339,56 @@ class Config(ConfigSuperClass):
             text_to_dict('{"normalize_embeddings": true}')
         )
 
+        # HF Options and general parameters
+
+        self.HUGGINGFACE_ENDPOINT_URL = self.get_env(
+            'HUGGINGFACE_ENDPOINT_URL',
+            "https://api-inference.huggingface.co/models"
+        )
+        self.HUGGINGFACE_VERBOSE = self.get_env(
+            "HUGGINGFACE_VERBOSE", "0")
+
+        self.HUGGINGFACE_MAX_NEW_TOKENS = self.get_env(
+            "HUGGINGFACE_MAX_NEW_TOKENS", "512")
+
+        self.HUGGINGFACE_TOP_K = self.get_env(
+            "HUGGINGFACE_TOP_K", "50")
+
+        self.HUGGINGFACE_TEMPERATURE = self.get_env(
+            "HUGGINGFACE_TEMPERATURE", "0.1")
+
+        self.HUGGINGFACE_REPETITION_PENALTY = self.get_env(
+            "HUGGINGFACE_REPETITION_PENALTY", "1.03")
+
+        self.HUGGINGFACE_TIMEOUT = self.get_env(
+            "HUGGINGFACE_TIMEOUT", "60")
+
+        # Reference: from python3.xx > transformers > def pipeline() comment:
+        # device (`int` or `str` or `torch.device`):
+        #   Defines the device (*e.g.*, `"cpu"`, `"cuda:1"`, `"mps"`, or a GPU
+        #   ordinal rank like `1`) on which this pipeline will be allocated.
+        self.HUGGINGFACE_PIPELINE_DEVICE = self.get_env(
+            "HUGGINGFACE_PIPELINE_DEVICE",
+            ""
+            # "0"
+            # "cuda"
+        )
+
+        # Groq
+
+        self.GROQ_API_KEY = self.get_env('GROQ_API_KEY', '')
+        self.GROQ_TEMPERATURE = self.get_env('GROQ_TEMPERATURE', '0')
+        self.GROQ_MAX_TOKENS = self.get_env('GROQ_MAX_TOKENS', '')
+        self.GROQ_TIMEOUT = self.get_env('GROQ_TIMEOUT', '')
+        self.GROQ_MAX_RETRIES = self.get_env('GROQ_MAX_RETRIES', '2')
+        # https://console.groq.com/docs/models
+        self.GROQ_MODEL = self.get_env(
+            'GROQ_MODEL',
+            'mixtral-8x7b-32768'
+            # 'llama-3.1-70b-versatile'
+            # 'llama-3.1-8b-instant'
+        )
+
         # Clarifai credentials and other parameters
 
         # PAT (Personal API Token): https://clarifai.com/settings/security
@@ -272,55 +398,76 @@ class Config(ConfigSuperClass):
 
         self.AI_CLARIFAI_DEFAULT_CHAT_MODEL = self.get_env(
             'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'GPT-4'
-            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'claude-v2'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'mixtral-8x7B-Instruct-v0_1'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'llama2-70b-chat'    # TODO implement this param
+            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'claude-v2'
+            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'mixtral-8x7B-Instruct-v0_1'
+            # 'AI_CLARIFAI_DEFAULT_CHAT_MODEL', 'llama2-70b-chat'
         )
 
         self.AI_CLARIFAI_DEFAULT_TEXT_EMBEDDING_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_TEXT_EMBEDDING_MODEL', 'text-embedding-ada'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_TEXT_EMBEDDING_MODEL', 'BAAI-bge-base-en-v15'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_TEXT_EMBEDDING_MODEL',
+            'text-embedding-ada'
+            # 'BAAI-bge-base-en-v15'
         )
 
         self.AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL', 'whisper'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL', 'whisper-large-v2'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL', 'whisper'
+            # 'AI_CLARIFAI_DEFAULT_AUDIO_TO_TEXT_MODEL', 'whisper-large-v2'
         )
 
         self.AI_CLARIFAI_DEFAULT_TEXT_TO_AUDIO_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_TEXT_TO_AUDIO_MODEL', 'speech-synthesis'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_TEXT_TO_AUDIO_MODEL', 'speech-synthesis'
         )
 
         self.AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE = self.get_env(
-            'AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE', 'python_sdk'    # TODO implement this param
-            # 'AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE', 'clarifai_grpc'    # TODO implement this param
+            'AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE', 'python_sdk'
+            # 'AI_CLARIFAI_AUDIO_TO_TEXT_SDK_TYPE', 'clarifai_grpc'
         )
 
         self.AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL', 'stable-diffusion-xl'    # TODO implement this param
-            # 'AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL', 'dall-e-3'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL', 'stable-diffusion-xl'
+            # 'AI_CLARIFAI_DEFAULT_IMG_GEN_MODEL', 'dall-e-3'
         )
 
         self.AI_CLARIFAI_DEFAULT_VISION_MODEL = self.get_env(
-            'AI_CLARIFAI_DEFAULT_VISION_MODEL', 'openai-gpt-4-vision'    # TODO implement this param
+            'AI_CLARIFAI_DEFAULT_VISION_MODEL', 'openai-gpt-4-vision'
             # 'AI_CLARIFAI_DEFAULT_VISION_MODEL', 'food-item-recognition'
+        )
+
+        # AI/ML API
+
+        self.AIMLAPI_API_KEY = self.get_env('AIMLAPI_API_KEY', "")
+        self.AIMLAPI_MODEL_NAME = self.get_env(
+            'AIMLAPI_MODEL_NAME',
+            "o1-mini"
+            # "o1-preview"
+        )
+        self.AIMLAPI_TEMPERATURE = self.get_env('AIMLAPI_TEMPERATURE', '1')
+
+        self.AIMLAPI_BASE_URL = self.get_env(
+            'AIMLAPI_BASE_URL',
+            "https://api.aimlapi.com/"
         )
 
         # ElevenLabs
 
         self.ELEVENLABS_API_KEY = self.get_env('ELEVENLABS_API_KEY', "")
 
-        self.ELEVENLABS_VOICE_ID_FEMALE = self.get_env('ELEVENLABS_VOICE_ID_FEMALE',
-                                                       "EXAVITQu4vr4xnSDxMaL")  # Sarah
-        self.ELEVENLABS_VOICE_ID_MALE = self.get_env('ELEVENLABS_VOICE_ID_FEMALE',
-                                                     "29vD33N1CtxCmqQRPOHJ")  # Drew
+        self.ELEVENLABS_VOICE_ID_FEMALE = self.get_env(
+            'ELEVENLABS_VOICE_ID_FEMALE',
+            "EXAVITQu4vr4xnSDxMaL")  # Sarah
+        self.ELEVENLABS_VOICE_ID_MALE = self.get_env(
+            'ELEVENLABS_VOICE_ID_FEMALE',
+            "29vD33N1CtxCmqQRPOHJ")  # Drew
 
-        self.ELEVENLABS_MODEL_ID = self.get_env('ELEVENLABS_MODEL_ID', "eleven_multilingual_v2")
+        self.ELEVENLABS_MODEL_ID = self.get_env(
+            'ELEVENLABS_MODEL_ID',
+            "eleven_multilingual_v2")
         self.ELEVENLABS_STABILITY = self.get_env('ELEVENLABS_STABILITY', "0.5")
-        self.ELEVENLABS_SIMILARITY_BOOST = self.get_env('ELEVENLABS_SIMILARITY_BOOST', "0.5")
+        self.ELEVENLABS_SIMILARITY_BOOST = self.get_env(
+            'ELEVENLABS_SIMILARITY_BOOST', "0.5")
         self.ELEVENLABS_STYLE = self.get_env('ELEVENLABS_STYLE', "0")
-        self.ELEVENLABS_USE_SPEAKER_BOOST = self.get_env('ELEVENLABS_USE_SPEAKER_BOOST', "1")
-
+        self.ELEVENLABS_USE_SPEAKER_BOOST = self.get_env(
+            'ELEVENLABS_USE_SPEAKER_BOOST', "1")
 
         # Cohere credentials and other parameters
 

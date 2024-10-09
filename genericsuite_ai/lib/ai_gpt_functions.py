@@ -42,6 +42,9 @@ from genericsuite_ai.lib.ai_gpt_fn_conversations import (
 from genericsuite_ai.lib.clarifai import (
     cac as cac_clarifai,
 )
+from genericsuite_ai.lib.huggingface import (
+    cac as cac_huggingface,
+)
 from genericsuite_ai.lib.web_scraping import (
     cac as cac_web_scraping,
     webpage_analyzer_text_response,
@@ -133,6 +136,7 @@ def gpt_func_appcontext_assignment(
         cac_conversations,
         cac_clarifai,
         cac_web_scraping,
+        cac_huggingface,
     ]
 
     additional_func_context = app_context.get_other_data('additional_func_context')
