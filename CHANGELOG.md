@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## 0.1.10 (2024-10-06)
+## 0.1.10 (2024-10-07)
 ---
 
 ### New
@@ -31,6 +31,7 @@ Implement Groq chat model [GS-92].
 Implement Amazon Bedrock chat and image generator [GS-131].
 Add HUGGINGFACE_PIPELINE_DEVICE to configura the "device" pipeline() parameter [FA-233].
 Implement o1-mini/o1-preview models use through AI/ML API aimlapi.com [GS-138].
+Implement GS Huggingface lightweight model, identified by model_types "huggingface_remote" or "gs_huggingface". The model_types "huggingface" and "huggingface_pipeline" use the "langchain_hugginface" dependency that required "sentence-transformers", making imposible to deploy the project AWS Lambda Functions [GS-136].
 
 ### Changes
 Langchain upgraded to "^0.3.0" [GS-131].
@@ -44,6 +45,9 @@ The user with free plan can only use the "gpt-4o-mini" model with their own API 
 Fix Anthropic Claude2 API Error since large prompt change, replacing Claude2 with Claude 3.5 Sonnet [GS-33].
 Fix the "Warning: deprecated HuggingFaceTextGenInference-use HuggingFaceEnpoint instead" [GS-59].
 Fix dependency incompatibility between GS BE Core and GS BE AI fixing the "urllib3" version to "1.26" (and clarifai to "^10.1.0" in consecuence) because GS BE Core's Boto3 use "urllib3" versions less then "<2" [GS-128].
+
+### Breaks
+The "langchain_hugginface" dependency is not longer included in this package. It must be imported in the App's project [GS-136].
 
 
 ## 0.1.9 (2024-07-27)
