@@ -30,6 +30,7 @@ Implement Anthropic Claude 3.5 Sonnet [GS-33].
 Implement Groq chat model [GS-92].
 Implement Amazon Bedrock chat and image generator [GS-131].
 Add HUGGINGFACE_PIPELINE_DEVICE to configura the "device" pipeline() parameter [FA-233].
+Implement o1-mini/o1-preview models use through AI/ML API aimlapi.com [GS-138].
 
 ### Changes
 Langchain upgraded to "^0.3.0" [GS-131].

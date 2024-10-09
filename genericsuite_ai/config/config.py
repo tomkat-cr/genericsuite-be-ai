@@ -433,6 +433,21 @@ class Config(ConfigSuperClass):
             # 'AI_CLARIFAI_DEFAULT_VISION_MODEL', 'food-item-recognition'
         )
 
+        # AI/ML API
+
+        self.AIMLAPI_API_KEY = self.get_env('AIMLAPI_API_KEY', "")
+        self.AIMLAPI_MODEL_NAME = self.get_env(
+            'AIMLAPI_MODEL_NAME',
+            "o1-mini"
+            # "o1-preview"
+        )
+        self.AIMLAPI_TEMPERATURE = self.get_env('AIMLAPI_TEMPERATURE', '1')
+
+        self.AIMLAPI_BASE_URL = self.get_env(
+            'AIMLAPI_BASE_URL',
+            "https://api.aimlapi.com/"
+        )
+
         # ElevenLabs
 
         self.ELEVENLABS_API_KEY = self.get_env('ELEVENLABS_API_KEY', "")

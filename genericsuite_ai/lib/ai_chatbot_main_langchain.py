@@ -29,7 +29,10 @@ from genericsuite.util.app_context import (
     AppContext,
     CommonAppContext,
 )
-from genericsuite.util.app_logger import log_debug, log_error
+from genericsuite.util.app_logger import (
+    log_debug,
+    log_warning,
+)
 from genericsuite.util.utilities import (
     get_standard_base_exception_msg,
     get_default_resultset,
@@ -451,6 +454,12 @@ def get_lcel_chain(
     Get the prompt to use and construct the LCEL chain
     """
     settings = Config(cac.app_context)
+
+    # If system_msg_permitted is False, the LLM model does not
+    # support System message nor binding tools or functions.
+    system_msg_permitted = \
+        cac.app_context.get_other_data("system_msg_permitted")
+
     _ = DEBUG and log_debug('>>> GET_LCEL_CHAIN')
     _ = DEBUG and log_debug(f'Tools: {tools}')
 
@@ -458,26 +467,33 @@ def get_lcel_chain(
     # https://python.langchain.com/v0.2/docs/how_to/tool_calling/
 
     # Check if the LLM supports binding tools or functions
-    if hasattr(llm, 'bind_tools'):
-        llm_with_tools = llm.bind_tools(tools)
-    elif hasattr(llm, 'bind_functions'):
-        llm_with_tools = llm.bind_functions(functions=tools)
-    else:
-        if settings.AI_ALLOW_INFERENCE_WITH_NO_TOOLS == '0':
-            raise AttributeError("[AI_GLCELCH-E005] LLM does not" +
+    llm_with_tools = None
+    if system_msg_permitted:
+        # Models different than o1-mini/o1-preview accept Tools...
+        if hasattr(llm, 'bind_tools'):
+            llm_with_tools = llm.bind_tools(tools)
+        elif hasattr(llm, 'bind_functions'):
+            llm_with_tools = llm.bind_functions(functions=tools)
+    if not llm_with_tools:
+        if settings.AI_ALLOW_INFERENCE_WITH_NO_TOOLS == '0' \
+           and system_msg_permitted:
+            raise AttributeError("[AI_GLCEL_CH-E005] LLM does not" +
                                  " support binding tools or functions")
         model_type = cac.app_context.get_other_data("model_type")
-        log_error('get_lcel_chain: [AI_GLCELCH-E010]' +
-                  ' LLM does not support binding tools or functions.' +
-                  f' Model: {model_type}')
+        log_warning(
+            'get_lcel_chain: [AI_GLCEL_CH-E010]' +
+            ' LLM does not support binding tools or functions.' +
+            f' Model: {model_type}')
         llm_with_tools = llm
 
-    new_prompt = build_gs_prompt(get_self_base_prompt(NON_AGENT_PROMPT))
+    messages = []
+    if system_msg_permitted:
+        # Models different than o1-mini/o1-preview accept System message...
+        new_prompt = build_gs_prompt(get_self_base_prompt(NON_AGENT_PROMPT))
+        messages.append(("system", new_prompt,))
+    messages.append(MessagesPlaceholder(variable_name="messages"))
     _ = DEBUG and log_debug('Start call to ChatPromptTemplate.from_messages()')
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", new_prompt,),
-        MessagesPlaceholder(variable_name="messages"),
-    ])
+    prompt = ChatPromptTemplate.from_messages(messages)
     _ = DEBUG and log_debug('Start chain = prompt | llm_with_tools')
     # Build a Chatbot
     # https://python.langchain.com/v0.2/docs/tutorials/chatbot/#message-history

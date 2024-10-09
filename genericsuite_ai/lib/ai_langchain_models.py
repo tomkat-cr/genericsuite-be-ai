@@ -48,6 +48,16 @@ class BedrockAsyncCallbackHandler(AsyncCallbackHandler):
             log_error(f"Guardrails: {kwargs}")
 
 
+def get_system_msg_permitted(model_name: str) -> bool:
+    """
+    Check if the model allows system messages
+    """
+    return model_name not in [
+        "o1-mini",
+        "o1-preview",
+    ]
+
+
 def get_model(
     app_context: AppContext,
     model_type: str,
@@ -130,7 +140,7 @@ def get_model(
                 model=model_name,
             )
 
-        # Hugging Face Inference API (Genericsuite Huggingface light)
+        # Genericsuite's Hugging Face lightweight Inference API
         if model_type == "huggingface_remote" or \
            model_type == "gs_huggingface":
             manufacturer = "GS Hugging Face"
@@ -332,6 +342,25 @@ def get_model(
                         **model_config,
                     )
 
+        # AI/ML API
+        if model_type == "aimlapi":
+            # https://lablab.ai/blog/how-to-access-o1-models
+            # https://python.langchain.com/api_reference/openai/llms/langchain_openai.llms.base.OpenAI.html
+            manufacturer = "AI/ML API"
+            openai_api_key = model_params.get('aimlapi_api_key') \
+                or settings.AIMLAPI_API_KEY
+            model_name = model_params.get('aimlapi_model_name') \
+                or settings.AIMLAPI_MODEL_NAME
+            model_object = ChatOpenAI(
+                base_url=settings.AIMLAPI_BASE_URL,
+                openai_api_key=openai_api_key,
+                model=model_name,
+                temperature=float(settings.AIMLAPI_TEMPERATURE),
+            )
+            if not model_object:
+                error = "ERROR [GET_MODEL-AIMLAPI-010] - AI/ML API with" + \
+                        " ChatOpenAI cannot be initialized"
+
     except Exception as err:
         error = f"[GET_MODEL-GENEX-010] - {err}"
 
@@ -343,6 +372,7 @@ def get_model(
         "manufacturer": manufacturer,
         "model_params": model_params,
         "pref_agent_type": pref_agent_type,
+        "system_msg_permitted": get_system_msg_permitted(model_name),
         "other_data": other_data,
         "error": error,
     }
@@ -446,6 +476,8 @@ def get_model_obj(
                                get_model_response["model_name"])
     app_context.set_other_data("pref_agent_type",
                                get_model_response["pref_agent_type"])
+    app_context.set_other_data("system_msg_permitted",
+                               get_model_response["system_msg_permitted"])
     app_context.set_other_data("model_manufacturer",
                                get_model_response["manufacturer"])
     app_context.set_other_data("model_load_error",
