@@ -22,16 +22,16 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ### New
 Implement HF (HuggingFace) local pipelines [GS-59].
-Implement Falcon Mamba with HF [GS-118].
-Implement Meta Llama 3.1 with HF [GS-119].
 Implement HF (HuggingFace) image generator [GS-117].
 Implement Flux.1 image generator [GS-117].
 Implement Anthropic Claude 3.5 Sonnet [GS-33].
 Implement Groq chat model [GS-92].
 Implement Amazon Bedrock chat and image generator [GS-131].
-Add HUGGINGFACE_PIPELINE_DEVICE to configura the "device" pipeline() parameter [FA-233].
+Add HUGGINGFACE_PIPELINE_DEVICE to configure the "device" pipeline() parameter [FA-233].
 Implement o1-mini/o1-preview models use through AI/ML API aimlapi.com [GS-138].
 Implement GS Huggingface lightweight model, identified by model_types "huggingface_remote" or "gs_huggingface". The model_types "huggingface" and "huggingface_pipeline" use the "langchain_hugginface" dependency that required "sentence-transformers", making imposible to deploy the project AWS Lambda Functions [GS-136].
+Implement Falcon Mamba with HF [GS-118].
+Implement Meta Llama 3.1 with HF [GS-119].
 
 ### Changes
 Langchain upgraded to "^0.3.0" [GS-131].
