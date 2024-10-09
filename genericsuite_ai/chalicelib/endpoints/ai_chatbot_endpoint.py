@@ -42,7 +42,9 @@ def ai_chatbot_endpoint(
     :param other_params: Other parameters that may be needed.
     :return: The response from the AI chatbot.
     """
-    return ai_chatbot_endpoint_model(request=request, blueprint=bp,
+    return ai_chatbot_endpoint_model(
+        request=request,
+        blueprint=bp,
         other_params=other_params)
 
 
@@ -64,7 +66,9 @@ def vision_image_analyzer_endpoint(
     :param request: The request containing the image file.
     :return: The text with the image analysis.
     """
-    return vision_image_analyzer_endpoint_model(request=request, blueprint=bp,
+    return vision_image_analyzer_endpoint_model(
+        request=request,
+        blueprint=bp,
         other_params=other_params)
 
 
@@ -86,5 +90,7 @@ def transcribe_audio_endpoint(
     :param request: The request containing the audio file.
     :return: The transcription result.
     """
-    return transcribe_audio_endpoint_model(request=request, blueprint=bp,
+    return transcribe_audio_endpoint_model(
+        request=request,
+        blueprint=bp,
         other_params=other_params)
