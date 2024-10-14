@@ -45,22 +45,6 @@ class Config(ConfigSuperClass):
             # 'AI_TECHNOLOGY', 'openai'
         )
 
-        self.EMBEDDINGS_ENGINE = self.get_env(
-            'EMBEDDINGS_ENGINE', 'openai'
-            # 'EMBEDDINGS_ENGINE', 'clarifai'
-            # 'EMBEDDINGS_ENGINE', 'bedrock'
-            # 'EMBEDDINGS_ENGINE', 'huggingface'
-            # 'EMBEDDINGS_ENGINE', 'cohere'
-            # 'EMBEDDINGS_ENGINE', 'ollama'
-        )
-
-        self.VECTOR_STORE_ENGINE = self.get_env(
-            'VECTOR_STORE_ENGINE', 'FAISS'
-            # 'VECTOR_STORE_ENGINE', 'clarifai'
-            # 'VECTOR_STORE_ENGINE', 'mongo'
-            # 'VECTOR_STORE_ENGINE', 'vectara'
-        )
-
         self.LANGCHAIN_DEFAULT_MODEL = self.get_env(
             'LANGCHAIN_DEFAULT_MODEL', 'chat_openai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'anthropic'
@@ -71,6 +55,7 @@ class Config(ConfigSuperClass):
             # 'LANGCHAIN_DEFAULT_MODEL', 'gemini'
             # 'LANGCHAIN_DEFAULT_MODEL', 'clarifai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'bedrock'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'ollama'
         )
 
         self.AI_VISION_TECHNOLOGY = self.get_env(
@@ -98,6 +83,31 @@ class Config(ConfigSuperClass):
             'AI_TEXT_TO_AUDIO_TECHNOLOGY', 'openai'
             # 'AI_TEXT_TO_AUDIO_TECHNOLOGY', 'clarifai'
         )
+
+        self.EMBEDDINGS_ENGINE = self.get_env(
+            'EMBEDDINGS_ENGINE', 'openai'
+            # 'EMBEDDINGS_ENGINE', 'clarifai'
+            # 'EMBEDDINGS_ENGINE', 'bedrock'
+            # 'EMBEDDINGS_ENGINE', 'huggingface'
+            # 'EMBEDDINGS_ENGINE', 'cohere'
+            # 'EMBEDDINGS_ENGINE', 'ollama'
+        )
+
+        self.VECTOR_STORE_ENGINE = self.get_env(
+            'VECTOR_STORE_ENGINE', 'FAISS'
+            # 'VECTOR_STORE_ENGINE', 'clarifai'
+            # 'VECTOR_STORE_ENGINE', 'mongo'
+            # 'VECTOR_STORE_ENGINE', 'vectara'
+        )
+
+        self.AI_MODEL_ALLOW_SYSTEM_MSG = self.get_env(
+            'AI_MODEL_ALLOW_SYSTEM_MSG', '')
+
+        self.AI_MODEL_ALLOW_TOOLS = self.get_env(
+            'AI_MODEL_ALLOW_TOOLS', '')
+
+        self.AI_MODEL_NEED_PREAMBLE = self.get_env(
+            'AI_MODEL_NEED_PREAMBLE', '')
 
         self.AI_ADDITIONAL_MODELS = self.get_env(
             # 'AI_ADDITIONAL_MODELS', '1'   # Add aditional models to the LLM
@@ -249,12 +259,12 @@ class Config(ConfigSuperClass):
         self.AWS_BEDROCK_MODEL_ID = self.get_env(
             'AWS_BEDROCK_MODEL_ID',
             "amazon.titan-text-premier-v1:0"
-            "amazon.titan-text-express-v1"
-            "ai21.jamba-instruct-v1:0"
-            "anthropic.claude-3-haiku-20240307-v1:0"
-            "anthropic.claude-3-opus-20240229-v1:0"
-            "anthropic.claude-3-sonnet-20240229-v1:0"
-            "anthropic.claude-3-5-sonnet-20240229-v1:0"
+            # "amazon.titan-text-express-v1"
+            # "ai21.jamba-instruct-v1:0"
+            # "anthropic.claude-3-haiku-20240307-v1:0"
+            # "anthropic.claude-3-opus-20240229-v1:0"
+            # "anthropic.claude-3-sonnet-20240229-v1:0"
+            # "anthropic.claude-3-5-sonnet-20240229-v1:0"
         )
 
         self.AWS_BEDROCK_IMAGE_GEN_MODEL_ID = self.get_env(
@@ -436,6 +446,7 @@ class Config(ConfigSuperClass):
         # AI/ML API
 
         self.AIMLAPI_API_KEY = self.get_env('AIMLAPI_API_KEY', "")
+
         self.AIMLAPI_MODEL_NAME = self.get_env(
             'AIMLAPI_MODEL_NAME',
             "o1-mini"
@@ -478,9 +489,22 @@ class Config(ConfigSuperClass):
 
         # Ollama credentials and other parameters
 
-        self.OLLAMA_MODEL = self.get_env('OLLAMA_MODEL', "llama:7b")
+        self.OLLAMA_MODEL = self.get_env(
+            'OLLAMA_MODEL', "llama3.2"
+            # 'OLLAMA_MODEL', "llama:7b"
+        )
+
         self.OLLAMA_EMBEDDINGS_MODEL = self.get_env(
-            'OLLAMA_EMBEDDINGS_MODEL', "llama:7b"
+            'OLLAMA_EMBEDDINGS_MODEL', "llama3.2"
+            # 'OLLAMA_EMBEDDINGS_MODEL', "llama:7b"
+        )
+
+        self.OLLAMA_TEMPERATURE = self.get_env(
+            'OLLAMA_TEMPERATURE', "0"
+        )
+
+        self.OLLAMA_BASE_URL = self.get_env(
+            'OLLAMA_BASE_URL', ""
         )
 
         # MongoDB credentials and other parameters

@@ -10,7 +10,7 @@ from langchain_groq import ChatGroq
 from langchain_openai import OpenAI
 from langchain_openai import ChatOpenAI
 
-from langchain_community.chat_models.ollama import ChatOllama
+from langchain_ollama import ChatOllama
 from langchain_community.llms import Clarifai
 
 from langchain_core.callbacks import AsyncCallbackHandler
@@ -48,11 +48,41 @@ class BedrockAsyncCallbackHandler(AsyncCallbackHandler):
             log_error(f"Guardrails: {kwargs}")
 
 
-def get_system_msg_permitted(model_name: str) -> bool:
+def get_system_msg_permitted(app_context: AppContext, model_name: str) -> bool:
     """
     Check if the model allows system messages
     """
+    settings = Config(app_context)
+    if settings.AI_MODEL_ALLOW_SYSTEM_MSG != "":
+        return settings.AI_MODEL_ALLOW_SYSTEM_MSG == "1"
     return model_name not in [
+        "o1-mini",
+        "o1-preview",
+    ]
+
+
+def get_tools_permitted(app_context: AppContext, model_name: str) -> bool:
+    """
+    Check if the model allows Tools / GPT functions
+    """
+    settings = Config(app_context)
+    if settings.AI_MODEL_ALLOW_TOOLS != "":
+        return settings.AI_MODEL_ALLOW_TOOLS == "1"
+    return model_name not in [
+        "o1-mini",
+        "o1-preview",
+    ]
+
+
+def get_need_preamble(app_context: AppContext, model_name: str) -> bool:
+    """
+    Check if the model needs another model as a preamble to handle tools
+    and system message.
+    """
+    settings = Config(app_context)
+    if settings.AI_MODEL_NEED_PREAMBLE != "":
+        return settings.AI_MODEL_NEED_PREAMBLE == "1"
+    return model_name in [
         "o1-mini",
         "o1-preview",
     ]
@@ -99,13 +129,14 @@ def get_model(
     try:
         # OpenAI ChatGPT
         if model_type == "chat_openai":
+            # https://python.langchain.com/docs/integrations/chat/openai/
             other_data["user_plan"] = model_params.get(
                 "user_plan",
                 "Unknown or N/A")
             manufacturer = "OpenAI"
-            openai_api_key = model_params.get('openai_api_key') \
+            openai_api_key = model_params.get("openai_api_key") \
                 or settings.OPENAI_API_KEY
-            model_name = model_params.get('model_name') \
+            model_name = model_params.get("model_name") \
                 or settings.OPENAI_MODEL
             model_object = ChatOpenAI(
                 # model="gpt-3.5-turbo"
@@ -124,7 +155,6 @@ def get_model(
             manufacturer = "Google"
             model_name = settings.GOOGLE_MODEL
             model_object = ChatGoogleGenerativeAI(
-                # model="gemini-pro",
                 model=model_name,
                 temperature=float(settings.OPENAI_TEMPERATURE),
                 google_api_key=settings.GOOGLE_API_KEY,
@@ -133,12 +163,16 @@ def get_model(
 
         # Ollama
         if model_type == "ollama":
+            # https://python.langchain.com/docs/integrations/chat/ollama/
             manufacturer = "Ollama"
             model_name = settings.OLLAMA_MODEL
-            model_object = ChatOllama(
-                # model="llama:7b",
-                model=model_name,
-            )
+            model_config = {
+                'model': model_name,
+                'temperature': int(settings.OLLAMA_TEMPERATURE),
+            }
+            if settings.OLLAMA_BASE_URL:
+                model_config['base_url'] = settings.OLLAMA_BASE_URL
+            model_object = ChatOllama(**model_config)
 
         # Genericsuite's Hugging Face lightweight Inference API
         if model_type == "huggingface_remote" or \
@@ -174,9 +208,9 @@ def get_model(
                 pref_agent_type = 'react_chat_agent'
 
         if model_type == "huggingface":
-            # https://python.langchain.com/v0.2/docs/integrations/platforms/huggingface
-            # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_endpoint/
-            # https://python.langchain.com/v0.2/docs/integrations/chat/huggingface/
+            # https://python.langchain.com/docs/integrations/platforms/huggingface/
+            # https://python.langchain.com/docs/integrations/llms/huggingface_endpoint/
+            # https://python.langchain.com/docs/integrations/chat/huggingface/
             #
             from langchain_huggingface import HuggingFaceEndpoint  # type: ignore[import]
             from langchain_huggingface import ChatHuggingFace  # type: ignore[import]
@@ -215,6 +249,8 @@ def get_model(
 
         # Hugging Face Pipelines
         if model_type == "huggingface_pipeline":
+            # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_pipelines/
+            #
             from langchain_huggingface.llms import \
                 HuggingFacePipeline  # type: ignore[import]
             from transformers import (
@@ -223,7 +259,7 @@ def get_model(
                 pipeline)  # type: ignore[import]
             from langchain_huggingface import \
                 ChatHuggingFace  # type: ignore[import]
-            # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_pipelines/
+            #
             manufacturer = "Hugging Face (Pipeline)"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
             if 'repo_id' in model_params:
@@ -258,6 +294,7 @@ def get_model(
 
         # Anthropic Claude
         if model_type == "anthropic":
+            # https://python.langchain.com/docs/integrations/chat/anthropic/
             manufacturer = "Anthropic"
             model_name = settings.ANTHROPIC_MODEL
             if not settings.ANTHROPIC_API_KEY:
@@ -271,7 +308,7 @@ def get_model(
 
         # Groq
         if model_type == "groq":
-            # https://python.langchain.com/v0.2/docs/integrations/chat/groq/
+            # https://python.langchain.com/docs/integrations/chat/groq/
             manufacturer = "Groq"
             model_name = settings.GROQ_MODEL
             if 'model' in model_params:
@@ -372,7 +409,10 @@ def get_model(
         "manufacturer": manufacturer,
         "model_params": model_params,
         "pref_agent_type": pref_agent_type,
-        "system_msg_permitted": get_system_msg_permitted(model_name),
+        "system_msg_permitted": get_system_msg_permitted(
+            app_context, model_name),
+        "tools_permitted": get_tools_permitted(app_context, model_name),
+        "need_preamble": get_need_preamble(app_context, model_name),
         "other_data": other_data,
         "error": error,
     }
@@ -426,6 +466,9 @@ def get_model_middleware(
             "manufacturer": None,
             "model_params": None,
             "pref_agent_type": None,
+            "system_msg_permitted": False,
+            "tools_permitted": False,
+            "need_preamble": False,
             "other_data": {},
             "error": error,
         }
@@ -436,6 +479,12 @@ def get_model_middleware(
                 f'\n | user_plan: {model_params["user_plan"]}')
         return result
     return get_model(app_context, model_type, model_params)
+
+
+MODEL_ATTR_NAME_REPLACE = {
+    "manufacturer": "model_manufacturer",
+    "error": "model_load_error",
+}
 
 
 def get_model_obj(
@@ -469,23 +518,41 @@ def get_model_obj(
         log_debug("GET_MODEL_OBJ | Model (selected_model_type): >> " +
                   f'{selected_model_type} <<')
 
-    get_model_response = get_model_middleware(app_context, selected_model_type)
-    app_context.set_other_data("model_type",
-                               get_model_response["model_type"])
-    app_context.set_other_data("model_name",
-                               get_model_response["model_name"])
-    app_context.set_other_data("pref_agent_type",
-                               get_model_response["pref_agent_type"])
-    app_context.set_other_data("system_msg_permitted",
-                               get_model_response["system_msg_permitted"])
-    app_context.set_other_data("model_manufacturer",
-                               get_model_response["manufacturer"])
-    app_context.set_other_data("model_load_error",
-                               get_model_response["error"])
-    if get_model_response["error"]:
-        log_error(f"ERROR [AI-GMO-E010] - {get_model_response}")
+    model_response = get_model_middleware(app_context, selected_model_type)
+
+    # Add the last retrieved model type to the app_context
+    app_context.set_other_data(
+        "model_type",
+        model_response["model_type"])
+    # Add last model attributes to the app_context under its type
+    app_context.set_other_data(
+        model_response["model_type"],
+        {
+            MODEL_ATTR_NAME_REPLACE.get(key, key):
+            model_response[key]
+            for key in model_response
+        }
+    )
+
+    # app_context.set_other_data("model_name",
+    #                            model_response["model_name"])
+    # app_context.set_other_data("pref_agent_type",
+    #                            model_response["pref_agent_type"])
+    # app_context.set_other_data("system_msg_permitted",
+    #                            model_response["system_msg_permitted"])
+    # app_context.set_other_data("tools_permitted",
+    #                            model_response["tools_permitted"])
+    # app_context.set_other_data("need_preamble",
+    #                            model_response["need_preamble"])
+    # app_context.set_other_data("model_manufacturer",
+    #                            model_response["manufacturer"])
+    # app_context.set_other_data("model_load_error",
+    #                            model_response["error"])
+
+    if model_response["error"]:
+        log_error(f"ERROR [AI-GMO-E010] - {model_response}")
         return None
-    default_model = get_model_response["model_object"]
+    default_model = model_response["model_object"]
 
     if settings.AI_ADDITIONAL_MODELS != "1":
         return default_model
@@ -505,12 +572,12 @@ def get_model_obj(
     for model_name in add_models:
         if model_name == selected_model_type:
             continue
-        get_model_response = get_model_middleware(app_context, model_name)
-        if get_model_response["error"]:
-            log_error(f"ERROR [AI-GMO-E020] - {get_model_response}")
+        model_response = get_model_middleware(app_context, model_name)
+        if model_response["error"]:
+            log_error(f"ERROR [AI-GMO-E020] - {model_response}")
             additional_model = None
         else:
-            additional_model = get_model_response["model_object"]
+            additional_model = model_response["model_object"]
         if additional_model:
             additional_pars[model_name] = additional_model
             alternative_models.append(additional_pars[model_name])
@@ -544,10 +611,12 @@ def get_model_load_error(
             in the app context by the get_model_obj() method:
             model_load_error, model_manufacturer, and model_type.
     """
+    model_type = app_context.get_other_data("model_type")
+    model_data = app_context.get_other_data(model_type)
     return "ERROR " + \
-        str(app_context.get_other_data("model_load_error")) + \
+        str(model_data["model_load_error"]) + \
         ", loading model: " + \
-        str(app_context.get_other_data("model_manufacturer")) + \
+        str(model_data["model_manufacturer"]) + \
         " / " + \
-        str(app_context.get_other_data("model_type")) + \
+        str(model_type) + \
         f" [{error_code}]"

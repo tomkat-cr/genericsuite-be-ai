@@ -233,14 +233,15 @@ def build_gs_prompt(base_prompt: str) -> str:
         f'>>> BUILD_GS_PROMPT | base_prompt: {base_prompt}')
     settings = Config(cac.app_context)
 
-    parent_model = cac.app_context.get_other_data("model_type")
-    model_name = cac.app_context.get_other_data("model_name")
-    model_manufacturer = cac.app_context.get_other_data("model_manufacturer")
+    model_type = cac.app_context.get_other_data("model_type")
+    model_data = cac.app_context.get_other_data(model_type)
+    model_name = model_data["model_name"]
+    model_manufacturer = model_data["model_manufacturer"]
     lang = get_response_lang(cac.app_context)
     bottom_line_prompt = get_constant("AI_PROMPT_TEMPLATES", "BOTTOM_LINE", "")
 
     translate_method = settings.LANGCHAIN_TRANSLATE_USING
-    if parent_model in ['gemini'] or model_name in ['gemini']:
+    if model_type in ['gemini'] or model_name in ['gemini']:
         # Enforce translation of final answer before send it to the user
         # outside the Agent run for Models that translates the format
         # elements phrases like "Final Answer:" or "Thought:"
@@ -447,6 +448,7 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
 
 
 def get_lcel_chain(
+    model_type: str,
     llm: Any,
     tools: list,
 ) -> Runnable:
@@ -454,11 +456,13 @@ def get_lcel_chain(
     Get the prompt to use and construct the LCEL chain
     """
     settings = Config(cac.app_context)
-
+    model_data = cac.app_context.get_other_data(model_type)
     # If system_msg_permitted is False, the LLM model does not
     # support System message nor binding tools or functions.
-    system_msg_permitted = \
-        cac.app_context.get_other_data("system_msg_permitted")
+    system_msg_permitted = model_data["system_msg_permitted"]
+    # If tools_permitted is False, the LLM model does not
+    # support Tools or Functions caling.
+    tools_permitted = model_data["tools_permitted"]
 
     _ = DEBUG and log_debug('>>> GET_LCEL_CHAIN')
     _ = DEBUG and log_debug(f'Tools: {tools}')
@@ -468,7 +472,7 @@ def get_lcel_chain(
 
     # Check if the LLM supports binding tools or functions
     llm_with_tools = None
-    if system_msg_permitted:
+    if tools_permitted:
         # Models different than o1-mini/o1-preview accept Tools...
         if hasattr(llm, 'bind_tools'):
             llm_with_tools = llm.bind_tools(tools)
@@ -476,10 +480,9 @@ def get_lcel_chain(
             llm_with_tools = llm.bind_functions(functions=tools)
     if not llm_with_tools:
         if settings.AI_ALLOW_INFERENCE_WITH_NO_TOOLS == '0' \
-           and system_msg_permitted:
+           and tools_permitted:
             raise AttributeError("[AI_GLCEL_CH-E005] LLM does not" +
                                  " support binding tools or functions")
-        model_type = cac.app_context.get_other_data("model_type")
         log_warning(
             'get_lcel_chain: [AI_GLCEL_CH-E010]' +
             ' LLM does not support binding tools or functions.' +
@@ -503,15 +506,19 @@ def get_lcel_chain(
 
 
 def run_lcel_chain(
+    model_type: str,
     agent_executor: RunnableWithMessageHistory,
     question: str,
 ) -> Output:
     """
     Run the LCEL chain and returns the .invoke() results.
     """
+    model_data = cac.app_context.get_other_data(model_type)
+    need_preamble = model_data["need_preamble"]
     tools_dict = get_functions_dict(cac.app_context)
+
     _ = DEBUG and \
-        log_debug('>>> 3.0) RUN_ASSISTANT | LCEL | tools_dict:' +
+        log_debug('>>> 3.0) RUN_LCEL_CHAIN | tools_dict:' +
                   f' {tools_dict}')
 
     session_id = cac.app_context.get_other_data("cid")
@@ -521,18 +528,29 @@ def run_lcel_chain(
         }
     })
     lcel_messages = [HumanMessage(content=question)]
+
+    # if need_preamble:
+    #     # Get the prompt to use and construct the preamble agent
+    #     final_agent_executor = agent_executor
+    #     agent_executor, memory = get_agent_executor(
+    #         agent_type=agent_type,
+    #         llm=llm,
+    #         tools=tools,
+    #         messages=messages,
+    #     )
+
     exec_result = agent_executor.invoke(
         lcel_messages,
         config=config,
     )
     # _ = DEBUG and \
     log_debug(
-        '>>> 3.1) RUN_ASSISTANT | LCEL | exec_result:' +
+        '>>> 3.1) RUN_LCEL_CHAIN | exec_result:' +
         f' {exec_result}')
 
     if hasattr(exec_result, 'tool_calls') and exec_result.tool_calls:
         _ = DEBUG and log_debug(
-            '>>> 3.3) RUN_ASSISTANT | Calling exec_result.tool_calls...')
+            '>>> 3.3) RUN_LCEL_CHAIN | Calling exec_result.tool_calls...')
 
         # https://python.langchain.com/v0.2/docs/how_to/tool_calling/#passing-tool-outputs-to-the-model
         lcel_messages.append(exec_result)
@@ -547,7 +565,7 @@ def run_lcel_chain(
                 tool_args = tool_call["args"].copy()
             _ = DEBUG and \
                 log_debug(
-                    '>>> 3.3) RUN_ASSISTANT | LCEL' +
+                    '>>> 3.3) RUN_LCEL_CHAIN' +
                     f' | tool_name: {tool_call["name"].lower()}' +
                     f'\n| tool_call["args"]: {tool_call["args"]}' +
                     f'\n| tool_call["args"] TYPE: {type(tool_call["args"])}' +
@@ -562,7 +580,7 @@ def run_lcel_chain(
                             tool_call_id=tool_call["id"]))
             _ = DEBUG and \
                 log_debug(
-                    '>>> 3.4) RUN_ASSISTANT | LCEL' +
+                    '>>> 3.4) RUN_LCEL_CHAIN' +
                     f'\n| tool_output:\n{tool_output}' +
                     '\n| session_history_store[session_id]:' +
                     f'\n{session_history_store[session_id]}')
@@ -600,6 +618,7 @@ def verify_tools(tools, conv_response):
 
 
 def run_assistant(
+    model_type: str,
     conv_response: dict,
     llm: Any,
     tools: list,
@@ -611,6 +630,8 @@ def run_assistant(
     """
     settings = Config(cac.app_context)
     agent_type = settings.LANGCHAIN_AGENT_TYPE
+    model_data = cac.app_context.get_other_data(model_type)
+
     _ = DEBUG and \
         log_debug('>>> 1) RUN_ASSISTANT | LANGCHAIN_AGENT_TYPE:' +
                   f' {agent_type}')
@@ -619,14 +640,14 @@ def run_assistant(
     if conv_response["error"]:
         return conv_response
 
-    pref_agent_type = cac.app_context.get_other_data("pref_agent_type")
+    pref_agent_type = model_data["pref_agent_type"]
     if agent_type == 'lcel' and pref_agent_type == 'lcel':
         # LCEL implementation (no agent, just a LLM call)
 
         # Call pipe example (LCEL):
         # https://python.langchain.com/v0.1/docs/modules/agents/how_to/custom_agent/#create-the-agent
         agent_executor = RunnableWithMessageHistory(
-            get_lcel_chain(llm=llm, tools=tools),
+            get_lcel_chain(model_type=model_type, llm=llm, tools=tools),
             # Build a Chatbot
             # https://python.langchain.com/v0.2/docs/tutorials/chatbot/#message-history
             get_session_history
@@ -651,7 +672,9 @@ def run_assistant(
     try:
         if agent_type == 'lcel' and pref_agent_type == 'lcel':
             # LCEL implementation (no agent, just a LLM call)
-            exec_result = run_lcel_chain(agent_executor, question)
+            exec_result = run_lcel_chain(
+                model_type=model_type, agent_executor=agent_executor,
+                question=question)
             if hasattr(exec_result, 'content'):
                 conv_response["response"] = exec_result.content
             elif isinstance(exec_result, str):
@@ -764,6 +787,7 @@ def run_conversation(app_context: AppContext) -> dict:
 
     if not conv_response["error"]:
         conv_response = run_assistant(
+            model_type=model_type,
             conv_response=conv_response,
             llm=llm,
             tools=tools,
