@@ -56,6 +56,7 @@ class Config(ConfigSuperClass):
             # 'LANGCHAIN_DEFAULT_MODEL', 'clarifai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'bedrock'
             # 'LANGCHAIN_DEFAULT_MODEL', 'ollama'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'aimlapi'
         )
 
         self.AI_VISION_TECHNOLOGY = self.get_env(
@@ -108,6 +109,23 @@ class Config(ConfigSuperClass):
 
         self.AI_MODEL_NEED_PREAMBLE = self.get_env(
             'AI_MODEL_NEED_PREAMBLE', '')
+
+        self.AI_PREAMBLE_MODEL_DEFAULT_TYPE = self.get_env(
+            'AI_PREAMBLE_MODEL_DEFAULT_TYPE', 'chat_openai')
+
+        self.AI_PREAMBLE_MODEL_DEFAULT_MODEL = self.get_env(
+            'AI_PREAMBLE_MODEL_DEFAULT_MODEL', 'gpt-4o-mini')
+
+        self.AI_PREAMBLE_MODEL_BASE_CONF = self.get_env(
+            'AI_PREAMBLE_MODEL_BASE_CONF',
+            '{"o1-mini": {"model_type": "chat_openai", "model_name": ' +
+            '"gpt-4o-mini"}, "o1-preview": {"model_type": "chat_openai",' +
+            ' "model_name": "gpt-4o-mini"}}'
+        )
+
+        self.AI_PREAMBLE_MODEL_CUSTOM_CONF = self.get_env(
+            'AI_PREAMBLE_MODEL_CUSTOM_CONF', ''
+        )
 
         self.AI_ADDITIONAL_MODELS = self.get_env(
             # 'AI_ADDITIONAL_MODELS', '1'   # Add aditional models to the LLM
@@ -447,12 +465,23 @@ class Config(ConfigSuperClass):
 
         self.AIMLAPI_API_KEY = self.get_env('AIMLAPI_API_KEY', "")
 
+        # Reference:
+        # https://docs.aimlapi.com/api-overview/model-database/text-models
         self.AIMLAPI_MODEL_NAME = self.get_env(
             'AIMLAPI_MODEL_NAME',
+            # https://aimlapi.com/models/openai-o1-preview-api
             "o1-mini"
             # "o1-preview"
         )
-        self.AIMLAPI_TEMPERATURE = self.get_env('AIMLAPI_TEMPERATURE', '1')
+
+        self.AIMLAPI_TEMPERATURE = self.get_env(
+            'AIMLAPI_TEMPERATURE', '1')
+
+        self.AIMLAPI_MAX_TOKENS = self.get_env(
+            'AIMLAPI_MAX_TOKENS',
+            # "o1-preview" model supports at most 32768 completion tokens
+            '32768'
+        )
 
         self.AIMLAPI_BASE_URL = self.get_env(
             'AIMLAPI_BASE_URL',

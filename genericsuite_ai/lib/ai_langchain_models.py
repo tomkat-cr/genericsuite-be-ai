@@ -3,6 +3,7 @@
 Langchain models
 """
 from typing import Union, Optional, Any
+import json
 
 from langchain_anthropic import ChatAnthropic
 from langchain_aws import ChatBedrock
@@ -88,6 +89,20 @@ def get_need_preamble(app_context: AppContext, model_name: str) -> bool:
     ]
 
 
+def get_preamble_model(app_context: AppContext, model_name: str) -> bool:
+    settings = Config(app_context)
+    preamble_model_configs: dict = \
+        json.loads(settings.AI_PREAMBLE_MODEL_BASE_CONF)
+    if settings.AI_PREAMBLE_MODEL_CUSTOM_CONF:
+        preamble_model_configs.update(
+            json.loads(settings.AI_PREAMBLE_MODEL_CUSTOM_CONF)
+        )
+    return preamble_model_configs.get(model_name, {
+        "model_type": settings.AI_PREAMBLE_MODEL_DEFAULT_TYPE,
+        "model_name": settings.AI_PREAMBLE_MODEL_DEFAULT_MODEL,
+    })
+
+
 def get_model(
     app_context: AppContext,
     model_type: str,
@@ -134,7 +149,7 @@ def get_model(
                 "user_plan",
                 "Unknown or N/A")
             manufacturer = "OpenAI"
-            openai_api_key = model_params.get("openai_api_key") \
+            openai_api_key = model_params.get("api_key") \
                 or settings.OPENAI_API_KEY
             model_name = model_params.get("model_name") \
                 or settings.OPENAI_MODEL
@@ -179,8 +194,8 @@ def get_model(
            model_type == "gs_huggingface":
             manufacturer = "GS Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            if 'repo_id' in model_params:
-                model_name = model_params['repo_id']
+            if 'model_name' in model_params:
+                model_name = model_params['model_name']
             model_object = GsHuggingFaceEndpoint(
                 repo_id=model_name,
                 task="text-generation",
@@ -219,8 +234,8 @@ def get_model(
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
             # if 'url' in model_params:
             #     model_name = model_params['url']
-            if 'repo_id' in model_params:
-                model_name = model_params['repo_id']
+            if 'model_name' in model_params:
+                model_name = model_params['model_name']
             model_object = HuggingFaceEndpoint(
                 repo_id=model_name,
                 task="text-generation",
@@ -262,8 +277,8 @@ def get_model(
             #
             manufacturer = "Hugging Face (Pipeline)"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            if 'repo_id' in model_params:
-                model_name = model_params['repo_id']
+            if 'model_name' in model_params:
+                model_name = model_params['model_name']
             tokenizer = AutoTokenizer.from_pretrained(model_name)
             model = AutoModelForCausalLM.from_pretrained(model_name)
             model_config = {
@@ -311,8 +326,8 @@ def get_model(
             # https://python.langchain.com/docs/integrations/chat/groq/
             manufacturer = "Groq"
             model_name = settings.GROQ_MODEL
-            if 'model' in model_params:
-                model_name = model_params['model']
+            if 'model_name' in model_params:
+                model_name = model_params['model_name']
             if not settings.GROQ_API_KEY:
                 error = "ERROR [GET_MODEL-GROQ-010] - Missing GROQ_API_KEY"
             else:
@@ -333,8 +348,8 @@ def get_model(
             # https://python.langchain.com/docs/how_to/response_metadata/#bedrock-anthropic
             manufacturer = "AWS"
             model_name = settings.AWS_BEDROCK_MODEL_ID
-            if 'model' in model_params:
-                model_name = model_params['model']
+            if 'model_name' in model_params:
+                model_name = model_params['model_name']
             model_config = {}
             model_config["model_id"] = model_name
             if settings.AWS_BEDROCK_CREDENTIALS_PROFILE:
@@ -383,16 +398,18 @@ def get_model(
         if model_type == "aimlapi":
             # https://lablab.ai/blog/how-to-access-o1-models
             # https://python.langchain.com/api_reference/openai/llms/langchain_openai.llms.base.OpenAI.html
+            # https://docs.aimlapi.com/api-overview/model-database/text-models
             manufacturer = "AI/ML API"
-            openai_api_key = model_params.get('aimlapi_api_key') \
+            openai_api_key = model_params.get('api_key') \
                 or settings.AIMLAPI_API_KEY
-            model_name = model_params.get('aimlapi_model_name') \
+            model_name = model_params.get('model_name') \
                 or settings.AIMLAPI_MODEL_NAME
             model_object = ChatOpenAI(
                 base_url=settings.AIMLAPI_BASE_URL,
                 openai_api_key=openai_api_key,
                 model=model_name,
                 temperature=float(settings.AIMLAPI_TEMPERATURE),
+                max_tokens=int(settings.AIMLAPI_MAX_TOKENS),
             )
             if not model_object:
                 error = "ERROR [GET_MODEL-AIMLAPI-010] - AI/ML API with" + \
@@ -413,6 +430,7 @@ def get_model(
             app_context, model_name),
         "tools_permitted": get_tools_permitted(app_context, model_name),
         "need_preamble": get_need_preamble(app_context, model_name),
+        "preamble_model": get_preamble_model(app_context, model_name),
         "other_data": other_data,
         "error": error,
     }
@@ -447,7 +465,7 @@ def get_model_middleware(
     model_params["user_plan"] = billing.get_user_plan()
     if not billing.is_free_plan():
         if model_type == "chat_openai":
-            model_params["openai_api_key"] = billing.get_openai_api_key()
+            model_params["api_key"] = billing.get_openai_api_key()
             model_params["model_name"] = billing.get_openai_chat_model()
             _ = DEBUG and log_debug(
                 f"GET_MODEL_MIDDLEWARE | model_params: {model_params}")
@@ -455,9 +473,9 @@ def get_model_middleware(
     # Free plan only allows GPT with the user's OpenAI API key and user's
     # configured model or small GPT
     model_type = "chat_openai"
-    model_params["openai_api_key"] = billing.get_openai_api_key()
+    model_params["api_key"] = billing.get_openai_api_key()
     model_params["model_name"] = billing.get_openai_chat_model()
-    if not model_params["openai_api_key"]:
+    if not model_params["api_key"]:
         error = "ERROR [GET_MODEL-OAI-010] Missing OpenAI API Key"
         result = {
             "model_type": None,
@@ -490,6 +508,7 @@ MODEL_ATTR_NAME_REPLACE = {
 def get_model_obj(
     app_context: AppContext,
     model_type: Optional[Union[str, None]] = None,
+    model_params: Optional[dict] = None,
 ) -> Union[RunnableSerializable, None]:
     """
     Get model object with alternative models and fallback.
@@ -514,16 +533,22 @@ def get_model_obj(
     settings = Config(app_context)
     selected_model_type: str = settings.LANGCHAIN_DEFAULT_MODEL \
         if model_type is None else model_type
+
     if self_debug:
         log_debug("GET_MODEL_OBJ | Model (selected_model_type): >> " +
                   f'{selected_model_type} <<')
 
-    model_response = get_model_middleware(app_context, selected_model_type)
+    model_response = get_model_middleware(
+        app_context,
+        selected_model_type,
+        model_params,
+    )
 
     # Add the last retrieved model type to the app_context
     app_context.set_other_data(
         "model_type",
         model_response["model_type"])
+
     # Add last model attributes to the app_context under its type
     app_context.set_other_data(
         model_response["model_type"],

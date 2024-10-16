@@ -22,12 +22,13 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ---
 
 ### New
-Implement preamble model [GS-140].
+Implement preamble model to run OpenAI o1-mini/o1-preview models with Tools and System messages [GS-140].
+Add AI_PREAMBLE_MODEL_DEFAULT_TYPE, AI_PREAMBLE_MODEL_DEFAULT_MODEL, AI_PREAMBLE_MODEL_BASE_CONF, AI_PREAMBLE_MODEL_CUSTOM_CONF to customize the preamble model [GS-140].
 Implement ollama server [GS-139].
 Add AI_MODEL_ALLOW_SYSTEM_MSG, AI_MODEL_ALLOW_TOOLS, and AI_MODEL_NEED_PREAMBLE to manage models like Ollama "llava" that doesn't accept Tools [GS-140].
 
 ### Changes
-Update ChatOllama adding the"langchain-ollama" dependency [GS-139].
+Update ChatOllama adding the "langchain-ollama" dependency [GS-139].
 
 
 ## 0.1.10 (2024-10-07)
