@@ -30,6 +30,9 @@ Add AI_MODEL_ALLOW_SYSTEM_MSG, AI_MODEL_ALLOW_TOOLS, and AI_MODEL_NEED_PREAMBLE 
 ### Changes
 Update ChatOllama adding the "langchain-ollama" dependency [GS-139].
 
+### Fixes
+Fix Tools make Agent returns empty responses in LCEL chains. Now Agent returns the result when there're no more Tools to call [GS-143].
+
 
 ## 0.1.10 (2024-10-07)
 ---

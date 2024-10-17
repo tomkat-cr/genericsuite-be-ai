@@ -35,7 +35,7 @@ from genericsuite_ai.lib.huggingface_chat_model import (
     GsChatHuggingFace,
 )
 
-DEBUG = True
+DEBUG = False
 
 
 class BedrockAsyncCallbackHandler(AsyncCallbackHandler):
@@ -419,6 +419,7 @@ def get_model(
         error = f"[GET_MODEL-GENEX-010] - {err}"
 
     _ = error and log_error(error)
+    need_preamble = get_need_preamble(app_context, model_name)
     result = {
         "model_type": model_type,
         "model_name": model_name,
@@ -429,8 +430,10 @@ def get_model(
         "system_msg_permitted": get_system_msg_permitted(
             app_context, model_name),
         "tools_permitted": get_tools_permitted(app_context, model_name),
-        "need_preamble": get_need_preamble(app_context, model_name),
-        "preamble_model": get_preamble_model(app_context, model_name),
+        "need_preamble": need_preamble,
+        "preamble_model":
+            get_preamble_model(app_context, model_name)
+            if need_preamble else None,
         "other_data": other_data,
         "error": error,
     }
