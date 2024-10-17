@@ -36,6 +36,7 @@ from genericsuite.util.app_logger import (
 from genericsuite.util.utilities import (
     get_standard_base_exception_msg,
     get_default_resultset,
+    is_under_test
 )
 from genericsuite.constants.const_tables import get_constant
 
@@ -229,18 +230,21 @@ def build_gs_prompt(base_prompt: str) -> str:
     """
     Prepare the base prompt for the agent
     """
-    _ = DEBUG and log_debug(
+    self_debug = DEBUG or is_under_test()
+    # self_debug = True
+    _ = self_debug and log_debug(
         f'>>> BUILD_GS_PROMPT | base_prompt: {base_prompt}')
     settings = Config(cac.app_context)
 
-    parent_model = cac.app_context.get_other_data("model_type")
-    model_name = cac.app_context.get_other_data("model_name")
-    model_manufacturer = cac.app_context.get_other_data("model_manufacturer")
+    model_type = cac.app_context.get_other_data("model_type")
+    model_data = cac.app_context.get_other_data(model_type)
+    model_name = model_data["model_name"]
+    model_manufacturer = model_data["model_manufacturer"]
     lang = get_response_lang(cac.app_context)
     bottom_line_prompt = get_constant("AI_PROMPT_TEMPLATES", "BOTTOM_LINE", "")
 
     translate_method = settings.LANGCHAIN_TRANSLATE_USING
-    if parent_model in ['gemini'] or model_name in ['gemini']:
+    if model_type in ['gemini'] or model_name in ['gemini']:
         # Enforce translation of final answer before send it to the user
         # outside the Agent run for Models that translates the format
         # elements phrases like "Final Answer:" or "Thought:"
@@ -295,7 +299,8 @@ def build_gs_prompt(base_prompt: str) -> str:
     new_prompt = prefix + new_prompt.replace(
         BEGIN_PROMPT_TOKEN,
         suffix + BEGIN_PROMPT_TOKEN)
-    _ = DEBUG and log_debug(f'>>> BUILD_GS_PROMPT | new_prompt: {new_prompt}')
+    _ = self_debug and log_debug(
+        f'>>> BUILD_GS_PROMPT | new_prompt: {new_prompt}')
     return new_prompt
 
 
@@ -334,7 +339,7 @@ def get_agent_prompt(prompt_code: str) -> Any:
     return prompt
 
 
-def get_agent_executor(
+def get_agent_executor_non_lcel(
     agent_type: str,
     llm: Any,
     tools: list,
@@ -447,6 +452,7 @@ def get_session_history(session_id: str) -> BaseChatMessageHistory:
 
 
 def get_lcel_chain(
+    model_type: str,
     llm: Any,
     tools: list,
 ) -> Runnable:
@@ -454,11 +460,13 @@ def get_lcel_chain(
     Get the prompt to use and construct the LCEL chain
     """
     settings = Config(cac.app_context)
-
+    model_data = cac.app_context.get_other_data(model_type)
     # If system_msg_permitted is False, the LLM model does not
     # support System message nor binding tools or functions.
-    system_msg_permitted = \
-        cac.app_context.get_other_data("system_msg_permitted")
+    system_msg_permitted = model_data["system_msg_permitted"]
+    # If tools_permitted is False, the LLM model does not
+    # support Tools or Functions caling.
+    tools_permitted = model_data["tools_permitted"]
 
     _ = DEBUG and log_debug('>>> GET_LCEL_CHAIN')
     _ = DEBUG and log_debug(f'Tools: {tools}')
@@ -468,7 +476,7 @@ def get_lcel_chain(
 
     # Check if the LLM supports binding tools or functions
     llm_with_tools = None
-    if system_msg_permitted:
+    if tools_permitted:
         # Models different than o1-mini/o1-preview accept Tools...
         if hasattr(llm, 'bind_tools'):
             llm_with_tools = llm.bind_tools(tools)
@@ -476,10 +484,9 @@ def get_lcel_chain(
             llm_with_tools = llm.bind_functions(functions=tools)
     if not llm_with_tools:
         if settings.AI_ALLOW_INFERENCE_WITH_NO_TOOLS == '0' \
-           and system_msg_permitted:
+           and tools_permitted:
             raise AttributeError("[AI_GLCEL_CH-E005] LLM does not" +
                                  " support binding tools or functions")
-        model_type = cac.app_context.get_other_data("model_type")
         log_warning(
             'get_lcel_chain: [AI_GLCEL_CH-E010]' +
             ' LLM does not support binding tools or functions.' +
@@ -502,16 +509,35 @@ def get_lcel_chain(
     return chain
 
 
+def run_non_lcel_chain(
+    model_type: str,
+    agent: dict,
+    question: str,
+) -> Output:
+    agent_executor = agent["agent_executor"]
+    exec_result = agent_executor.invoke({
+        "input": question,
+        "chat_history": agent["memory"],
+    })
+    return exec_result
+
+
 def run_lcel_chain(
-    agent_executor: RunnableWithMessageHistory,
+    model_type: str,
+    # agent_executor: RunnableWithMessageHistory,
+    agent: dict,
     question: str,
 ) -> Output:
     """
     Run the LCEL chain and returns the .invoke() results.
     """
+    self_debug = DEBUG or is_under_test()
+    # self_debug = True
+    agent_executor = agent["agent_executor"]
     tools_dict = get_functions_dict(cac.app_context)
-    _ = DEBUG and \
-        log_debug('>>> 3.0) RUN_ASSISTANT | LCEL | tools_dict:' +
+
+    _ = self_debug and \
+        log_debug('>>> 3.0) RUN_LCEL_CHAIN | tools_dict:' +
                   f' {tools_dict}')
 
     session_id = cac.app_context.get_other_data("cid")
@@ -525,17 +551,20 @@ def run_lcel_chain(
         lcel_messages,
         config=config,
     )
-    # _ = DEBUG and \
-    log_debug(
-        '>>> 3.1) RUN_ASSISTANT | LCEL | exec_result:' +
-        f' {exec_result}')
 
-    if hasattr(exec_result, 'tool_calls') and exec_result.tool_calls:
-        _ = DEBUG and log_debug(
-            '>>> 3.3) RUN_ASSISTANT | Calling exec_result.tool_calls...')
+    _ = self_debug and \
+        log_debug(
+            '>>> 3.1) RUN_LCEL_CHAIN | exec_result:' +
+            f' {exec_result}')
+
+    while hasattr(exec_result, 'tool_calls') and exec_result.tool_calls:
+
+        _ = self_debug and log_debug(
+            '>>> 3.3) RUN_LCEL_CHAIN | Calling exec_result.tool_calls...')
 
         # https://python.langchain.com/v0.2/docs/how_to/tool_calling/#passing-tool-outputs-to-the-model
         lcel_messages.append(exec_result)
+
         for tool_call in exec_result.tool_calls:
             selected_tool = tools_dict[tool_call["name"].lower()]
             if isinstance(tool_call["args"], dict) \
@@ -545,24 +574,28 @@ def run_lcel_chain(
                 }
             else:
                 tool_args = tool_call["args"].copy()
-            _ = DEBUG and \
+
+            _ = self_debug and \
                 log_debug(
-                    '>>> 3.3) RUN_ASSISTANT | LCEL' +
+                    '>>> 3.3) RUN_LCEL_CHAIN' +
                     f' | tool_name: {tool_call["name"].lower()}' +
                     f'\n| tool_call["args"]: {tool_call["args"]}' +
                     f'\n| tool_call["args"] TYPE: {type(tool_call["args"])}' +
                     f'\n| tool_args: {tool_args}' +
                     f'\n| tool_args TYPE: {type(tool_args)}' +
                     f'\n| selected_tool: {selected_tool}')
+
             tool_output = selected_tool.invoke(tool_args)
             lcel_messages.append(ToolMessage(tool_output,
                                              tool_call_id=tool_call["id"]))
+
             session_history_store[session_id].add_message(
                 ToolMessage(tool_output,
                             tool_call_id=tool_call["id"]))
-            _ = DEBUG and \
+
+            _ = self_debug and \
                 log_debug(
-                    '>>> 3.4) RUN_ASSISTANT | LCEL' +
+                    '>>> 3.4) RUN_LCEL_CHAIN' +
                     f'\n| tool_output:\n{tool_output}' +
                     '\n| session_history_store[session_id]:' +
                     f'\n{session_history_store[session_id]}')
@@ -572,6 +605,17 @@ def run_lcel_chain(
             lcel_messages,
             config=config,
         )
+
+        _ = self_debug and \
+            log_debug(
+                '>>> 3.5) RUN_LCEL_CHAIN' +
+                f'\n| exec_result:\n{exec_result}')
+
+    _ = self_debug and \
+        log_debug(
+            '>>> 3.6) RUN_LCEL_CHAIN' +
+            f'\n| exec_result:\n{exec_result}')
+
     return exec_result
 
 
@@ -599,7 +643,261 @@ def verify_tools(tools, conv_response):
     return conv_response
 
 
+def get_agent_executor_and_memory(
+    model_type: str,
+    llm: Any,
+    tools: list,
+    messages: list,
+) -> dict:
+    """
+    Get agent executor, memory, agent type, and memory
+    """
+    settings = Config(cac.app_context)
+
+    result = get_default_resultset()
+    memory = []
+
+    agent_type = settings.LANGCHAIN_AGENT_TYPE
+    model_data = cac.app_context.get_other_data(model_type)
+    need_preamble = model_data["need_preamble"]
+
+    _ = DEBUG and \
+        log_debug('>>> get_agent_executor_and_memory | LANGCHAIN_AGENT_TYPE:' +
+                  f' {agent_type}')
+
+    pref_agent_type = model_data["pref_agent_type"]
+    if agent_type == 'lcel' and pref_agent_type == 'lcel':
+        # LCEL implementation (no agent, just a LLM call)
+        if need_preamble:
+            agent_executor = get_lcel_chain(
+                model_type=model_type, llm=llm, tools=tools)
+        else:
+            # Call pipe example (LCEL):
+            # https://python.langchain.com/v0.1/docs/modules/agents/how_to/custom_agent/#create-the-agent
+            agent_executor = RunnableWithMessageHistory(
+                get_lcel_chain(model_type=model_type, llm=llm, tools=tools),
+                # Build a Chatbot
+                # https://python.langchain.com/v0.2/docs/tutorials/chatbot/#message-history
+                get_session_history
+            )
+    else:
+        # If the Model's preferred agent type is not LCEL,
+        # use the Model's preference, otherwise use
+        # the configured default agent type...
+        if pref_agent_type != 'lcel':
+            agent_type = pref_agent_type
+        # Get the prompt to use and construct the agent
+        agent_executor, memory = get_agent_executor_non_lcel(
+            agent_type=agent_type,
+            llm=llm,
+            tools=tools,
+            messages=messages,
+        )
+    result["agent_type"] = agent_type
+    result["pref_agent_type"] = pref_agent_type
+    result["agent_executor"] = agent_executor
+    result["memory"] = memory
+    return result
+
+
+def get_model_additional_data(
+    model_type: str,
+    tools: list,
+    messages: list,
+) -> dict:
+    """
+    Get additional data for the model_type, specially data related to
+    the model_type's preamble.
+
+    Args:
+        model_type (str): the model_type.
+        tools (list): the tools.
+
+    Returns:
+        dict: a standard response with this structure:
+            "need_preamble": bool
+            "llm": Any
+            "agent": dict
+            "error": bool
+            "error_message": str
+            "pref_agent_type": str
+    """
+    result = get_default_resultset()
+    del result["resultset"]
+    del result["totalPages"]
+
+    model_data = cac.app_context.get_other_data(model_type)
+    result["need_preamble"] = model_data["need_preamble"]
+
+    if not result["need_preamble"]:
+        return result
+
+    preamble_model = model_data["preamble_model"]
+
+    result["model_type"] = preamble_model['model_type']
+
+    result["llm"] = get_model_obj(
+        app_context=cac.app_context,
+        model_type=result["model_type"],
+        model_params={"model_name": preamble_model['model_name']}
+    )
+    if not result["llm"]:
+        # No model found or model error
+        result["error"] = True
+        result["error_message"] = get_model_load_error(
+            app_context=cac.app_context,
+            error_code="AIRCLC-GMAD-E010"
+        )
+        return result
+
+    preamble_model_data = \
+        cac.app_context.get_other_data(result["model_type"])
+
+    result["pref_agent_type"] = preamble_model_data["pref_agent_type"]
+
+    result["agent"] = get_agent_executor_and_memory(
+        model_type=result["model_type"],
+        llm=result["llm"],
+        tools=tools,
+        messages=messages,
+    )
+    if result["agent"]["error"]:
+        result["error"] = True
+        result["error_message"] = result["agent"]["error_message"]
+        return result
+
+    return result
+
+
+def run_final_agent(
+    model_type: str,
+    agent: dict,
+    question: str,
+) -> dict:
+    """
+    Run the final agent.
+
+    Args:
+        model_type (str): the model_type.
+        agent (dict): the agent.
+        question (str): the question.
+
+    Returns:
+        dict: a standard response with this structure:
+            "response": str
+            "error": bool
+            "error_message": str
+    """
+    result = get_default_resultset()
+    _ = DEBUG and \
+        log_debug('>>> 1) run_final_agent | Start chain/agent execution...')
+    try:
+        if agent["agent_type"] == 'lcel' \
+           and agent["pref_agent_type"] == 'lcel':
+            # LCEL implementation (no agent, just a LLM call)
+            exec_result = run_lcel_chain(
+                model_type=model_type,
+                agent=agent,
+                question=question)
+            if hasattr(exec_result, 'content'):
+                result["response"] = exec_result.content
+            elif isinstance(exec_result, str):
+                result["response"] = exec_result
+            else:
+                result["response"] = \
+                    "ERROR - Empty response from Assistant [AIRCLC-E030]"
+        else:
+            # Chat Agent implementation
+            exec_result = run_non_lcel_chain(
+                model_type=model_type,
+                agent=agent,
+                question=question)
+            result["response"] = exec_result.get(
+                "output",
+                "ERROR - Empty response from Agent [AIRCLC-E035]"
+            )
+        _ = DEBUG and \
+            log_debug(
+                '>>> 2) run_final_agent | LANGCHAIN_AGENT_TYPE:' +
+                f' {agent["agent_type"]} |' +
+                f' exec_result: {exec_result}')
+    except Exception as error:
+        result["error"] = True
+        result["error_message"] = \
+            get_standard_base_exception_msg(error, "AIRCLC-E020")
+    return result
+
+
+def run_agent(
+    model_type: str,
+    agent: dict,
+    question: str,
+) -> dict:
+    """
+    Run the agent.
+
+    Args:
+        model_type (str): the model_type.
+        agent (dict): the agent.
+        question (str): the question.
+
+    Returns:
+        dict: a standard response with this structure:
+            "response": str
+            "error": bool
+            "error_message": str
+    """
+    self_debug = DEBUG or is_under_test()
+    # self_debug = True
+    if not agent['other_data']['need_preamble']:
+        _ = DEBUG and \
+            log_debug('>>> 1) run_agent | Start NORMAL chain/agent execution')
+        return run_final_agent(
+            model_type=model_type,
+            agent=agent,
+            question=question
+        )
+
+    preamble_prompt = \
+        "Don't answer the following Question, just verify and eventually" + \
+        " execute any Tools needed to answer it. If no Tools are needed," + \
+        " return ''.\n\n" + \
+        "Question: " + question
+
+    _ = self_debug and \
+        log_debug(
+            '>>> 2) run_agent | Start PREAMBLE chain/agent ' +
+            f'execution | preamble_prompt: {preamble_prompt}')
+
+    preamble_result = run_final_agent(
+        model_type=agent['other_data']['model_type'],
+        agent=agent['other_data']['agent'],
+        question=preamble_prompt
+    )
+
+    if preamble_result["error"]:
+        return preamble_result
+
+    final_question = question
+    if preamble_result["response"] and preamble_result["response"] != "''":
+        final_question = question + ". Addicional information: " + \
+            preamble_result["response"].strip()
+
+    _ = self_debug and \
+        log_debug(
+            '>>> 3) run_agent | Start FINAL chain/agent execution' +
+            f'\n | preamble_result: {preamble_result}' +
+            f'\n | final_question: {final_question}')
+
+    return run_final_agent(
+        model_type=model_type,
+        agent=agent,
+        question=final_question
+    )
+
+
 def run_assistant(
+    model_type: str,
     conv_response: dict,
     llm: Any,
     tools: list,
@@ -609,75 +907,56 @@ def run_assistant(
     """
     Run the assistant
     """
+    self_debug = DEBUG or is_under_test()
+    # self_debug = True
+
     settings = Config(cac.app_context)
-    agent_type = settings.LANGCHAIN_AGENT_TYPE
+
     _ = DEBUG and \
         log_debug('>>> 1) RUN_ASSISTANT | LANGCHAIN_AGENT_TYPE:' +
-                  f' {agent_type}')
+                  f' {settings.LANGCHAIN_AGENT_TYPE}')
 
     conv_response = verify_tools(tools, conv_response)
     if conv_response["error"]:
         return conv_response
 
-    pref_agent_type = cac.app_context.get_other_data("pref_agent_type")
-    if agent_type == 'lcel' and pref_agent_type == 'lcel':
-        # LCEL implementation (no agent, just a LLM call)
+    agent = get_agent_executor_and_memory(
+        model_type=model_type,
+        llm=llm,
+        tools=tools,
+        messages=messages,
+    )
+    if agent["error"]:
+        conv_response["error"] = agent["error"]
+        conv_response["error_message"] = agent["error_message"]
+        return conv_response
 
-        # Call pipe example (LCEL):
-        # https://python.langchain.com/v0.1/docs/modules/agents/how_to/custom_agent/#create-the-agent
-        agent_executor = RunnableWithMessageHistory(
-            get_lcel_chain(llm=llm, tools=tools),
-            # Build a Chatbot
-            # https://python.langchain.com/v0.2/docs/tutorials/chatbot/#message-history
-            get_session_history
-        )
-    else:
-        # If the Model's preferred agent type is not LCEL,
-        # use the Model's preference, otherwise use
-        # the configured default agent type...
-        if pref_agent_type != 'lcel':
-            agent_type = pref_agent_type
-        # Get the prompt to use and construct the agent
-        agent_executor, memory = get_agent_executor(
-            agent_type=agent_type,
-            llm=llm,
-            tools=tools,
-            messages=messages,
-        )
+    agent["other_data"] = get_model_additional_data(
+        model_type=model_type,
+        tools=tools,
+        messages=messages,
+    )
+    if agent["other_data"]["error"]:
+        conv_response["error"] = agent["other_data"]["error"]
+        conv_response["error_message"] = agent["other_data"]["error_message"]
+        return conv_response
 
     # Run Agent
     _ = DEBUG and \
         log_debug('>>> 2) RUN_ASSISTANT | Start chain/agent execution...')
-    try:
-        if agent_type == 'lcel' and pref_agent_type == 'lcel':
-            # LCEL implementation (no agent, just a LLM call)
-            exec_result = run_lcel_chain(agent_executor, question)
-            if hasattr(exec_result, 'content'):
-                conv_response["response"] = exec_result.content
-            elif isinstance(exec_result, str):
-                conv_response["response"] = exec_result
-            else:
-                conv_response["response"] = \
-                    "ERROR - Empty response from Assistant [AIRCLC-E030]"
-        else:
-            # Chat Agent implementation
-            exec_result = agent_executor.invoke({
-                "input": question,
-                "chat_history": memory,
-            })
-            conv_response["response"] = exec_result.get(
-                "output",
-                "ERROR - Empty response from Agent [AIRCLC-E035]"
-            )
-        _ = DEBUG and \
-            log_debug(
-                '>>> 4) RUN_ASSISTANT | LANGCHAIN_AGENT_TYPE:' +
-                f' {agent_type} |' +
-                f' exec_result: {exec_result}')
-    except Exception as error:
-        conv_response["error"] = True
-        conv_response["error_message"] = \
-            get_standard_base_exception_msg(error, "AIRCLC-E020")
+
+    exec_result = run_agent(
+        model_type=model_type,
+        agent=agent,
+        question=question)
+
+    _ = self_debug and \
+        log_debug(f'>>> 3) RUN_ASSISTANT | exec_result: {exec_result}')
+
+    conv_response["error"] = exec_result["error"]
+    conv_response["error_message"] = exec_result["error_message"]
+    conv_response["response"] = exec_result["response"] \
+        if not conv_response["error"] else None
     return conv_response
 
 
@@ -764,6 +1043,7 @@ def run_conversation(app_context: AppContext) -> dict:
 
     if not conv_response["error"]:
         conv_response = run_assistant(
+            model_type=model_type,
             conv_response=conv_response,
             llm=llm,
             tools=tools,

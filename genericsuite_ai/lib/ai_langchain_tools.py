@@ -202,7 +202,8 @@ def interpret_tool_params(
     self_debug = DEBUG or is_under_test()
     # self_debug = True
     _ = self_debug and \
-        log_debug("INTERPRET_TOOL_PARAMS" +
+        log_debug(
+            "INTERPRET_TOOL_PARAMS" +
             f"\n | tool_params: {tool_params}" + 
             f"\n | tool_params type: {type(tool_params)}"
             f"\n | schema: {schema}" +
