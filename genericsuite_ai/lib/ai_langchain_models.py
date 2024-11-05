@@ -21,7 +21,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from genericsuite.util.app_context import AppContext
 from genericsuite.util.app_logger import log_debug, log_error
-from genericsuite.util.utilities import is_under_test
+from genericsuite.util.utilities import (
+    is_under_test,
+    get_default_resultset,
+)
 
 from genericsuite_ai.config.config import Config
 from genericsuite_ai.lib.clarifai import (
@@ -103,6 +106,46 @@ def get_preamble_model(app_context: AppContext, model_name: str) -> bool:
     })
 
 
+def get_openai_api(model_params: dict) -> ChatOpenAI:
+    """
+    Get OpenAI API
+
+    Args:
+        model_config (dict): model configuration
+
+    Returns:
+        ChatOpenAI: OpenAI API object
+    """
+    response = get_default_resultset()
+    openai_api_key = model_params.get("api_key")
+    model_name = model_params.get("model_name")
+    model_config = {
+        "model": model_name,
+        "openai_api_key": openai_api_key,
+    }
+    for key in ["base_url", "stop"]:
+        if model_params.get(key):
+            model_config[key] = model_params[key]
+    for key in ["temperature"]:
+        if model_params.get(key):
+            model_config[key] = float(model_params[key])
+    for key in ["top_p", "max_tokens"]:
+        if model_params.get(key):
+            model_config[key] = int(model_params[key])
+    if model_params.get("streaming", "0") == "1":
+        model_config["streaming"] = True
+        model_config["n"] = 1
+    model_object = ChatOpenAI(**model_config)
+    if not model_object:
+        response['error'] = True
+        response['error_message'] = \
+            "ERROR [GET_MODEL-OAI-020] - ChatOpenAI cannot" + \
+            f" be initialized for {model_params.get('provider', 'N/A')}"
+    else:
+        response['model_object'] = model_object
+    return response
+
+
 def get_model(
     app_context: AppContext,
     model_type: str,
@@ -143,25 +186,46 @@ def get_model(
     other_data = {}
     try:
         # OpenAI ChatGPT
-        if model_type == "chat_openai":
+        if model_type == "chat_openai" or model_type == "openai":
             # https://python.langchain.com/docs/integrations/chat/openai/
             other_data["user_plan"] = model_params.get(
                 "user_plan",
                 "Unknown or N/A")
             manufacturer = "OpenAI"
-            openai_api_key = model_params.get("api_key") \
-                or settings.OPENAI_API_KEY
-            model_name = model_params.get("model_name") \
-                or settings.OPENAI_MODEL
-            model_object = ChatOpenAI(
-                # model="gpt-3.5-turbo"
-                model=model_name,
-                temperature=float(settings.OPENAI_TEMPERATURE),
-                openai_api_key=openai_api_key,
-            )
-            if not model_object:
-                error = "ERROR [GET_MODEL-OAI-020] - ChatOpenAI cannot" + \
-                        " be initialized"
+            # openai_api_key = model_params.get("api_key") \
+            #     or settings.OPENAI_API_KEY
+            # model_name = model_params.get("model_name") \
+            #     or settings.OPENAI_MODEL
+            # model_config = {
+            #     "model": model_name,
+            #     "temperature": float(settings.OPENAI_TEMPERATURE),
+            #     "top_p": int(settings.OPENAI_TOP_P),
+            #     "openai_api_key": openai_api_key,
+            # }
+            # if settings.OPENAI_MAX_TOKENS != "":
+            #     model_config["max_tokens"] = int(settings.OPENAI_MAX_TOKENS)
+            # if settings.AI_STREAMING == "1":
+            #     model_config["streaming"] = True
+            #     model_config["n"] = 1
+            # model_object = ChatOpenAI(**model_config)
+            # if not model_object:
+            #     error = "ERROR [GET_MODEL-OAI-020] - ChatOpenAI cannot" + \
+            #             " be initialized"
+            openai_model = get_openai_api({
+                "provider": manufacturer,
+                "api_key": model_params.get(
+                    "api_key", settings.OPENAI_API_KEY),
+                "model_name": model_params.get(
+                    "model_name", settings.OPENAI_MODEL),
+                "temperature": settings.OPENAI_TEMPERATURE,
+                "top_p": settings.OPENAI_TOP_P,
+                "max_tokens": settings.OPENAI_MAX_TOKENS,
+                "streaming": settings.AI_STREAMING,
+            })
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
 
         # Google Gemini
         if model_type == "gemini" and settings.GOOGLE_API_KEY:
@@ -183,7 +247,7 @@ def get_model(
             model_name = settings.OLLAMA_MODEL
             model_config = {
                 'model': model_name,
-                'temperature': int(settings.OLLAMA_TEMPERATURE),
+                'temperature': float(settings.OLLAMA_TEMPERATURE),
             }
             if settings.OLLAMA_BASE_URL:
                 model_config['base_url'] = settings.OLLAMA_BASE_URL
@@ -400,20 +464,84 @@ def get_model(
             # https://python.langchain.com/api_reference/openai/llms/langchain_openai.llms.base.OpenAI.html
             # https://docs.aimlapi.com/api-overview/model-database/text-models
             manufacturer = "AI/ML API"
-            openai_api_key = model_params.get('api_key') \
-                or settings.AIMLAPI_API_KEY
-            model_name = model_params.get('model_name') \
-                or settings.AIMLAPI_MODEL_NAME
-            model_object = ChatOpenAI(
-                base_url=settings.AIMLAPI_BASE_URL,
-                openai_api_key=openai_api_key,
-                model=model_name,
-                temperature=float(settings.AIMLAPI_TEMPERATURE),
-                max_tokens=int(settings.AIMLAPI_MAX_TOKENS),
-            )
-            if not model_object:
-                error = "ERROR [GET_MODEL-AIMLAPI-010] - AI/ML API with" + \
-                        " ChatOpenAI cannot be initialized"
+            # openai_api_key = model_params.get('api_key') \
+            #     or settings.AIMLAPI_API_KEY
+            # model_name = model_params.get('model_name') \
+            #     or settings.AIMLAPI_MODEL_NAME
+            # model_config = {
+            #     "base_url": settings.AIMLAPI_BASE_URL,
+            #     "openai_api_key": openai_api_key,
+            #     "model": model_name,
+            #     "temperature": float(settings.AIMLAPI_TEMPERATURE),
+            # }
+            # if settings.AIMLAPI_MAX_TOKENS != "":
+            #     model_config["max_tokens"] = int(settings.AIMLAPI_MAX_TOKENS)
+            # if settings.AI_STREAMING == "1":
+            #     model_config["streaming"] = True
+            #     model_config["n"] = 1
+            # model_object = ChatOpenAI(**model_config)
+            # if not model_object:
+            #     error = "ERROR [GET_MODEL-AIMLAPI-010] - AI/ML API with" + \
+            #             " ChatOpenAI cannot be initialized"
+            openai_model = get_openai_api({
+                "provider": manufacturer,
+                "base_url": settings.AIMLAPI_BASE_URL,
+                "api_key": model_params.get(
+                    "api_key", settings.AIMLAPI_API_KEY),
+                "model_name": model_params.get(
+                    "model_name", settings.AIMLAPI_MODEL_NAME),
+                "temperature": settings.AIMLAPI_TEMPERATURE,
+                "top_p": settings.AIMLAPI_TOP_P,
+                "max_tokens": settings.AIMLAPI_MAX_TOKENS,
+                "streaming": settings.AI_STREAMING,
+            })
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
+
+        # Nvidia
+        if model_type == "nvidia":
+            # https://build.nvidia.com/nvidia/llama-3_1-nemotron-70b-instruct
+            manufacturer = "Nvidia"
+            openai_model = get_openai_api({
+                "provider": manufacturer,
+                "base_url": settings.NVIDIA_BASE_URL,
+                "api_key": model_params.get(
+                    "api_key", settings.NVIDIA_API_KEY),
+                "model_name": model_params.get(
+                    "model_name", settings.NVIDIA_MODEL_NAME),
+                "temperature": settings.NVIDIA_TEMPERATURE,
+                "top_p": settings.NVIDIA_TOP_P,
+                "max_tokens": settings.NVIDIA_MAX_TOKENS,
+                "streaming": settings.AI_STREAMING,
+            })
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
+
+        # Rhymes.ai
+        if model_type == "rhymes":
+            # https://lablab.ai/t/aria-api-tutorial
+            manufacturer = "Rhymes.ai"
+            openai_model = get_openai_api({
+                "provider": manufacturer,
+                "base_url": settings.RHYMES_CHAT_BASE_URL,
+                "api_key": model_params.get(
+                    "api_key", settings.RHYMES_CHAT_API_KEY),
+                "model_name": model_params.get(
+                    "model_name", settings.RHYMES_CHAT_MODEL_NAME),
+                "temperature": settings.RHYMES_CHAT_TEMPERATURE,
+                "top_p": settings.RHYMES_CHAT_TOP_P,
+                "max_tokens": settings.RHYMES_CHAT_MAX_TOKENS,
+                "stop": ["<|im_end|>"],
+                "streaming": settings.AI_STREAMING,
+            })
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
 
     except Exception as err:
         error = f"[GET_MODEL-GENEX-010] - {err}"
