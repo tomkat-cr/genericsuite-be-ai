@@ -348,10 +348,12 @@ def get_agent_executor_non_lcel(
     """
     Get the prompt to use and construct the agent executor
     """
+    self_debug = DEBUG or is_under_test()
+    self_debug = True
     settings = Config(cac.app_context)
     agent_executor = None
     memory = None
-    if DEBUG:
+    if self_debug:
         log_debug(f'>>> GET_AGENT_EXECUTOR | agent_type: {agent_type}')
 
     # Agent types
@@ -459,6 +461,8 @@ def get_lcel_chain(
     """
     Get the prompt to use and construct the LCEL chain
     """
+    self_debug = DEBUG or is_under_test()
+    self_debug = True
     settings = Config(cac.app_context)
     model_data = cac.app_context.get_other_data(model_type)
     # If system_msg_permitted is False, the LLM model does not
@@ -468,8 +472,8 @@ def get_lcel_chain(
     # support Tools or Functions caling.
     tools_permitted = model_data["tools_permitted"]
 
-    _ = DEBUG and log_debug('>>> GET_LCEL_CHAIN')
-    _ = DEBUG and log_debug(f'Tools: {tools}')
+    _ = self_debug and log_debug('>>> GET_LCEL_CHAIN')
+    _ = self_debug and log_debug(f'Tools: {tools}')
 
     # 2024-05-21 | For LCEL:
     # https://python.langchain.com/v0.2/docs/how_to/tool_calling/
@@ -499,13 +503,13 @@ def get_lcel_chain(
         new_prompt = build_gs_prompt(get_self_base_prompt(NON_AGENT_PROMPT))
         messages.append(("system", new_prompt,))
     messages.append(MessagesPlaceholder(variable_name="messages"))
-    _ = DEBUG and log_debug('Start call to ChatPromptTemplate.from_messages()')
+    _ = self_debug and log_debug('Start call to ChatPromptTemplate.from_messages()')
     prompt = ChatPromptTemplate.from_messages(messages)
-    _ = DEBUG and log_debug('Start chain = prompt | llm_with_tools')
+    _ = self_debug and log_debug('Start chain = prompt | llm_with_tools')
     # Build a Chatbot
     # https://python.langchain.com/v0.2/docs/tutorials/chatbot/#message-history
     chain = prompt | llm_with_tools
-    _ = DEBUG and log_debug('Return chain')
+    _ = self_debug and log_debug('Return chain')
     return chain
 
 
@@ -532,7 +536,7 @@ def run_lcel_chain(
     Run the LCEL chain and returns the .invoke() results.
     """
     self_debug = DEBUG or is_under_test()
-    # self_debug = True
+    self_debug = True
     agent_executor = agent["agent_executor"]
     tools_dict = get_functions_dict(cac.app_context)
 

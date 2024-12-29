@@ -59,6 +59,9 @@ class Config(ConfigSuperClass):
             # 'LANGCHAIN_DEFAULT_MODEL', 'aimlapi'
             # 'LANGCHAIN_DEFAULT_MODEL', 'nvidia'
             # 'LANGCHAIN_DEFAULT_MODEL', 'rhymes'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'xai'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'together'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'ibm'
         )
 
         self.AI_VISION_TECHNOLOGY = self.get_env(
@@ -225,12 +228,19 @@ class Config(ConfigSuperClass):
         self.OPENAI_API_KEY = self.get_env('OPENAI_API_KEY', '')
 
         self.OPENAI_MODEL = self.get_env(
-            'OPENAI_MODEL_NAME', self.get_env('OPENAI_MODEL', 'gpt-4o-mini')
-            # 'OPENAI_MODEL', 'gpt-3.5-turbo'
-        )
+            'OPENAI_MODEL_NAME',
+            self.get_env(
+                'OPENAI_MODEL',
+                'gpt-4o-mini'
+                # 'gpt-4o'
+                # 'gpt-3.5-turbo'
+            ))
         self.OPENAI_MODEL_PREMIUM = self.get_env(
-            'OPENAI_MODEL_PREMIUM', 'gpt-4o'
-            # 'OPENAI_MODEL_PREMIUM', 'gpt-4-turbo'
+            'OPENAI_MODEL_PREMIUM',
+            'gpt-4o'
+            # "o1-mini"
+            # "o1-preview"
+            # 'gpt-4'
         )
         self.OPENAI_MODEL_INSTRUCT = self.get_env(
             'OPENAI_MODEL_INSTRUCT', 'gpt-3.5-turbo-instruct'
@@ -264,7 +274,8 @@ class Config(ConfigSuperClass):
         )
 
         self.OPENAI_TEMPERATURE = self.get_env('OPENAI_TEMPERATURE', '0.7')
-        self.OPENAI_MAX_TOKENS = self.get_env('OPENAI_MAX_TOKENS', '')  # '1024'
+        self.OPENAI_MAX_TOKENS = \
+            self.get_env('OPENAI_MAX_TOKENS', '')  # '1024'
         self.OPENAI_TOP_P = self.get_env('OPENAI_TOP_P', '1')
 
         # Anthropic credentials and other parameters
@@ -573,6 +584,60 @@ class Config(ConfigSuperClass):
 
         self.RHYMES_VIDEO_CFG_SCALE = self.get_env(
             'RHYMES_VIDEO_CFG_SCALE', "7.5")
+
+        # xAI (ex-Twitter) Grok
+
+        # https://console.x.ai
+        self.XAI_API_KEY = self.get_env(
+            'XAI_API_KEY', "")
+
+        # https://docs.x.ai/api/endpoints#list-models
+        self.XAI_MODEL_NAME = self.get_env(
+            'XAI_MODEL_NAME', "grok-beta"
+        )
+
+        self.XAI_TEMPERATURE = self.get_env(
+            'XAI_TEMPERATURE', '0.5')
+
+        self.XAI_MAX_TOKENS = self.get_env(
+            'XAI_MAX_TOKENS', '')  # '1024'
+
+        self.XAI_TOP_P = self.get_env(
+            'XAI_TOP_P', '1')
+
+        self.XAI_BASE_URL = self.get_env('XAI_BASE_URL', "https://api.x.ai/v1")
+
+        # IBM
+
+        self.IBM_WATSONX_PROJECT_ID = self.get_env('IBM_WATSONX_PROJECT_ID')
+        self.IBM_WATSONX_API_KEY = self.get_env('IBM_WATSONX_API_KEY')
+
+        self.IBM_WATSONX_MODEL_NAME = self.get_env(
+            'IBM_WATSONX_MODEL_NAME', 'meta-llama/llama-3-1-70b-instruct')
+
+        self.IBM_WATSONX_URL = self.get_env(
+            'IBM_WATSONX_URL',
+            "https://us-south.ml.cloud.ibm.com/ml/v1/text/generation?"
+            "version=2023-05-29"
+            # "https://eu-de.ml.cloud.ibm.com/ml/v1/text/generation?"
+            # "version=2023-05-29")
+        )
+
+        # Together AI
+
+        # https://api.together.xyz/settings/api-keys
+        self.TOGETHER_API_KEY = self.get_env('TOGETHER_API_KEY')
+
+        # https://api.together.xyz/models
+        self.TOGETHER_MODEL_NAME = \
+            self.get_env(
+                'TOGETHER_MODEL_NAME',
+                "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
+            )
+
+        self.TOGETHER_TEMPERATURE = self.get_env('TOGETHER_TEMPERATURE')
+        self.TOGETHER_TOP_P = self.get_env('TOGETHER_TOP_P')
+        self.TOGETHER_MAX_TOKENS = self.get_env('TOGETHER_MAX_TOKENS')
 
         # ElevenLabs
 

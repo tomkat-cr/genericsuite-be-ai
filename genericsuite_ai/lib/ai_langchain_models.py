@@ -10,8 +10,8 @@ from langchain_aws import ChatBedrock
 from langchain_groq import ChatGroq
 from langchain_openai import OpenAI
 from langchain_openai import ChatOpenAI
-
 from langchain_ollama import ChatOllama
+from langchain_together import ChatTogether
 from langchain_community.llms import Clarifai
 
 from langchain_core.callbacks import AsyncCallbackHandler
@@ -37,6 +37,7 @@ from genericsuite_ai.lib.huggingface_endpoint import (
 from genericsuite_ai.lib.huggingface_chat_model import (
     GsChatHuggingFace,
 )
+from genericsuite_ai.lib.ibm import IbmWatsonx
 
 DEBUG = False
 
@@ -182,6 +183,8 @@ def get_model(
     error = None
     manufacturer = None
     model_name = None
+    tools_permitted = None
+    need_preamble = None
     pref_agent_type = 'lcel'
     other_data = {}
     try:
@@ -291,8 +294,10 @@ def get_model(
             # https://python.langchain.com/docs/integrations/llms/huggingface_endpoint/
             # https://python.langchain.com/docs/integrations/chat/huggingface/
             #
-            from langchain_huggingface import HuggingFaceEndpoint  # type: ignore[import]
-            from langchain_huggingface import ChatHuggingFace  # type: ignore[import]
+            from langchain_huggingface \
+                import HuggingFaceEndpoint  # type: ignore[import]
+            from langchain_huggingface \
+                import ChatHuggingFace  # type: ignore[import]
             #
             manufacturer = "Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
@@ -543,11 +548,93 @@ def get_model(
             else:
                 model_object = openai_model["model_object"]
 
+        # xAI (ex-Twitter) Grok
+        if model_type == "xai":
+            # https://docs.x.ai/api/integrations#openai-sdk
+            manufacturer = "xAI"
+            model_config = {
+                "provider": manufacturer,
+                "base_url": settings.XAI_BASE_URL,
+                "api_key": model_params.get(
+                    "api_key", settings.XAI_API_KEY),
+                "model_name": model_params.get(
+                    "model_name", settings.XAI_MODEL_NAME),
+                "temperature": settings.XAI_TEMPERATURE,
+                "top_p": settings.XAI_TOP_P,
+                "max_tokens": settings.XAI_MAX_TOKENS,
+                "stop": ["<|im_end|>"],
+                "streaming": settings.AI_STREAMING,
+            }
+            _ = DEBUG and \
+                log_debug(f"GET_MODEL | xAI model_config: {model_config}")
+            openai_model = get_openai_api(model_config)
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
+
+        # IBM watsonx
+        if model_type == "ibm":
+            manufacturer = "IBM watsonx"
+            tools_permitted = False
+            model_name = settings.IBM_WATSONX_MODEL_NAME
+            api_key = settings.IBM_WATSONX_API_KEY
+            project_id = settings.IBM_WATSONX_PROJECT_ID
+            model_url = settings.IBM_WATSONX_URL
+            # n = int(settings.IBM_WATSONX_N)
+            if not api_key:
+                error = "ERROR [GET_MODEL-IBM-010] - Missing" \
+                    " IBM_WATSONX_API_KEY"
+            elif not project_id:
+                error = "ERROR [GET_MODEL-IBM-020] - Missing" \
+                    " IBM_WATSONX_PROJECT_ID"
+            elif not model_url:
+                error = "ERROR [GET_MODEL-IBM-030] - Missing" \
+                    " IBM_WATSONX_URL"
+            elif not model_name:
+                error = "ERROR [GET_MODEL-IBM-040] - Missing" \
+                    " IBM_WATSONX_MODEL_NAME"
+            else:
+                model_object = IbmWatsonx(
+                    model_name=model_name,
+                    api_key=api_key,
+                    project_id=project_id,
+                    model_url=model_url,
+                    # n=n,
+                )
+        # Together
+        if model_type == "together":
+            # https://python.langchain.com/docs/integrations/chat/together/
+            manufacturer = "Together.ai"
+            model_name = model_params.get("model_name") \
+                or settings.TOGETHER_MODEL_NAME
+            api_key = model_params.get("api_key") or settings.TOGETHER_API_KEY
+            if not api_key:
+                error = \
+                    "ERROR [GET_MODEL-GENEX-010] - Missing TOGETHER_API_KEY"
+            else:
+                model_config = {
+                    "together_api_key": api_key,
+                    "model": model_name,
+                    "stop": ["<|eot_id|>", "<|eom_id|>"],
+                }
+                if settings.TOGETHER_TEMPERATURE:
+                    model_config["temperature"] = \
+                        float(settings.TOGETHER_TEMPERATURE)
+                if settings.TOGETHER_TOP_P:
+                    model_config["top_p"] = float(settings.TOGETHER_TOP_P)
+                if settings.TOGETHER_MAX_TOKENS:
+                    model_config["max_tokens"] = \
+                        int(settings.TOGETHER_MAX_TOKENS)
+                model_object = ChatTogether(**model_config)
+
     except Exception as err:
         error = f"[GET_MODEL-GENEX-010] - {err}"
 
     _ = error and log_error(error)
-    need_preamble = get_need_preamble(app_context, model_name)
+
+    need_preamble = need_preamble if need_preamble is not None else \
+        get_need_preamble(app_context, model_name)
     result = {
         "model_type": model_type,
         "model_name": model_name,
@@ -557,7 +644,9 @@ def get_model(
         "pref_agent_type": pref_agent_type,
         "system_msg_permitted": get_system_msg_permitted(
             app_context, model_name),
-        "tools_permitted": get_tools_permitted(app_context, model_name),
+        "tools_permitted":
+            tools_permitted if tools_permitted is not None else
+            get_tools_permitted(app_context, model_name),
         "need_preamble": need_preamble,
         "preamble_model":
             get_preamble_model(app_context, model_name)

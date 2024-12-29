@@ -21,6 +21,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ---
 
 ### New
+Implement Together AI provider and models [GS-158].
+Implement xAI Grok model [GS-157].
+Implement IBM watsonx provider [GS-155].
+Implement generic Langchain model abstract interface [GS-155].
 Implement Nvidia API / NIM / Nemotron [GS-93].
 Implement Rhymes.ai Aria chat model [GS-152].
 Implement Rhymes.ai Allegro video generation model [GS-153].
