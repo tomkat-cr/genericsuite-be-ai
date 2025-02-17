@@ -17,7 +17,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## 0.1.12 (2024-10-29)
+## Unreleased
+## 0.1.12 (2025-02-17)
 ---
 
 ### New
@@ -36,7 +37,8 @@ Add OPENAI_TOP_P to configure top_p parameter in OpenAI chat model.
 
 ### Changes
 Change "black-forest-labs/FLUX.1-schnell" image generation model by default.
-Change OPENAI_MAX_TOKENS and AIMLAPI_MAX_TOKENS to have '' by default to get the maximun tokens possible.
+Change OPENAI_MAX_TOKENS and AIMLAPI_MAX_TOKENS to have '' by default to get the maximun tokens possible [GS-157].
+Change "grok-beta" changed to "grok-2" as default model for xAI [GS-157].
 
 ### Fixes
 Fix: the "ValueError: invalid literal for int() with base 10: ''" error in get_vision_response() when OPENAI_MAX_TOKENS is empty [GS-152].

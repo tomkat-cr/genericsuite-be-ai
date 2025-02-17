@@ -591,9 +591,9 @@ class Config(ConfigSuperClass):
         self.XAI_API_KEY = self.get_env(
             'XAI_API_KEY', "")
 
-        # https://docs.x.ai/api/endpoints#list-models
+        # https://docs.x.ai/docs/models?cluster=us-east-1
         self.XAI_MODEL_NAME = self.get_env(
-            'XAI_MODEL_NAME', "grok-beta"
+            'XAI_MODEL_NAME', "grok-2"
         )
 
         self.XAI_TEMPERATURE = self.get_env(
