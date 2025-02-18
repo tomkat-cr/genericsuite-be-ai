@@ -572,6 +572,9 @@ class Config(ConfigSuperClass):
         self.RHYMES_VIDEO_API_KEY = self.get_env(
             'RHYMES_VIDEO_API_KEY', "")
 
+        self.RHYMES_VIDEO_MODEL_NAME = self.get_env(
+            'RHYMES_VIDEO_MODEL_NAME', "allegro")
+
         # Reference:
         # https://github.com/rhymes-ai/Allegro
         self.RHYMES_VIDEO_BASE_URL = self.get_env(

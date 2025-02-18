@@ -28,10 +28,10 @@ Implement IBM watsonx provider [GS-155].
 Implement generic Langchain model abstract interface [GS-155].
 Implement Nvidia API / NIM / Nemotron [GS-93].
 Implement Rhymes.ai Aria chat model [GS-152].
-Implement Rhymes.ai Allegro video generation model [GS-153].
+Implement Rhymes.ai Allegro video generation model (only configuration) [GS-153].
 Add AI_STREAMING envvar to configure the Streaming response method [GS-32].
 Add NVIDIA_API_KEY, NVIDIA_MODEL_NAME, NVIDIA_TEMPERATURE, NVIDIA_MAX_TOKENS, NVIDIA_TOP_P, and NVIDIA_BASE_URL envvars [GS-93].
-Add RHYMES_CHAT_API_KEY, RHYMES_CHAT_MODEL_NAME, RHYMES_CHAT_TEMPERATURE, RHYMES_CHAT_MAX_TOKENS, RHYMES_CHAT_TOP_P, RHYMES_CHAT_BASE_URL, RHYMES_VIDEO_BASE_URL, RHYMES_VIDEO_NUM_STEP, and RHYMES_VIDEO_CFG_SCALE envvars [GS-152].
+Add RHYMES_CHAT_API_KEY, RHYMES_CHAT_MODEL_NAME, RHYMES_CHAT_TEMPERATURE, RHYMES_CHAT_MAX_TOKENS, RHYMES_CHAT_TOP_P, RHYMES_CHAT_BASE_URL, RHYMES_VIDEO_API_KEY, RHYMES_VIDEO_MODEL_NAME, RHYMES_VIDEO_BASE_URL, RHYMES_VIDEO_NUM_STEP, and RHYMES_VIDEO_CFG_SCALE envvars [GS-152].
 Add AIMLAPI_TOP_P to configure top_p parameter in AI/ML API [GS-138].
 Add OPENAI_TOP_P to configure top_p parameter in OpenAI chat model.
 
