@@ -17,8 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## Unreleased
-## 0.1.12 (2025-02-17)
+## 0.1.12 (2025-02-19)
 ---
 
 ### New
@@ -41,7 +40,9 @@ Change OPENAI_MAX_TOKENS and AIMLAPI_MAX_TOKENS to have '' by default to get the
 Change "grok-beta" changed to "grok-2" as default model for xAI [GS-157].
 
 ### Fixes
-Fix: the "ValueError: invalid literal for int() with base 10: ''" error in get_vision_response() when OPENAI_MAX_TOKENS is empty [GS-152].
+Fix the "ValueError: invalid literal for int() with base 10: ''" error in get_vision_response() when OPENAI_MAX_TOKENS is empty [GS-152].
+Fix poetry 2.x "The option --no-update does not exist" error message [FA-84].
+Fix "'License :: OSI Approved :: ISC License' is not a valid classifier" error running "python3 -m twine upload dist/*" [FA-84].
 
 
 ## 0.1.11 (2024-10-17)

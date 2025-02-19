@@ -19,7 +19,7 @@ from genericsuite_ai.lib.ai_langchain_models_abstract import CustomLLM as LLM
 from genericsuite.util.app_logger import log_debug
 
 
-DEBUG = True
+DEBUG = False
 
 
 class IbmWatsonx(LLM):

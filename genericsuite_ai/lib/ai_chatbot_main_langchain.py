@@ -349,7 +349,7 @@ def get_agent_executor_non_lcel(
     Get the prompt to use and construct the agent executor
     """
     self_debug = DEBUG or is_under_test()
-    self_debug = True
+    # self_debug = True
     settings = Config(cac.app_context)
     agent_executor = None
     memory = None
@@ -462,7 +462,7 @@ def get_lcel_chain(
     Get the prompt to use and construct the LCEL chain
     """
     self_debug = DEBUG or is_under_test()
-    self_debug = True
+    # self_debug = True
     settings = Config(cac.app_context)
     model_data = cac.app_context.get_other_data(model_type)
     # If system_msg_permitted is False, the LLM model does not
@@ -536,7 +536,7 @@ def run_lcel_chain(
     Run the LCEL chain and returns the .invoke() results.
     """
     self_debug = DEBUG or is_under_test()
-    self_debug = True
+    # self_debug = True
     agent_executor = agent["agent_executor"]
     tools_dict = get_functions_dict(cac.app_context)
 
