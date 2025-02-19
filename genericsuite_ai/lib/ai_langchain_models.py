@@ -195,25 +195,6 @@ def get_model(
                 "user_plan",
                 "Unknown or N/A")
             manufacturer = "OpenAI"
-            # openai_api_key = model_params.get("api_key") \
-            #     or settings.OPENAI_API_KEY
-            # model_name = model_params.get("model_name") \
-            #     or settings.OPENAI_MODEL
-            # model_config = {
-            #     "model": model_name,
-            #     "temperature": float(settings.OPENAI_TEMPERATURE),
-            #     "top_p": int(settings.OPENAI_TOP_P),
-            #     "openai_api_key": openai_api_key,
-            # }
-            # if settings.OPENAI_MAX_TOKENS != "":
-            #     model_config["max_tokens"] = int(settings.OPENAI_MAX_TOKENS)
-            # if settings.AI_STREAMING == "1":
-            #     model_config["streaming"] = True
-            #     model_config["n"] = 1
-            # model_object = ChatOpenAI(**model_config)
-            # if not model_object:
-            #     error = "ERROR [GET_MODEL-OAI-020] - ChatOpenAI cannot" + \
-            #             " be initialized"
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "api_key": model_params.get(
@@ -469,25 +450,6 @@ def get_model(
             # https://python.langchain.com/api_reference/openai/llms/langchain_openai.llms.base.OpenAI.html
             # https://docs.aimlapi.com/api-overview/model-database/text-models
             manufacturer = "AI/ML API"
-            # openai_api_key = model_params.get('api_key') \
-            #     or settings.AIMLAPI_API_KEY
-            # model_name = model_params.get('model_name') \
-            #     or settings.AIMLAPI_MODEL_NAME
-            # model_config = {
-            #     "base_url": settings.AIMLAPI_BASE_URL,
-            #     "openai_api_key": openai_api_key,
-            #     "model": model_name,
-            #     "temperature": float(settings.AIMLAPI_TEMPERATURE),
-            # }
-            # if settings.AIMLAPI_MAX_TOKENS != "":
-            #     model_config["max_tokens"] = int(settings.AIMLAPI_MAX_TOKENS)
-            # if settings.AI_STREAMING == "1":
-            #     model_config["streaming"] = True
-            #     model_config["n"] = 1
-            # model_object = ChatOpenAI(**model_config)
-            # if not model_object:
-            #     error = "ERROR [GET_MODEL-AIMLAPI-010] - AI/ML API with" + \
-            #             " ChatOpenAI cannot be initialized"
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "base_url": settings.AIMLAPI_BASE_URL,

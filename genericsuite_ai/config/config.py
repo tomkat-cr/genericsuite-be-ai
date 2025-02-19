@@ -46,7 +46,7 @@ class Config(ConfigSuperClass):
         )
 
         self.LANGCHAIN_DEFAULT_MODEL = self.get_env(
-            'LANGCHAIN_DEFAULT_MODEL', 'chat_openai'
+            'LANGCHAIN_DEFAULT_MODEL', 'openai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'anthropic'
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_remote' # gs_huggingface
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface'

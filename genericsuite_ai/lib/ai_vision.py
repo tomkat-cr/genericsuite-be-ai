@@ -268,34 +268,6 @@ def get_vision_response(response: dict, other: dict) -> dict:
         else:
             # OpenAI by default...
             openai_api_key = billing.get_openai_api_key()
-            # if not openai_api_key:
-            #     response['error'] = True
-            #     response['error_message'] = \
-            #         "OpenAI API key is not configured [IAIG-E020]"
-            #     return response
-            # client = OpenAI(
-            #     api_key=openai_api_key
-            # )
-            # # Process the question and image
-            # model_config = {
-            #     "model": settings.OPENAI_VISION_MODEL,
-            #     "messages": [{
-            #         "role": "user",
-            #         "content": response["question"],
-            #     }],
-            # }
-            # if max_tokens:
-            #     model_config["max_tokens"] = max_tokens
-            # if settings.OPENAI_TEMPERATURE:
-            #     model_config["temperature"] = \
-            #         float(settings.OPENAI_TEMPERATURE)
-            # vision_response = client.chat.completions.create(
-            #     # model="gpt-4-vision-preview",
-            #     **model_config,
-            # )
-            # log_debug("get_vision_response | OpenAI GPT Vision" +
-            #           f" response: {vision_response}")
-            # response['response'] = vision_response.choices[0].message.content
             model_params = {
                 "provider": "OpenAI",
                 "api_key": openai_api_key,

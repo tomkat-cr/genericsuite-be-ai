@@ -33,11 +33,14 @@ Add NVIDIA_API_KEY, NVIDIA_MODEL_NAME, NVIDIA_TEMPERATURE, NVIDIA_MAX_TOKENS, NV
 Add RHYMES_CHAT_API_KEY, RHYMES_CHAT_MODEL_NAME, RHYMES_CHAT_TEMPERATURE, RHYMES_CHAT_MAX_TOKENS, RHYMES_CHAT_TOP_P, RHYMES_CHAT_BASE_URL, RHYMES_VIDEO_API_KEY, RHYMES_VIDEO_MODEL_NAME, RHYMES_VIDEO_BASE_URL, RHYMES_VIDEO_NUM_STEP, and RHYMES_VIDEO_CFG_SCALE envvars [GS-152].
 Add AIMLAPI_TOP_P to configure top_p parameter in AI/ML API [GS-138].
 Add OPENAI_TOP_P to configure top_p parameter in OpenAI chat model.
+Add CustomLLM abstract class for LangChain to implement new LLM providers not implemented in LangChain yet [GS-155]. 
 
 ### Changes
 Change "black-forest-labs/FLUX.1-schnell" image generation model by default.
-Change OPENAI_MAX_TOKENS and AIMLAPI_MAX_TOKENS to have '' by default to get the maximun tokens possible [GS-157].
+Change OPENAI_MAX_TOKENS and AIMLAPI_MAX_TOKENS to have '' by default to get the maximum tokens possible [GS-157].
 Change "grok-beta" changed to "grok-2" as default model for xAI [GS-157].
+Change "openai" instead of "openai_chat" to get the default OpenAI provider in the LANGCHAIN_DEFAULT_MODEL parameter.
+"get_openai_api()" function was added to standarize LLM client creation for providers compatible with the OpenAI completions API [GS-157].
 
 ### Fixes
 Fix the "ValueError: invalid literal for int() with base 10: ''" error in get_vision_response() when OPENAI_MAX_TOKENS is empty [GS-152].
