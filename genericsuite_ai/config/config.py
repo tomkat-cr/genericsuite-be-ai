@@ -46,7 +46,7 @@ class Config(ConfigSuperClass):
         )
 
         self.LANGCHAIN_DEFAULT_MODEL = self.get_env(
-            'LANGCHAIN_DEFAULT_MODEL', 'chat_openai'
+            'LANGCHAIN_DEFAULT_MODEL', 'openai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'anthropic'
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_remote' # gs_huggingface
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface'
@@ -57,10 +57,16 @@ class Config(ConfigSuperClass):
             # 'LANGCHAIN_DEFAULT_MODEL', 'bedrock'
             # 'LANGCHAIN_DEFAULT_MODEL', 'ollama'
             # 'LANGCHAIN_DEFAULT_MODEL', 'aimlapi'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'nvidia'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'rhymes'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'xai'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'together'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'ibm'
         )
 
         self.AI_VISION_TECHNOLOGY = self.get_env(
             'AI_VISION_TECHNOLOGY', 'openai'
+            # 'AI_VISION_TECHNOLOGY', 'rhymes'
             # 'AI_VISION_TECHNOLOGY', 'gemini'
             # 'AI_VISION_TECHNOLOGY', 'clarifai'
         )
@@ -125,6 +131,11 @@ class Config(ConfigSuperClass):
 
         self.AI_PREAMBLE_MODEL_CUSTOM_CONF = self.get_env(
             'AI_PREAMBLE_MODEL_CUSTOM_CONF', ''
+        )
+
+        self.AI_STREAMING = self.get_env(
+            # 'AI_STREAMING', '1'  # Streaming response method
+            'AI_STREAMING', '0'  # Wait-until-finished response method
         )
 
         self.AI_ADDITIONAL_MODELS = self.get_env(
@@ -217,12 +228,19 @@ class Config(ConfigSuperClass):
         self.OPENAI_API_KEY = self.get_env('OPENAI_API_KEY', '')
 
         self.OPENAI_MODEL = self.get_env(
-            'OPENAI_MODEL_NAME', self.get_env('OPENAI_MODEL', 'gpt-4o-mini')
-            # 'OPENAI_MODEL', 'gpt-3.5-turbo'
-        )
+            'OPENAI_MODEL_NAME',
+            self.get_env(
+                'OPENAI_MODEL',
+                'gpt-4o-mini'
+                # 'gpt-4o'
+                # 'gpt-3.5-turbo'
+            ))
         self.OPENAI_MODEL_PREMIUM = self.get_env(
-            'OPENAI_MODEL_PREMIUM', 'gpt-4o'
-            # 'OPENAI_MODEL_PREMIUM', 'gpt-4-turbo'
+            'OPENAI_MODEL_PREMIUM',
+            'gpt-4o'
+            # "o1-mini"
+            # "o1-preview"
+            # 'gpt-4'
         )
         self.OPENAI_MODEL_INSTRUCT = self.get_env(
             'OPENAI_MODEL_INSTRUCT', 'gpt-3.5-turbo-instruct'
@@ -256,7 +274,9 @@ class Config(ConfigSuperClass):
         )
 
         self.OPENAI_TEMPERATURE = self.get_env('OPENAI_TEMPERATURE', '0.7')
-        self.OPENAI_MAX_TOKENS = self.get_env('OPENAI_MAX_TOKENS', '500')
+        self.OPENAI_MAX_TOKENS = \
+            self.get_env('OPENAI_MAX_TOKENS', '')  # '1024'
+        self.OPENAI_TOP_P = self.get_env('OPENAI_TOP_P', '1')
 
         # Anthropic credentials and other parameters
 
@@ -342,8 +362,8 @@ class Config(ConfigSuperClass):
 
         self.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL = self.get_env(
             'HUGGINGFACE_DEFAULT_IMG_GEN_MODEL',
-            # "black-forest-labs/FLUX.1-schnell"
-            "black-forest-labs/FLUX.1-dev"
+            "black-forest-labs/FLUX.1-schnell"
+            # "black-forest-labs/FLUX.1-dev"
         )
 
         # HF Embeddings
@@ -477,16 +497,150 @@ class Config(ConfigSuperClass):
         self.AIMLAPI_TEMPERATURE = self.get_env(
             'AIMLAPI_TEMPERATURE', '1')
 
+        self.AIMLAPI_TOP_P = self.get_env(
+            'AIMLAPI_TOP_P', '')
+
         self.AIMLAPI_MAX_TOKENS = self.get_env(
             'AIMLAPI_MAX_TOKENS',
             # "o1-preview" model supports at most 32768 completion tokens
-            '32768'
+            ''  # '32768'
         )
 
         self.AIMLAPI_BASE_URL = self.get_env(
             'AIMLAPI_BASE_URL',
             "https://api.aimlapi.com/"
         )
+
+        # Nvidia
+
+        self.NVIDIA_API_KEY = self.get_env('NVIDIA_API_KEY', "")
+
+        # Reference:
+        # https://build.nvidia.com/nvidia/llama-3_1-nemotron-70b-instruct
+        self.NVIDIA_MODEL_NAME = self.get_env(
+            'NVIDIA_MODEL_NAME',
+            "nvidia/llama-3.1-nemotron-70b-instruct"
+        )
+
+        self.NVIDIA_TEMPERATURE = self.get_env(
+            'NVIDIA_TEMPERATURE', '0.5')
+
+        self.NVIDIA_MAX_TOKENS = self.get_env(
+            'NVIDIA_MAX_TOKENS',
+            ''  # '1024'
+        )
+
+        self.NVIDIA_TOP_P = self.get_env(
+            'NVIDIA_TOP_P',
+            '1'
+        )
+
+        self.NVIDIA_BASE_URL = self.get_env(
+            'NVIDIA_BASE_URL',
+            "https://integrate.api.nvidia.com/v1"
+        )
+
+        # Rhymes.ai
+
+        # Rhymes.ai Aria: Text and image Chat
+
+        self.RHYMES_CHAT_API_KEY = self.get_env(
+            'RHYMES_CHAT_API_KEY', "")
+
+        # Reference:
+        # https://github.com/rhymes-ai/Aria
+        self.RHYMES_CHAT_MODEL_NAME = self.get_env(
+            'RHYMES_CHAT_MODEL_NAME', "aria"
+        )
+
+        self.RHYMES_CHAT_TEMPERATURE = self.get_env(
+            'RHYMES_CHAT_TEMPERATURE', '0.5')
+
+        self.RHYMES_CHAT_MAX_TOKENS = self.get_env(
+            'RHYMES_CHAT_MAX_TOKENS', '')  # '1024'
+
+        self.RHYMES_CHAT_TOP_P = self.get_env(
+            'RHYMES_CHAT_TOP_P', '1')
+
+        self.RHYMES_CHAT_BASE_URL = self.get_env(
+            'RHYMES_CHAT_BASE_URL',
+            "https://api.rhymes.ai/v1"
+        )
+
+        # Rhymes.ai Allegro: Video Generation
+
+        self.RHYMES_VIDEO_API_KEY = self.get_env(
+            'RHYMES_VIDEO_API_KEY', "")
+
+        self.RHYMES_VIDEO_MODEL_NAME = self.get_env(
+            'RHYMES_VIDEO_MODEL_NAME', "allegro")
+
+        # Reference:
+        # https://github.com/rhymes-ai/Allegro
+        self.RHYMES_VIDEO_BASE_URL = self.get_env(
+            'RHYMES_VIDEO_BASE_URL',
+            "https://api.rhymes.ai/v1/generateVideoSyn"
+        )
+
+        self.RHYMES_VIDEO_NUM_STEP = self.get_env(
+            'RHYMES_VIDEO_NUM_STEP', "50")
+
+        self.RHYMES_VIDEO_CFG_SCALE = self.get_env(
+            'RHYMES_VIDEO_CFG_SCALE', "7.5")
+
+        # xAI (ex-Twitter) Grok
+
+        # https://console.x.ai
+        self.XAI_API_KEY = self.get_env(
+            'XAI_API_KEY', "")
+
+        # https://docs.x.ai/docs/models?cluster=us-east-1
+        self.XAI_MODEL_NAME = self.get_env(
+            'XAI_MODEL_NAME', "grok-2"
+        )
+
+        self.XAI_TEMPERATURE = self.get_env(
+            'XAI_TEMPERATURE', '0.5')
+
+        self.XAI_MAX_TOKENS = self.get_env(
+            'XAI_MAX_TOKENS', '')  # '1024'
+
+        self.XAI_TOP_P = self.get_env(
+            'XAI_TOP_P', '1')
+
+        self.XAI_BASE_URL = self.get_env('XAI_BASE_URL', "https://api.x.ai/v1")
+
+        # IBM
+
+        self.IBM_WATSONX_PROJECT_ID = self.get_env('IBM_WATSONX_PROJECT_ID')
+        self.IBM_WATSONX_API_KEY = self.get_env('IBM_WATSONX_API_KEY')
+
+        self.IBM_WATSONX_MODEL_NAME = self.get_env(
+            'IBM_WATSONX_MODEL_NAME', 'meta-llama/llama-3-1-70b-instruct')
+
+        self.IBM_WATSONX_URL = self.get_env(
+            'IBM_WATSONX_URL',
+            "https://us-south.ml.cloud.ibm.com/ml/v1/text/generation?"
+            "version=2023-05-29"
+            # "https://eu-de.ml.cloud.ibm.com/ml/v1/text/generation?"
+            # "version=2023-05-29")
+        )
+
+        # Together AI
+
+        # https://api.together.xyz/settings/api-keys
+        self.TOGETHER_API_KEY = self.get_env('TOGETHER_API_KEY')
+
+        # https://api.together.xyz/models
+        self.TOGETHER_MODEL_NAME = \
+            self.get_env(
+                'TOGETHER_MODEL_NAME',
+                "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo"
+            )
+
+        self.TOGETHER_TEMPERATURE = self.get_env('TOGETHER_TEMPERATURE')
+        self.TOGETHER_TOP_P = self.get_env('TOGETHER_TOP_P')
+        self.TOGETHER_MAX_TOKENS = self.get_env('TOGETHER_MAX_TOKENS')
 
         # ElevenLabs
 

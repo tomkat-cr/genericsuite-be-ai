@@ -156,6 +156,51 @@ def get_vision_name() -> str:
     return model_name
 
 
+def get_openai_api_response(model_params: dict) -> dict:
+    """
+    Returns the OpenAI API response for a vision request
+    """
+    response = get_default_resultset()
+    # Initialize the OpenAI client
+    if not model_params.get("api_key"):
+        response['error'] = True
+        response['error_message'] = \
+            f"{model_params.get('provider', 'N/A')} " + \
+            "API key is not configured [IAIG-E020]"
+        return response
+    client_config = {
+        "api_key": model_params["api_key"],
+    }
+    for key in ["base_url"]:
+        if model_params.get(key):
+            client_config[key] = model_params[key]
+    client = OpenAI(**client_config)
+    # Prepare the OpenAI API request
+    model_config = {
+        "model": model_params["model_name"],
+        "messages": [{
+            "role": "user",
+            "content": model_params["question"],
+        }],
+    }
+    for key in ["temperature"]:
+        if model_params.get(key):
+            model_config[key] = float(model_params[key])
+    for key in ["top_p", "max_tokens"]:
+        if model_params.get(key):
+            model_config[key] = int(model_params[key])
+    # Process the question and image
+    vision_response = client.chat.completions.create(
+        # model="gpt-4-vision-preview",
+        **model_config,
+    )
+    log_debug("get_vision_response | " +
+              f"{model_params.get('provider', 'N/A')} " +
+              f"  Vision response: {vision_response}")
+    response['response'] = vision_response.choices[0].message.content
+    return response
+
+
 def get_vision_response(response: dict, other: dict) -> dict:
     """ Returns the Vision configured technology response """
 
@@ -163,23 +208,32 @@ def get_vision_response(response: dict, other: dict) -> dict:
     billing = BillingUtilities(cac.get())
     # Maximun tokens to be used by the model. Defaults to 500.
     max_tokens = get_default_value("max_tokens", other,
-                                   int(settings.OPENAI_MAX_TOKENS))
+                                   settings.OPENAI_MAX_TOKENS)
+    if max_tokens:
+        max_tokens = int(max_tokens)
     log_debug("get_vision_response | AI_VISION_TECHNOLOGY:" +
               f" {settings.AI_VISION_TECHNOLOGY}")
     try:
         if settings.AI_VISION_TECHNOLOGY == "gemini":
+            model_config = {
+                "model": settings.GOOGLE_VISION_MODEL,
+                "google_api_key": settings.GOOGLE_API_KEY,
+            }
+            if max_tokens:
+                model_config["max_output_tokens"] = max_tokens
+            if settings.OPENAI_TEMPERATURE:
+                model_config["temperature"] = \
+                    float(settings.OPENAI_TEMPERATURE)
             client = ChatGoogleGenerativeAI(
                 # model="gemini-pro-vision"
-                model=settings.GOOGLE_VISION_MODEL,
-                google_api_key=settings.GOOGLE_API_KEY,
-                max_output_tokens=max_tokens,
-                temperature=float(settings.OPENAI_TEMPERATURE),
+                **model_config,
             )
             vision_response = client.invoke([
                 HumanMessage(content=response["question"])
             ])
             log_debug(f"Google Gemini Vision response: {vision_response}")
             response['response'] = vision_response.content
+
         elif settings.AI_VISION_TECHNOLOGY == "clarifai":
             vision_response = clarifai_vision(
                 image_url=response["question"][1]["image_url"],
@@ -192,31 +246,44 @@ def get_vision_response(response: dict, other: dict) -> dict:
                 response['error_message'] = vision_response["error_message"]
             else:
                 response['response'] = vision_response["resultset"]
-        else:
-            # Open the client
-            openai_api_key = billing.get_openai_api_key()
-            if not openai_api_key:
+
+        elif settings.AI_VISION_TECHNOLOGY == "rhymes":
+            model_params = {
+                "provider": "Rhymes",
+                "api_key": settings.RHYMES_CHAT_API_KEY,
+                "model_name": settings.RHYMES_CHAT_MODEL_NAME,
+                "base_url": settings.RHYMES_CHAT_BASE_URL,
+                "question": response["question"],
+                "temperature": settings.RHYMES_CHAT_TEMPERATURE,
+                "top_p": settings.RHYMES_CHAT_TOP_P,
+                "max_tokens": settings.RHYMES_CHAT_MAX_TOKENS,
+            }
+            model_response = get_openai_api_response(model_params)
+            if model_response["error"]:
                 response['error'] = True
-                response['error_message'] = \
-                    "OpenAI API key is not configured [IAIG-E020]"
-                return response
-            client = OpenAI(
-                api_key=openai_api_key
-            )
-            # Process the question and image
-            vision_response = client.chat.completions.create(
-                # model="gpt-4-vision-preview",
-                model=settings.OPENAI_VISION_MODEL,
-                messages=[{
-                    "role": "user",
-                    "content": response["question"],
-                }],
-                max_tokens=max_tokens,
-                temperature=float(settings.OPENAI_TEMPERATURE),
-            )
-            log_debug("get_vision_response | OpenAI GPT Vision" +
-                      f" response: {vision_response}")
-            response['response'] = vision_response.choices[0].message.content
+                response['error_message'] = model_response["error_message"]
+            else:
+                response['response'] = model_response["response"]
+
+        else:
+            # OpenAI by default...
+            openai_api_key = billing.get_openai_api_key()
+            model_params = {
+                "provider": "OpenAI",
+                "api_key": openai_api_key,
+                "model_name": settings.OPENAI_VISION_MODEL,
+                "question": response["question"],
+                "temperature": settings.OPENAI_TEMPERATURE,
+                "top_p": settings.OPENAI_TOP_P,
+                "max_tokens": max_tokens,
+            }
+            model_response = get_openai_api_response(model_params)
+            if model_response["error"]:
+                response['error'] = True
+                response['error_message'] = model_response["error_message"]
+            else:
+                response['response'] = model_response["response"]
+
     except Exception as error:
         response['error'] = True
         response['error_message'] = f"ERROR [IAGV-010]: {str(error)}"

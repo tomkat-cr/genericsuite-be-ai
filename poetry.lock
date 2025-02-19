@@ -1971,6 +1971,23 @@ files = [
 langchain-core = ">=0.3.0,<0.4.0"
 
 [[package]]
+name = "langchain-together"
+version = "0.2.0"
+description = "An integration package connecting Together AI and LangChain"
+optional = false
+python-versions = "<4.0,>=3.9"
+files = [
+    {file = "langchain_together-0.2.0-py3-none-any.whl", hash = "sha256:6ed3c20804d9d437bacfb5b494a85c0a8aca0eca223cc2575b5d368420ca2c9f"},
+    {file = "langchain_together-0.2.0.tar.gz", hash = "sha256:39656451179e9c10dffa3a84642855d3ca23f7c01848953765adc30b08d276cc"},
+]
+
+[package.dependencies]
+aiohttp = ">=3.9.1,<4.0.0"
+langchain-core = ">=0.3,<0.4"
+langchain-openai = ">=0.2,<0.3"
+requests = ">=2,<3"
+
+[[package]]
 name = "langsmith"
 version = "0.1.125"
 description = "Client library to connect to the LangSmith LLM Tracing and Evaluation Platform."
@@ -4289,4 +4306,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4.0"
-content-hash = "98fb48fb8394da38567af797101960dfb6f4034c49656803248b537d619cac81"
+content-hash = "48f97baa24ae17d02f8ec74dc3399603aac0893564ed35486cf1e5f12a6989b2"

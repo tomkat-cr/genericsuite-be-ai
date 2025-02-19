@@ -12,12 +12,14 @@ requirements:
 	poetry export -f requirements.txt --output requirements.txt --without-hashes
 
 lock-rebuild:
-	poetry lock --no-update
+	poetry lock
+	# poetry lock --no-update
 	poetry install --sync
 
 build:
 	# Build 'dist' directory needed for the Pypi publish
-	poetry lock --no-update
+	poetry lock
+	# poetry lock --no-update
 	rm -rf dist
 	python3 -m build
 
