@@ -53,6 +53,7 @@ class Config(ConfigSuperClass):
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_pipeline'
             # 'LANGCHAIN_DEFAULT_MODEL', 'groq'
             # 'LANGCHAIN_DEFAULT_MODEL', 'gemini'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'vertexai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'clarifai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'bedrock'
             # 'LANGCHAIN_DEFAULT_MODEL', 'ollama'
@@ -61,6 +62,7 @@ class Config(ConfigSuperClass):
             # 'LANGCHAIN_DEFAULT_MODEL', 'rhymes'
             # 'LANGCHAIN_DEFAULT_MODEL', 'xai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'together'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'openrouter'
             # 'LANGCHAIN_DEFAULT_MODEL', 'ibm'
         )
 
@@ -210,20 +212,9 @@ class Config(ConfigSuperClass):
             'LANGCHAIN_USE_LANGSMITH_HUB', '0'
         )
 
-        # Google credentials and other parameters
-
-        self.GOOGLE_API_KEY = self.get_env('GOOGLE_API_KEY', '')
-        self.GOOGLE_CSE_ID = self.get_env('GOOGLE_CSE_ID', '')
-        self.GOOGLE_MODEL = self.get_env('GOOGLE_MODEL', 'gemini-pro')
-        self.GOOGLE_VISION_MODEL = self.get_env(
-            'GOOGLE_VISION_MODEL', 'gemini-pro-vision'
-        )
-        self.GOOGLE_IMG_GEN_MODEL = self.get_env(
-            # 'GOOGLE_IMG_GEN_MODEL', 'gemini-pro-vision'
-            'GOOGLE_IMG_GEN_MODEL', 'imagegeneration@005'
-        )
-
-        # OpenAI credentials and other parameters
+        # ...
+        # OpenAI
+        # ...
 
         self.OPENAI_API_KEY = self.get_env('OPENAI_API_KEY', '')
 
@@ -243,7 +234,8 @@ class Config(ConfigSuperClass):
             # 'gpt-4'
         )
         self.OPENAI_MODEL_INSTRUCT = self.get_env(
-            'OPENAI_MODEL_INSTRUCT', 'gpt-3.5-turbo-instruct'
+            'OPENAI_MODEL_INSTRUCT', 'gpt-4o-mini'
+            # 'OPENAI_MODEL_INSTRUCT', 'gpt-3.5-turbo-instruct'
         )
         self.OPENAI_VISION_MODEL = self.get_env(
             'OPENAI_VISION_MODEL', 'gpt-4o'
@@ -273,18 +265,75 @@ class Config(ConfigSuperClass):
             # TODO implement this param
         )
 
+        # Model settings
+
         self.OPENAI_TEMPERATURE = self.get_env('OPENAI_TEMPERATURE', '0.7')
+
         self.OPENAI_MAX_TOKENS = \
             self.get_env('OPENAI_MAX_TOKENS', '')  # '1024'
+
         self.OPENAI_TOP_P = self.get_env('OPENAI_TOP_P', '1')
 
-        # Anthropic credentials and other parameters
+        # ...
+        # Google API
+        # ...
+
+        self.GOOGLE_CSE_ID = self.get_env('GOOGLE_CSE_ID', '')
+
+        self.GOOGLE_API_KEY = self.get_env('GOOGLE_API_KEY', '')
+
+        self.GOOGLE_MODEL = self.get_env('GOOGLE_MODEL', 'gemini-pro')
+
+        self.GOOGLE_VISION_MODEL = self.get_env(
+            'GOOGLE_VISION_MODEL', 'gemini-pro-vision'
+        )
+
+        self.GOOGLE_IMG_GEN_MODEL = self.get_env(
+            # 'GOOGLE_IMG_GEN_MODEL', 'gemini-pro-vision'
+            'GOOGLE_IMG_GEN_MODEL', 'imagegeneration@005'
+        )
+
+        # ...
+        # Google Vertex AI
+        # ...
+
+        self.GOOGLE_CLOUD_PROJECT = self.get_env('GOOGLE_CLOUD_PROJECT')
+
+        self.GOOGLE_CLOUD_LOCATION = self.get_env('GOOGLE_CLOUD_LOCATION',
+                                                  'us-central1')
+
+        self.GOOGLE_APPLICATION_CREDENTIALS = self.get_env(
+            'GOOGLE_APPLICATION_CREDENTIALS', None
+            # 'GOOGLE_APPLICATION_CREDENTIALS', "service_account.json"
+        )
+
+        # Reference:
+        # https://console.cloud.google.com/vertex-ai/studio/freeform
+        self.VERTEXAI_MODEL = self.get_env(
+            'VERTEXAI_MODEL', 'gemini-2.0-flash-001'
+        )
+
+        self.VERTEXAI_TEMPERATURE = self.get_env('VERTEXAI_TEMPERATURE', '0')
+
+        self.VERTEXAI_MAX_TOKENS = \
+            self.get_env('VERTEXAI_MAX_TOKENS', '')
+
+        self.VERTEXAI_MAX_RETRIES = \
+            self.get_env('VERTEXAI_MAX_RETRIES', '6')
+
+        # ...
+        # Anthropic
+        # ...
 
         self.ANTHROPIC_MODEL = self.get_env(
             'ANTHROPIC_MODEL', 'claude-3-5-sonnet-20240620'
             # 'ANTHROPIC_MODEL', 'claude-3-sonnet'
         )
         self.ANTHROPIC_API_KEY = self.get_env('ANTHROPIC_API_KEY', '')
+
+        # ...
+        # AWS
+        # ...
 
         # AWS credentials and other parameters
 
@@ -333,7 +382,9 @@ class Config(ConfigSuperClass):
             # 'AWS_BEDROCK_EMBEDDINGS_PROFILE', "bedrock-admin"
         )
 
-        # HuggingFace (HF) credentials and other parameters
+        # ...
+        # HuggingFace (HF)
+        # ...
 
         self.HUGGINGFACE_API_KEY = self.get_env('HUGGINGFACE_API_KEY', "")
 
@@ -422,7 +473,9 @@ class Config(ConfigSuperClass):
             # "cuda"
         )
 
+        # ...
         # Groq
+        # ...
 
         self.GROQ_API_KEY = self.get_env('GROQ_API_KEY', '')
         self.GROQ_TEMPERATURE = self.get_env('GROQ_TEMPERATURE', '0')
@@ -437,7 +490,9 @@ class Config(ConfigSuperClass):
             # 'llama-3.1-8b-instant'
         )
 
-        # Clarifai credentials and other parameters
+        # ...
+        # Clarifai
+        # ...
 
         # PAT (Personal API Token): https://clarifai.com/settings/security
         self.CLARIFAI_PAT = self.get_env('CLARIFAI_PAT')
@@ -481,7 +536,9 @@ class Config(ConfigSuperClass):
             # 'AI_CLARIFAI_DEFAULT_VISION_MODEL', 'food-item-recognition'
         )
 
+        # ...
         # AI/ML API
+        # ...
 
         self.AIMLAPI_API_KEY = self.get_env('AIMLAPI_API_KEY', "")
 
@@ -511,7 +568,27 @@ class Config(ConfigSuperClass):
             "https://api.aimlapi.com/"
         )
 
+        # ...
+        # OpenRouter
+        # ...
+
+        self.OPENROUTER_API_KEY = self.get_env('OPENROUTER_API_KEY', "")
+
+        # Reference:
+        # https://openrouter.ai/models
+        self.OPENROUTER_MODEL_NAME = self.get_env(
+            'OPENROUTER_MODEL_NAME',
+            "google/gemini-2.0-flash-exp:free"
+        )
+
+        self.OPENROUTER_BASE_URL = self.get_env(
+            'OPENROUTER_BASE_URL',
+            "https://openrouter.ai/api/v1"
+        )
+
+        # ...
         # Nvidia
+        # ...
 
         self.NVIDIA_API_KEY = self.get_env('NVIDIA_API_KEY', "")
 
@@ -540,7 +617,9 @@ class Config(ConfigSuperClass):
             "https://integrate.api.nvidia.com/v1"
         )
 
+        # ...
         # Rhymes.ai
+        # ...
 
         # Rhymes.ai Aria: Text and image Chat
 
@@ -588,7 +667,9 @@ class Config(ConfigSuperClass):
         self.RHYMES_VIDEO_CFG_SCALE = self.get_env(
             'RHYMES_VIDEO_CFG_SCALE', "7.5")
 
+        # ...
         # xAI (ex-Twitter) Grok
+        # ...
 
         # https://console.x.ai
         self.XAI_API_KEY = self.get_env(
@@ -610,23 +691,38 @@ class Config(ConfigSuperClass):
 
         self.XAI_BASE_URL = self.get_env('XAI_BASE_URL', "https://api.x.ai/v1")
 
+        # ...
         # IBM
+        # ...
 
         self.IBM_WATSONX_PROJECT_ID = self.get_env('IBM_WATSONX_PROJECT_ID')
         self.IBM_WATSONX_API_KEY = self.get_env('IBM_WATSONX_API_KEY')
 
         self.IBM_WATSONX_MODEL_NAME = self.get_env(
-            'IBM_WATSONX_MODEL_NAME', 'meta-llama/llama-3-1-70b-instruct')
+            'IBM_WATSONX_MODEL_NAME', 'ibm/granite-3-8b-instruct'
+            # 'meta-llama/llama-3-1-70b-instruct'
+        )
+
+        self.IBM_WATSONX_REGION = self.get_env(
+            'IBM_WATSONX_REGION',
+            "us-south"
+            # "eu-de"
+        )
 
         self.IBM_WATSONX_URL = self.get_env(
             'IBM_WATSONX_URL',
-            "https://us-south.ml.cloud.ibm.com/ml/v1/text/generation?"
-            "version=2023-05-29"
-            # "https://eu-de.ml.cloud.ibm.com/ml/v1/text/generation?"
-            # "version=2023-05-29")
+            f"https://{self.IBM_WATSONX_REGION}.ml.cloud.ibm.com/ml/v1/text"
+            "/generation?version=2023-05-29"
         )
 
+        self.IBM_WATSONX_IDENTITY_TOKEN_URL = self.get_env(
+            'IBM_WATSONX_IDENTITY_TOKEN_URL',
+            "https://iam.cloud.ibm.com/identity/token"
+        )
+
+        # ...
         # Together AI
+        # ...
 
         # https://api.together.xyz/settings/api-keys
         self.TOGETHER_API_KEY = self.get_env('TOGETHER_API_KEY')
@@ -642,7 +738,9 @@ class Config(ConfigSuperClass):
         self.TOGETHER_TOP_P = self.get_env('TOGETHER_TOP_P')
         self.TOGETHER_MAX_TOKENS = self.get_env('TOGETHER_MAX_TOKENS')
 
+        # ...
         # ElevenLabs
+        # ...
 
         self.ELEVENLABS_API_KEY = self.get_env('ELEVENLABS_API_KEY', "")
 
@@ -663,14 +761,18 @@ class Config(ConfigSuperClass):
         self.ELEVENLABS_USE_SPEAKER_BOOST = self.get_env(
             'ELEVENLABS_USE_SPEAKER_BOOST', "1")
 
-        # Cohere credentials and other parameters
+        # ...
+        # Cohere
+        # ...
 
         self.COHERE_API_KEY = self.get_env('COHERE_API_KEY', "")
         self.COHERE_EMBEDDINGS_MODEL = self.get_env(
             'COHERE_EMBEDDINGS_MODEL', "embed-english-light-v3.0"
         )
 
-        # Ollama credentials and other parameters
+        # ...
+        # Ollama
+        # ...
 
         self.OLLAMA_MODEL = self.get_env(
             'OLLAMA_MODEL', "llama3.2"
@@ -690,7 +792,9 @@ class Config(ConfigSuperClass):
             'OLLAMA_BASE_URL', ""
         )
 
-        # MongoDB credentials and other parameters
+        # ...
+        # MongoDB
+        # ...
 
         # For MongooDB embeddings
         self.MONGODB_VS_COLLECTION = self.get_env(
@@ -700,17 +804,24 @@ class Config(ConfigSuperClass):
             'MONGODB_VS_INDEX_NAME', ""
         )
 
-        # Pinecone credentials and other parameters
+        # ...
+        # Pinecone
+        # ...
+
         # PINECONE_API_KEY = self.get_env('PINECONE_API_KEY', "")
         # PINECONE_ENV = self.get_env('PINECONE_ENV', "")
 
-        # Vectara credentials and other parameters
+        # ...
+        # Vectara
+        # ...
 
         self.VECTARA_CUSTOMER_ID = self.get_env('VECTARA_CUSTOMER_ID', "")
         self.VECTARA_CORPUS_ID = self.get_env('VECTARA_CORPUS_ID', "")
         self.VECTARA_API_KEY = self.get_env('VECTARA_API_KEY', "")
 
-        # Weaviate credentials and other parameters
+        # ...
+        # Weaviate
+        # ...
 
         self.WEAVIATE_URL = self.get_env('WEAVIATE_URL', "")
         self.WEAVIATE_API_KEY = self.get_env('WEAVIATE_API_KEY', "")

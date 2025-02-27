@@ -224,6 +224,42 @@ def get_model(
                 convert_system_message_to_human=True,
             )
 
+        # Google VertexAI
+        if model_type == "vertexai":
+            # https://python.langchain.com/api_reference/google_vertexai/index.html
+            # https://python.langchain.com/docs/integrations/chat/google_vertex_ai_palm/
+            # https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference
+            # https://console.cloud.google.com/vertex-ai/studio/freeform
+            # https://cloud.google.com/docs/authentication/application-default-credentials#GAC
+            from langchain_google_vertexai import ChatVertexAI
+            manufacturer = "Google Vertex AI"
+            model_name = settings.VERTEXAI_MODEL
+            model_config = {
+                'model': model_name,
+                'stop': None,
+            }
+            if settings.GOOGLE_APPLICATION_CREDENTIALS:
+                model_config["credentials"] = \
+                    settings.GOOGLE_APPLICATION_CREDENTIALS
+            else:
+                model_config["project"] = settings.GOOGLE_CLOUD_PROJECT 
+                model_config["location"] = settings.GOOGLE_CLOUD_LOCATION
+
+            model_config["max_tokens"] = model_params.get(
+                "max_tokens", settings.VERTEXAI_MAX_TOKENS)
+            if model_config["max_tokens"]:
+                model_config["max_tokens"] = int(model_config["max_tokens"])
+
+            model_config["max_retries"] = model_params.get(
+                "max_retries", settings.VERTEXAI_MAX_RETRIES)
+            if model_config["max_retries"]:
+                model_config["max_retries"] = int(model_config["max_retries"])
+
+            model_config["temperature"] = model_params.get(
+                "temperature", settings.VERTEXAI_TEMPERATURE)
+
+            model_object = ChatVertexAI(**model_config)
+
         # Ollama
         if model_type == "ollama":
             # https://python.langchain.com/docs/integrations/chat/ollama/
@@ -467,6 +503,28 @@ def get_model(
             else:
                 model_object = openai_model["model_object"]
 
+        # Openrouter
+        if model_type == "openrouter":
+            # https://openrouter.ai/docs/quickstart
+            # https://openrouter.ai/models
+            manufacturer = "OpenRouter"
+            openai_model = get_openai_api({
+                "provider": manufacturer,
+                "base_url": settings.OPENROUTER_BASE_URL,
+                "api_key": model_params.get(
+                    "api_key", settings.OPENROUTER_API_KEY),
+                "model_name": model_params.get(
+                    "model_name", settings.OPENROUTER_MODEL_NAME),
+                "temperature": settings.OPENAI_TEMPERATURE,
+                "top_p": settings.OPENAI_TOP_P,
+                "max_tokens": settings.OPENAI_MAX_TOKENS,
+                "streaming": settings.AI_STREAMING,
+            })
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
+
         # Nvidia
         if model_type == "nvidia":
             # https://build.nvidia.com/nvidia/llama-3_1-nemotron-70b-instruct
@@ -543,6 +601,7 @@ def get_model(
             api_key = settings.IBM_WATSONX_API_KEY
             project_id = settings.IBM_WATSONX_PROJECT_ID
             model_url = settings.IBM_WATSONX_URL
+            identity_token_url = settings.IBM_WATSONX_IDENTITY_TOKEN_URL
             # n = int(settings.IBM_WATSONX_N)
             if not api_key:
                 error = "ERROR [GET_MODEL-IBM-010] - Missing" \
@@ -562,6 +621,7 @@ def get_model(
                     api_key=api_key,
                     project_id=project_id,
                     model_url=model_url,
+                    identity_token_url=identity_token_url,
                     # n=n,
                 )
         # Together
@@ -573,7 +633,7 @@ def get_model(
             api_key = model_params.get("api_key") or settings.TOGETHER_API_KEY
             if not api_key:
                 error = \
-                    "ERROR [GET_MODEL-GENEX-010] - Missing TOGETHER_API_KEY"
+                    "ERROR [GET_MODEL-TOGETHER-010] - Missing TOGETHER_API_KEY"
             else:
                 model_config = {
                     "together_api_key": api_key,

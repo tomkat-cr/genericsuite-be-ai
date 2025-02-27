@@ -17,13 +17,25 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## Unreleased
+## 0.1.13 (2025-02-22)
+---
+
+### New
+Implement OpenRouter AI provider and models [GS-182].
+Implement Vertex AI provider and models [GS-183] .
+
+### Changes
+Add envvars to configure various parameters of the IBM WatsonX provider [GS-184].
+
+
 ## 0.1.12 (2025-02-19)
 ---
 
 ### New
 Implement Together AI provider and models [GS-158].
 Implement xAI Grok model [GS-157].
-Implement IBM watsonx provider [GS-155].
+Implement IBM WatsonX provider [GS-155] [GS-184].
 Implement generic Langchain model abstract interface [GS-155].
 Implement Nvidia API / NIM / Nemotron [GS-93].
 Implement Rhymes.ai Aria chat model [GS-152].
@@ -40,7 +52,7 @@ Change "black-forest-labs/FLUX.1-schnell" image generation model by default.
 Change OPENAI_MAX_TOKENS and AIMLAPI_MAX_TOKENS to have '' by default to get the maximum tokens possible [GS-157].
 Change "grok-beta" changed to "grok-2" as default model for xAI [GS-157].
 Change "openai" instead of "openai_chat" to get the default OpenAI provider in the LANGCHAIN_DEFAULT_MODEL parameter.
-"get_openai_api()" function was added to standarize LLM client creation for providers compatible with the OpenAI completions API [GS-157].
+"get_openai_api()" function was added to standardize LLM client creation for providers compatible with the OpenAI completions API [GS-157].
 
 ### Fixes
 Fix the "ValueError: invalid literal for int() with base 10: ''" error in get_vision_response() when OPENAI_MAX_TOKENS is empty [GS-152].
