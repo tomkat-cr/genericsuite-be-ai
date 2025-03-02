@@ -9,7 +9,7 @@ from google.oauth2 import service_account
 from genericsuite.util.app_logger import log_debug
 
 
-DEBUG = True
+DEBUG = False
 
 
 def get_service_account_credentials(creds_file_path: str):

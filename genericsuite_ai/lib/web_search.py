@@ -33,6 +33,7 @@ DEBUG = False
 cac = CommonAppContext()
 
 DUCKDUCKGO_MAX_ATTEMPTS = 3
+DEFAULT_MAX_RESULTS = 30
 
 
 # from ..registry import ability
@@ -58,7 +59,7 @@ class WebSearch(BaseModel):
     """
     query: str = Field(description="The search query")
     num_results: Optional[int] = Field(
-        default=20,
+        default=DEFAULT_MAX_RESULTS,
         description="The number of results to return.")
 
 
@@ -68,7 +69,7 @@ def web_search(params: Dict) -> str:
 Useful when you need to perform a web search to have access to real-time information, and/or answer questions about recent events.
 Args: params (dict): Tool parameter. Must contain:
 "query" (str): The search query.
-"num_results" (int): number of results to return. Defaults to 20.
+"num_results" (int): number of results to return. Defaults to 30.
     """
     return web_search_func(params)
 
@@ -81,7 +82,7 @@ def web_search_func(params: Any) -> str:
     Args:
         params (dict): Tool parameter. Must contain:
             "query" (str): The search query.
-            "num_results" (int): number of results to return. Defaults to 20.
+            "num_results" (int): number of results to return.
 
     Returns:
         str: The results of the search or [FUNC+ERROR] {error_message}
@@ -108,7 +109,7 @@ def web_search_func(params: Any) -> str:
     return result
 
 
-def web_search_google(query: str, num_results: int = 20) -> str:
+def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
     """
     Return the results of a Google search with a call to
     the langchain wrapper.
@@ -130,7 +131,7 @@ def web_search_google(query: str, num_results: int = 20) -> str:
     # https://stackoverflow.com/questions/76547862/why-is-my-google-custom-search-api-call-from-python-not-working
     # To fix the error "'Request contains an invalid argument.',
     #   'domain': 'global', 'reason': 'badRequest'"
-    max_results = max(int(num_results), 10)
+    max_results = max(int(num_results), DEFAULT_MAX_RESULTS)
 
     # https://python.langchain.com/docs/integrations/tools/google_search#number-of-results
     try:
@@ -151,7 +152,7 @@ def web_search_google(query: str, num_results: int = 20) -> str:
     return results
 
 
-def web_search_ddg_lc(query: str, num_results: int = 20) -> str:
+def web_search_ddg_lc(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
     """
     Return the results of a DuckDuckGo search with a call to
     the langchain wrapper.
@@ -183,7 +184,7 @@ def web_search_ddg_lc(query: str, num_results: int = 20) -> str:
     return results
 
 
-def web_search_ddg(query: str, num_results: int = 20) -> str:
+def web_search_ddg(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
     """
     Return the results of a DuckDuckGo search with a direct call to
     the duckduckgo_search.DDGS function.

@@ -26,7 +26,11 @@ Implement OpenRouter AI provider and models [GS-182].
 Implement Vertex AI provider and models [GS-183] .
 
 ### Changes
-Add envvars to configure various parameters of the IBM WatsonX provider [GS-184].
+Tool web_search() updated to use DEFAULT_MAX_RESULTS=30 [GS-87].
+Add envvars to configure various parameters of the IBM WatsonX provider (IBM_WATSONX_REGION, IBM_WATSONX_TEMPERATURE, IBM_WATSONX_REPETITION_PENALTY, IBM_WATSONX_MAX_NEW_TOKENS, IBM_WATSONX_MIN_NEW_TOKENS, IBM_WATSONX_DECODING_METHOD, IBM_WATSONX_MODERATION_HAP_THRESHOLD) [GS-184].
+
+### Fixes
+Fix "ERROR: Failed building wheel for pyreqwest-impersonate" error running "sam build" (with "make deploy_run_local_qa") when "duckduckgo-search" were updated to version "6.1.1" [GS-87].
 
 
 ## 0.1.12 (2025-02-19)
