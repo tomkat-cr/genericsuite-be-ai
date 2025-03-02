@@ -48,13 +48,13 @@ class Config(ConfigSuperClass):
         self.LANGCHAIN_DEFAULT_MODEL = self.get_env(
             'LANGCHAIN_DEFAULT_MODEL', 'openai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'anthropic'
-            # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_remote' # gs_huggingface
+            # 'LANGCHAIN_DEFAULT_MODEL', 'gs_huggingface'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_remote'
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface'
             # 'LANGCHAIN_DEFAULT_MODEL', 'huggingface_pipeline'
             # 'LANGCHAIN_DEFAULT_MODEL', 'groq'
             # 'LANGCHAIN_DEFAULT_MODEL', 'gemini'
             # 'LANGCHAIN_DEFAULT_MODEL', 'vertexai'
-            # 'LANGCHAIN_DEFAULT_MODEL', 'clarifai'
             # 'LANGCHAIN_DEFAULT_MODEL', 'bedrock'
             # 'LANGCHAIN_DEFAULT_MODEL', 'ollama'
             # 'LANGCHAIN_DEFAULT_MODEL', 'aimlapi'
@@ -64,6 +64,7 @@ class Config(ConfigSuperClass):
             # 'LANGCHAIN_DEFAULT_MODEL', 'together'
             # 'LANGCHAIN_DEFAULT_MODEL', 'openrouter'
             # 'LANGCHAIN_DEFAULT_MODEL', 'ibm'
+            # 'LANGCHAIN_DEFAULT_MODEL', 'clarifai'
         )
 
         self.AI_VISION_TECHNOLOGY = self.get_env(
@@ -297,6 +298,7 @@ class Config(ConfigSuperClass):
         # Google Vertex AI
         # ...
 
+        # https://cloud.google.com/docs/authentication/application-default-credentials#GAC
         self.GOOGLE_CLOUD_PROJECT = self.get_env('GOOGLE_CLOUD_PROJECT')
 
         self.GOOGLE_CLOUD_LOCATION = self.get_env('GOOGLE_CLOUD_LOCATION',
@@ -308,7 +310,7 @@ class Config(ConfigSuperClass):
         )
 
         # Reference:
-        # https://console.cloud.google.com/vertex-ai/studio/freeform
+        # https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference
         self.VERTEXAI_MODEL = self.get_env(
             'VERTEXAI_MODEL', 'gemini-2.0-flash-001'
         )
@@ -319,7 +321,7 @@ class Config(ConfigSuperClass):
             self.get_env('VERTEXAI_MAX_TOKENS', '')
 
         self.VERTEXAI_MAX_RETRIES = \
-            self.get_env('VERTEXAI_MAX_RETRIES', '6')
+            self.get_env('VERTEXAI_MAX_RETRIES', '2')
 
         # ...
         # Anthropic
@@ -695,9 +697,12 @@ class Config(ConfigSuperClass):
         # IBM
         # ...
 
+        # https://dataplatform.cloud.ibm.com/docs/content/wsj/analyze-data/fm-credentials.html?context=wx&audience=wdp
+        # https://cloud.ibm.com/docs/account?topic=account-iamtoken_from_apikey#iamtoken_from_apikey
         self.IBM_WATSONX_PROJECT_ID = self.get_env('IBM_WATSONX_PROJECT_ID')
         self.IBM_WATSONX_API_KEY = self.get_env('IBM_WATSONX_API_KEY')
 
+        # https://dataplatform.cloud.ibm.com/samples?context=wx
         self.IBM_WATSONX_MODEL_NAME = self.get_env(
             'IBM_WATSONX_MODEL_NAME', 'ibm/granite-3-8b-instruct'
             # 'meta-llama/llama-3-1-70b-instruct'

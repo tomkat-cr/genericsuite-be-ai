@@ -38,6 +38,7 @@ from genericsuite_ai.lib.huggingface_chat_model import (
     GsChatHuggingFace,
 )
 from genericsuite_ai.lib.ibm import IbmWatsonx
+from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
 
 DEBUG = False
 
@@ -226,38 +227,49 @@ def get_model(
 
         # Google VertexAI
         if model_type == "vertexai":
-            # https://python.langchain.com/api_reference/google_vertexai/index.html
             # https://python.langchain.com/docs/integrations/chat/google_vertex_ai_palm/
+            # https://python.langchain.com/api_reference/google_vertexai/index.html
             # https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference
             # https://console.cloud.google.com/vertex-ai/studio/freeform
             # https://cloud.google.com/docs/authentication/application-default-credentials#GAC
+            # https://cloud.google.com/vertex-ai/generative-ai/docs/start/express-mode/overview
             from langchain_google_vertexai import ChatVertexAI
+
             manufacturer = "Google Vertex AI"
             model_name = settings.VERTEXAI_MODEL
             model_config = {
                 'model': model_name,
-                'stop': None,
             }
+
             if settings.GOOGLE_APPLICATION_CREDENTIALS:
-                model_config["credentials"] = \
-                    settings.GOOGLE_APPLICATION_CREDENTIALS
-            else:
-                model_config["project"] = settings.GOOGLE_CLOUD_PROJECT 
-                model_config["location"] = settings.GOOGLE_CLOUD_LOCATION
+                model_config["credentials"] = get_gcp_vertexai_credentials(
+                    settings.GOOGLE_APPLICATION_CREDENTIALS)
+            model_config["project"] = settings.GOOGLE_CLOUD_PROJECT
+            model_config["location"] = settings.GOOGLE_CLOUD_LOCATION
 
             model_config["max_tokens"] = model_params.get(
                 "max_tokens", settings.VERTEXAI_MAX_TOKENS)
             if model_config["max_tokens"]:
                 model_config["max_tokens"] = int(model_config["max_tokens"])
+            else:
+                del model_config["max_tokens"]
 
             model_config["max_retries"] = model_params.get(
                 "max_retries", settings.VERTEXAI_MAX_RETRIES)
             if model_config["max_retries"]:
                 model_config["max_retries"] = int(model_config["max_retries"])
+            else:
+                del model_config["max_retries"]
 
             model_config["temperature"] = model_params.get(
                 "temperature", settings.VERTEXAI_TEMPERATURE)
+            if model_config["temperature"]:
+                model_config["temperature"] = float(
+                    model_config["temperature"])
+            else:
+                del model_config["temperature"]
 
+            _ = DEBUG and log_debug(f"VERTEXAI | model_config: {model_config}")
             model_object = ChatVertexAI(**model_config)
 
         # Ollama

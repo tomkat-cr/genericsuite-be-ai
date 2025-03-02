@@ -55,9 +55,11 @@ class TextToAudio(BaseModel):
     """
     input_text: str = Field(description="text to speech out")
     target_lang: Optional[str] = Field(
-        description="target language. Defaults to user's preferred language")
+        description="target language. Defaults to user's preferred language",
+        default=None)
     other_options: Optional[dict] = Field(
-        description="Other options for the model")
+        description="Other options for the model",
+        default=None)
 
 
 # Audio-to-text / Speech-to-text
@@ -313,7 +315,7 @@ def audio_to_text_transcript(params: Any) -> dict:
 
 
 @tool
-def audio_processing_text_response(params: Any) -> str:
+def audio_processing_text_response(params: Dict) -> str:
     """
 Useful when you need to transcribe audio files with an audio to text generator.
 Args: params (dict): Tool parameters. It must have: "sound_filespec" (str): sound file path.
@@ -511,11 +513,13 @@ def text_to_audio_generator(params: Any) -> dict:
         params (dict): parameters for the function. It must contain:
             "input_text" (str): text to speech out.
             "target_lang" (Optional[str]): target language.
-                Defaults to user's preferred language.
+                Defaults to None, meaning the user's preferred language will
+                be used.
             "other_options" (Optional[dict]): other options. Available options:
                 "speaker_voice": "male" or "female". Defaults to female.
                 "mock_response": local file path with a mocked audio file.
                     e.g. '/tmp/9acd5e877ac44980b3604069e9b0d8df.wav'
+                Defaults to None.
 
     Returns:
         dict: a standard response with the model response.
@@ -566,7 +570,7 @@ def text_to_audio_generator(params: Any) -> dict:
 
 # @tool("text_to_audio_response", return_direct=True, args_schema=TextToAudio)
 @tool("text_to_audio_response", return_direct=True)
-def text_to_audio_response(params: Any) -> str:
+def text_to_audio_response(params: Dict) -> str:
     """
 Useful when you need to generate audio files from a given text. Call this tool when the Human question includes one of these text:
 "/TTS:", "/tts:", "Say it:", "Say it loud:", "Speak it:", "Speak it loud:", "Dimelo:", "Dime esto:", "Di esto en voz alta:", "Di este texto:", "Hablame:", "Habla esto:", "habla este texto:", etc.
@@ -584,11 +588,13 @@ def text_to_audio_response_func(params: Any) -> str:
         params (dict): Tool parameters. It must have:
             "input_text" (str): text to speech out. Don't translate it!
             "target_lang" (Optional[str]): target language.
-                Defaults to user's preferred language.
+                Defaults to None, meaning the user's preferred language will
+                be used.
             "other_options" (Optional[dict]): other options. Available options:
-                "speaker_voice": "male" or "female". Defaults to female.
+                "speaker_voice": "male" or "female". Defaults to male.
                 "mock_response": local file path with a mocked audio file.
                     e.g. '/tmp/9acd5e877ac44980b3604069e9b0d8df.wav'
+                Defaults to None.
 
     Returns:
         str: A local file path to send back to the user.

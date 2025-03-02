@@ -136,16 +136,28 @@ def ai_chatbot_endpoint(
         log_debug('AICBEP-2) AI_CHATBOT_ENDPOINT' +
                   f' - Response: {ai_chatbot_response}')
 
-    if '[SEND_FILE_BACK]' in ai_chatbot_response.get('response'):
-        file_to_send = ai_chatbot_response['response'].split('=')[1]
+    if '[SEND_FILE_BACK]' in ai_chatbot_response.get('response') or \
+       ai_chatbot_response.get('response').startswith('/tmp/'):
+        # Send the file back to the user.
+        file_to_send = \
+            ai_chatbot_response['response'].split('=')[1] \
+            if '[SEND_FILE_BACK]' in ai_chatbot_response.get('response') \
+            else ai_chatbot_response['response']
+        if file_to_send.endswith('\n') or file_to_send.endswith('\r'):
+            file_to_send = file_to_send[:-1]
         _ = DEBUG and log_debug(
-            'AICBEP-3) AI_CHATBOT_ENDPOINT' +
-            f' - Sending file: {file_to_send}')
+            'AICBEP-3.1) AI_CHATBOT_ENDPOINT' +
+            f'\n | Sending file: {file_to_send}' +
+            f'\n | Original response: {ai_chatbot_response["response"]}')
         if sendfile_callable:
+            _ = DEBUG and log_debug('AICBEP-3.2) AI_CHATBOT_ENDPOINT'
+                                    ' - sendfile_callable()...')
             return sendfile_callable(
                 file_to_send=file_to_send,
                 background_tasks=background_tasks,
             )
+        _ = DEBUG and log_debug('AICBEP-3.3) AI_CHATBOT_ENDPOINT'
+                                ' - send_file()...')
         return send_file(
             file_to_send=file_to_send,
         )
