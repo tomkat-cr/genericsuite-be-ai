@@ -4,13 +4,14 @@ Custom Language Model (LLM) abstract class for LangChain.
 Reference:
 https://python.langchain.com/docs/how_to/custom_llm/
 """
-
 from typing import Any, Dict, Iterator, List, Optional
-# from typing import Mapping
+import os
 
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 from langchain_core.language_models.llms import LLM
 from langchain_core.outputs import GenerationChunk
+
+from genericsuite.util.app_context import AppContext
 
 
 class CustomLLM(LLM):
@@ -42,6 +43,7 @@ class CustomLLM(LLM):
     # n: int
     """The number of characters from the last message of the prompt
     to be echoed."""
+    app_context: Optional[AppContext] = None
 
     def _call(
         self,
@@ -139,3 +141,12 @@ class CustomLLM(LLM):
         elif hasattr(self, "model_name") and isinstance(self.model_name, str):
             model_name = self.model_name
         return model_name
+
+    def _getenv(self, name: str, default_value: Any = None) -> Any:
+        """
+        Get the value of a parameter or environment variable (if app_context
+        was nos passed)
+        """
+        if self.app_context:
+            return self.app_context.get_env_var(name, default_value)
+        return os.environ.get(name, default_value)

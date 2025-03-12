@@ -36,7 +36,7 @@ from genericsuite_ai.lib.clarifai import (
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
 
-DEBUG = False
+DEBUG = True
 cac = CommonAppContext()
 
 
@@ -505,6 +505,29 @@ def get_tta_response(
     return response
 
 
+def get_mocks() -> list:
+    """
+    Returns a list of mock audio files.
+    """
+    import glob
+    # Get the mock audio files from "/tmp/openai_tts_*.mp3"
+    mock_files = glob.glob("/tmp/openai_tts_*.mp3")
+    _ = DEBUG and log_debug("GET_MOCKS | mock_files: " + str(mock_files))
+    return mock_files
+
+
+def get_a_random_mock() -> str:
+    """
+    Returns a random mock audio file.
+    """
+    mock_files = get_mocks()
+    import random
+    random_file = str(random.choice(mock_files))
+    _ = DEBUG and log_debug("GET_A_RANDOM_MOCK | random_file: " +
+                            random_file)
+    return random_file
+
+
 def text_to_audio_generator(params: Any) -> dict:
     """
     Generate an audio file from a given text.
@@ -537,8 +560,19 @@ def text_to_audio_generator(params: Any) -> dict:
     if not other_options:
         other_options = {}
         mock_file_example = None
-        # mock_file_example = '/tmp/xxx.wav'
-        # mock_file_example = "/tmp/openai_tts_xxxxx.mp3"
+
+        # -------
+        GET_MOCKS_DEBUG = cac.app_context.get_env_var("GET_MOCKS_DEBUG", "0")
+        if GET_MOCKS_DEBUG == "1":
+            mock_file_example = get_a_random_mock()
+        if GET_MOCKS_DEBUG != "0":
+            mock_file_example = GET_MOCKS_DEBUG
+        _ = DEBUG and log_debug(
+            ">> text_to_audio_generator:" +
+            f"\n | GET_MOCKS_DEBUG: {GET_MOCKS_DEBUG}" +
+            f"\n | mock_file_example: {mock_file_example}")
+        # -------
+
         if mock_file_example and os.path.isfile(mock_file_example):
             other_options["mock_response"] = mock_file_example
 
@@ -568,7 +602,6 @@ def text_to_audio_generator(params: Any) -> dict:
     return response
 
 
-# @tool("text_to_audio_response", return_direct=True, args_schema=TextToAudio)
 @tool("text_to_audio_response", return_direct=True)
 def text_to_audio_response(params: Dict) -> str:
     """
@@ -601,13 +634,16 @@ def text_to_audio_response_func(params: Any) -> str:
             e.g. [SEND_FILE_BACK]=/tmp/9acd5e877ac44980b3604069e9b0d8df.wav
             or [FUNC+ERROR] {error_message}
     """
+    self_debug = DEBUG
+    # self_debug = True
+
     model_response = text_to_audio_generator(params)
     if model_response["error"]:
         response = gpt_func_error(model_response["error_message"])
     else:
         response = f'[SEND_FILE_BACK]={model_response["response"]}'
 
-    if DEBUG:
+    if self_debug:
         log_debug("Answer from TEXT_TO_AUDIO_GENERATOR:")
         log_debug(response)
 

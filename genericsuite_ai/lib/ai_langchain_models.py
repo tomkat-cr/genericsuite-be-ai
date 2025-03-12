@@ -635,6 +635,7 @@ def get_model(
                     model_url=model_url,
                     identity_token_url=identity_token_url,
                     # n=n,
+                    app_context=app_context,
                 )
         # Together
         if model_type == "together":

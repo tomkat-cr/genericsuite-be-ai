@@ -5,7 +5,6 @@ Reference:
 https://developer.ibm.com/tutorials/integrate-your-watson-assistant-chatbot-with-watsonxai-for-generative-ai/
 https://developer.ibm.com/
 """
-import os
 import requests
 
 from typing import Any, List, Optional
@@ -108,7 +107,7 @@ class IbmWatsonx(LLM):
 
         model_url = self.model_url
         if not model_url:
-            region = os.environ.get('IBM_WATSONX_REGION', "us-south")
+            region = self._getenv('IBM_WATSONX_REGION', "us-south")
             model_url = \
                 f"https://{region}.ml.cloud.ibm.com/ml/v1/text/generation?" \
                 "version=2023-05-29"
@@ -117,52 +116,49 @@ class IbmWatsonx(LLM):
         if model_id == "CustomChatModel":
             model_id = kwargs.get(
                 "model_name",
-                os.environ.get("IBM_WATSONX_MODEL_NAME", model_id))
+                self._getenv("IBM_WATSONX_MODEL_NAME", model_id))
 
         project_id = self.project_id
         if not project_id:
             project_id = kwargs.get(
                 "project_id",
-                os.environ.get("IBM_WATSONX_PROJECT_ID"))
+                self._getenv("IBM_WATSONX_PROJECT_ID"))
 
         api_key = self.api_key
         if not api_key:
             api_key = kwargs.get(
                 "api_key",
-                os.environ.get("IBM_WATSONX_API_KEY"))
+                self._getenv("IBM_WATSONX_API_KEY"))
 
         temperature = kwargs.get(
             "temperature",
-            os.environ.get("IBM_WATSONX_TEMPERATURE", "0.5"))
+            self._getenv("IBM_WATSONX_TEMPERATURE", "0.5"))
 
         repetition_penalty = kwargs.get(
             "repetition_penalty",
-            os.environ.get("IBM_WATSONX_REPETITION_PENALTY", "2"))
+            self._getenv("IBM_WATSONX_REPETITION_PENALTY", "2"))
 
         max_new_tokens = kwargs.get(
             "max_new_tokens",
-            os.environ.get("IBM_WATSONX_MAX_NEW_TOKENS", "200"))
+            self._getenv("IBM_WATSONX_MAX_NEW_TOKENS", "200"))
 
         min_new_tokens = kwargs.get(
             "min_new_tokens",
-            os.environ.get("IBM_WATSONX_MIN_NEW_TOKENS", "50"))
+            self._getenv("IBM_WATSONX_MIN_NEW_TOKENS", "50"))
 
         # Decoding method: available options are "sample" and "greedy"
         decoding_method = kwargs.get(
             "decoding_method",
-            os.environ.get("IBM_WATSONX_DECODING_METHOD", "greedy"))
+            self._getenv("IBM_WATSONX_DECODING_METHOD", "greedy"))
+        # self._getenv("IBM_WATSONX_DECODING_METHOD", "sample"))
 
         moderation_hap_threshold = kwargs.get(
             "moderation_hap_threshold",
-            os.environ.get("IBM_WATSONX_MODERATION_HAP_THRESHOLD", "0.5"))
+            self._getenv("IBM_WATSONX_MODERATION_HAP_THRESHOLD", "0.5"))
 
         # moderation_pii_threshold = kwargs.get(
         #     "moderation_pii_threshold",
-        #     os.environ.get("IBM_WATSONX_MODERATION_PII_THRESHOLD", "0.5"))
-
-        access_token = self._get_access_token(api_key)
-        if access_token:
-            access_token = access_token.get("access_token")
+        #     self._getenv("IBM_WATSONX_MODERATION_PII_THRESHOLD", "0.5"))
 
         parameters = {
             "temperature": float(temperature),
@@ -172,11 +168,19 @@ class IbmWatsonx(LLM):
             "repetition_penalty": int(repetition_penalty)
         }
 
+        _ = DEBUG and log_debug(
+            "IBM WatsonX (before _get_access_token):"
+            f"\n | parameters: {parameters}")
+
+        access_token = self._get_access_token(api_key)
+        if access_token:
+            access_token = access_token.get("access_token")
+
         # Input type: available options are "structured" and "chat"
         input_type = kwargs.get(
             "input_type",
-            os.environ.get("IBM_WATSONX_INPUT_TYPE", "structured")
-            # os.environ.get("IBM_WATSONX_INPUT_TYPE", "chat")
+            self._getenv("IBM_WATSONX_INPUT_TYPE", "structured")
+            # self._getenv("IBM_WATSONX_INPUT_TYPE", "chat")
         )
 
         if input_type == "chat" and "granite" in model_id.lower():

@@ -704,7 +704,7 @@ class Config(ConfigSuperClass):
 
         # https://dataplatform.cloud.ibm.com/samples?context=wx
         self.IBM_WATSONX_MODEL_NAME = self.get_env(
-            'IBM_WATSONX_MODEL_NAME', 'ibm/granite-3-8b-instruct'
+            'IBM_WATSONX_MODEL_NAME', 'ibm/granite-3-2-8b-instruct'
             # 'meta-llama/llama-3-1-70b-instruct'
         )
 

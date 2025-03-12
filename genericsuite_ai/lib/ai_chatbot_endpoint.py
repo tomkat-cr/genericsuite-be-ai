@@ -42,7 +42,7 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-DEBUG = False
+DEBUG = True
 
 
 def ai_chatbot_endpoint(
@@ -80,7 +80,7 @@ def ai_chatbot_endpoint(
         additional_callable(app_context)
 
     # In endpoints handlers, the value must be taken first from os.environ,
-    # then from Config(). e.g. 
+    # then from Config(). e.g.
     #   ai_technology = os.environ.get('AI_TECHNOLOGY', settings.AI_TECHNOLOGY)
     # This is because the value is set in the database
     # when Config() was already initialized in the import statement.
@@ -88,7 +88,7 @@ def ai_chatbot_endpoint(
     # it's ok to take params from Config() directly because
     # app_context_and_set_env() has been called before in the
     # endpoint handler, then the os.environ variable is already set.
-    # The other way to do it is to assing `settings = Config()` 
+    # The other way to do it is to assing `settings = Config()`
     # after the app_context_and_set_env(request)
     settings = Config(app_context)
     billing = BillingUtilities(app_context)
@@ -144,6 +144,7 @@ def ai_chatbot_endpoint(
             if '[SEND_FILE_BACK]' in ai_chatbot_response.get('response') \
             else ai_chatbot_response['response']
         if file_to_send.endswith('\n') or file_to_send.endswith('\r'):
+            # Some LLMs generate a \n at the end
             file_to_send = file_to_send[:-1]
         _ = DEBUG and log_debug(
             'AICBEP-3.1) AI_CHATBOT_ENDPOINT' +

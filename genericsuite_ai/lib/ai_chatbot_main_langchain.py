@@ -231,7 +231,7 @@ def build_gs_prompt(base_prompt: str) -> str:
     Prepare the base prompt for the agent
     """
     self_debug = DEBUG or is_under_test()
-    # self_debug = True
+    self_debug = True
     _ = self_debug and log_debug(
         f'>>> BUILD_GS_PROMPT | base_prompt: {base_prompt}')
     settings = Config(cac.app_context)
@@ -258,9 +258,11 @@ def build_gs_prompt(base_prompt: str) -> str:
         f"Assistant is named {get_assistant_you_are(cac.app_context)}\n"
     suffix += \
         "\n" + \
-        "ADDITIONAL GUIDELINES:\n" + \
-        "----------------------\n" + \
+        "REQUIREMENTS:\n" + \
+        "------------\n" + \
         "\n"
+    # "ADDITIONAL GUIDELINES:\n" + \
+    # "----------------------\n" + \
 
     if translate_answer_flag:
         prefix += \
@@ -271,15 +273,19 @@ def build_gs_prompt(base_prompt: str) -> str:
 
     _ = DEBUG and log_debug('>>> Before get_current_date_time')
     suffix += \
-        f"For date references, {get_current_date_time.invoke({})}.\n" + \
+        f"* For date references, {get_current_date_time.invoke({})}.\n" + \
         "\n" + \
-        f"If the called Tool result has '{gpt_func_error('')}'," + \
+        f"* If the called Tool result has '{gpt_func_error('')}'," + \
         " stop processing and report the error, otherwise the" + \
         " called Tool response is Ok.\n" + \
+        "* If the called Tool result begins with '[SEND_FILE_BACK]'," + \
+        " then your final response will be exactly that function" + \
+        " response, with no additions or changes." + \
         "\n" + \
-        "Always use a json structure in the 'Action Input'" + \
+        "* Always use a json structure in the 'Action Input'" + \
         " when calling the Tool," + \
         " enclosing all attributes with curly braces.\n" + \
+        "\n" + \
         bottom_line_prompt + \
         "\n"
     _ = DEBUG and log_debug('>>> After get_current_date_time')
