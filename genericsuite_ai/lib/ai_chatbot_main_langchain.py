@@ -74,7 +74,7 @@ from genericsuite_ai.lib.translator import translate
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
 
-DEBUG = False
+DEBUG = True
 
 NON_AI_TRANSLATOR = 'google_translate'
 NON_AGENT_PROMPT = 'mediabros/gs_non_agent_lcel'
@@ -231,7 +231,7 @@ def build_gs_prompt(base_prompt: str) -> str:
     Prepare the base prompt for the agent
     """
     self_debug = DEBUG or is_under_test()
-    self_debug = True
+    # self_debug = True
     _ = self_debug and log_debug(
         f'>>> BUILD_GS_PROMPT | base_prompt: {base_prompt}')
     settings = Config(cac.app_context)

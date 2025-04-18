@@ -559,22 +559,25 @@ def text_to_audio_generator(params: Any) -> dict:
 
     if not other_options:
         other_options = {}
-        mock_file_example = None
 
-        # -------
-        GET_MOCKS_DEBUG = cac.app_context.get_env_var("GET_MOCKS_DEBUG", "0")
+    # -------
+    GET_MOCKS_DEBUG = cac.app_context.get_env_var("GET_MOCKS_DEBUG", "")
+    if GET_MOCKS_DEBUG != "":
+        mock_file_example = None
         if GET_MOCKS_DEBUG == "1":
             mock_file_example = get_a_random_mock()
-        if GET_MOCKS_DEBUG != "0":
+        elif GET_MOCKS_DEBUG != "0":
             mock_file_example = GET_MOCKS_DEBUG
-        _ = DEBUG and log_debug(
-            ">> text_to_audio_generator:" +
-            f"\n | GET_MOCKS_DEBUG: {GET_MOCKS_DEBUG}" +
-            f"\n | mock_file_example: {mock_file_example}")
-        # -------
 
         if mock_file_example and os.path.isfile(mock_file_example):
             other_options["mock_response"] = mock_file_example
+
+        _ = DEBUG and log_debug(
+            ">> text_to_audio_generator:" +
+            f"\n | GET_MOCKS_DEBUG: {GET_MOCKS_DEBUG}" +
+            f"\n | mock_file_example: {mock_file_example}"
+            f"\n | other_options: {other_options}")
+    # -------
 
     if not target_lang:
         target_lang = get_user_lang_code(cac.get())

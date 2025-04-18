@@ -25,17 +25,17 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 Implement OpenRouter AI provider and models [GS-182].
 Implement Vertex AI provider and models [GS-183].
 Add AI Endpoints for Flask [GS-15].
-Add envvar GET_MOCKS_DEBUG to test the text_to_audio_generator tool and save money in the sound AI API bill [GS-185].
+Add envvar GET_MOCKS_DEBUG to test the text_to_audio_generator tool and save money in the sound AI API bill by using existing audio files already generated in the /tmp directory (GET_MOCKS_DEBUG="1") or a specific file path (GET_MOCKS_DEBUG="/path/to/file.mp3") [GS-185].
 
 ### Changes
 Tool web_search() updated to use DEFAULT_MAX_RESULTS=30 [GS-87].
 Add envvars to configure various parameters of the IBM WatsonX provider (IBM_WATSONX_REGION, IBM_WATSONX_TEMPERATURE, IBM_WATSONX_REPETITION_PENALTY, IBM_WATSONX_MAX_NEW_TOKENS, IBM_WATSONX_MIN_NEW_TOKENS, IBM_WATSONX_DECODING_METHOD, IBM_WATSONX_MODERATION_HAP_THRESHOLD) [GS-184].
 Implement calls to AppContext.get_env_var() when AppContext is passed to the CustomLLM class, otherwise it calls to os.environ.get() [GD-184].
 
-
 ### Fixes
 Fix "ERROR: Failed building wheel for pyreqwest-impersonate" error running "sam build" (with "make deploy_run_local_qa") when "duckduckgo-search" were updated to version "6.1.1" [GS-87].
 Fix text-to-audio generation with text_to_audio_response() because sometimes with some models it never generate a new audio.
+Fix the missing model_name parameter calling get_openai_api().
 
 
 ## 0.1.12 (2025-02-19)

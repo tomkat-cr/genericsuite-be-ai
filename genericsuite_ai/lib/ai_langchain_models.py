@@ -40,7 +40,7 @@ from genericsuite_ai.lib.huggingface_chat_model import (
 from genericsuite_ai.lib.ibm import IbmWatsonx
 from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
 
-DEBUG = False
+DEBUG = True
 
 
 class BedrockAsyncCallbackHandler(AsyncCallbackHandler):
@@ -196,12 +196,12 @@ def get_model(
                 "user_plan",
                 "Unknown or N/A")
             manufacturer = "OpenAI"
+            model_name = model_params.get("model_name", settings.OPENAI_MODEL)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "api_key": model_params.get(
                     "api_key", settings.OPENAI_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.OPENAI_MODEL),
+                "model_name": model_name,
                 "temperature": settings.OPENAI_TEMPERATURE,
                 "top_p": settings.OPENAI_TOP_P,
                 "max_tokens": settings.OPENAI_MAX_TOKENS,
@@ -498,13 +498,14 @@ def get_model(
             # https://python.langchain.com/api_reference/openai/llms/langchain_openai.llms.base.OpenAI.html
             # https://docs.aimlapi.com/api-overview/model-database/text-models
             manufacturer = "AI/ML API"
+            model_name = model_params.get(
+                "model_name", settings.AIMLAPI_MODEL_NAME)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "base_url": settings.AIMLAPI_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.AIMLAPI_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.AIMLAPI_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.AIMLAPI_TEMPERATURE,
                 "top_p": settings.AIMLAPI_TOP_P,
                 "max_tokens": settings.AIMLAPI_MAX_TOKENS,
@@ -520,13 +521,14 @@ def get_model(
             # https://openrouter.ai/docs/quickstart
             # https://openrouter.ai/models
             manufacturer = "OpenRouter"
+            model_name = model_params.get(
+                "model_name", settings.OPENROUTER_MODEL_NAME)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "base_url": settings.OPENROUTER_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.OPENROUTER_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.OPENROUTER_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.OPENAI_TEMPERATURE,
                 "top_p": settings.OPENAI_TOP_P,
                 "max_tokens": settings.OPENAI_MAX_TOKENS,
@@ -541,13 +543,14 @@ def get_model(
         if model_type == "nvidia":
             # https://build.nvidia.com/nvidia/llama-3_1-nemotron-70b-instruct
             manufacturer = "Nvidia"
+            model_name = model_params.get(
+                "model_name", settings.NVIDIA_MODEL_NAME)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "base_url": settings.NVIDIA_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.NVIDIA_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.NVIDIA_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.NVIDIA_TEMPERATURE,
                 "top_p": settings.NVIDIA_TOP_P,
                 "max_tokens": settings.NVIDIA_MAX_TOKENS,
@@ -562,13 +565,14 @@ def get_model(
         if model_type == "rhymes":
             # https://lablab.ai/t/aria-api-tutorial
             manufacturer = "Rhymes.ai"
+            model_name = model_params.get(
+                "model_name", settings.RHYMES_CHAT_MODEL_NAME)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "base_url": settings.RHYMES_CHAT_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.RHYMES_CHAT_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.RHYMES_CHAT_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.RHYMES_CHAT_TEMPERATURE,
                 "top_p": settings.RHYMES_CHAT_TOP_P,
                 "max_tokens": settings.RHYMES_CHAT_MAX_TOKENS,
@@ -584,13 +588,14 @@ def get_model(
         if model_type == "xai":
             # https://docs.x.ai/api/integrations#openai-sdk
             manufacturer = "xAI"
+            model_name = model_params.get(
+                "model_name", settings.XAI_MODEL_NAME)
             model_config = {
                 "provider": manufacturer,
                 "base_url": settings.XAI_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.XAI_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.XAI_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.XAI_TEMPERATURE,
                 "top_p": settings.XAI_TOP_P,
                 "max_tokens": settings.XAI_MAX_TOKENS,
