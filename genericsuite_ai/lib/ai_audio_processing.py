@@ -36,7 +36,7 @@ from genericsuite_ai.lib.clarifai import (
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
 
-DEBUG = True
+DEBUG = False
 cac = CommonAppContext()
 
 

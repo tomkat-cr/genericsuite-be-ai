@@ -40,7 +40,7 @@ from genericsuite_ai.lib.huggingface_chat_model import (
 from genericsuite_ai.lib.ibm import IbmWatsonx
 from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
 
-DEBUG = True
+DEBUG = False
 
 
 class BedrockAsyncCallbackHandler(AsyncCallbackHandler):

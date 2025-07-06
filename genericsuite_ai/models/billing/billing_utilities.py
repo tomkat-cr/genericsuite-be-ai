@@ -10,7 +10,7 @@ from genericsuite.util.app_context import AppContext
 from genericsuite_ai.config.config import Config
 
 DEFAULT_PLAN = "free"
-DEBUG = True
+DEBUG = False
 
 
 class BillingUtilities(BillingUtilitiesSuperClass):

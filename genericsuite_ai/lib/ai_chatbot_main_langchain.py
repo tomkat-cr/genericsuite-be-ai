@@ -74,7 +74,7 @@ from genericsuite_ai.lib.translator import translate
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
 
-DEBUG = True
+DEBUG = False
 
 NON_AI_TRANSLATOR = 'google_translate'
 NON_AGENT_PROMPT = 'mediabros/gs_non_agent_lcel'

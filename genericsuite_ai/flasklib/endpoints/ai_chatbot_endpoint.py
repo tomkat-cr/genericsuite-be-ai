@@ -26,7 +26,7 @@ from genericsuite_ai.lib.ai_chatbot_endpoint import (
 #     assign_app_gpt_functions
 # )
 
-DEBUG = True
+DEBUG = False
 
 bp = BlueprintOne('ai', __name__, url_prefix='/ai')
 

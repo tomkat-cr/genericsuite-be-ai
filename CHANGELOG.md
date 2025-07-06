@@ -277,7 +277,7 @@ Implement Clarifai models and embeddings [FA-182].
 Add web search capability to the AI Asistant [FA-159].
 Chats stored in the DB [FA-119].
 Add the Billing Plan ("plan" attribute) to the user profile [FA-200].
-Add the OpenAI API key and model name ("openai_api_key" and "openai_model" attributes) to allow free plan users to use the AI Asistant at their own expenses [FA-201].
+Add the OpenAI API key and model name ("openai_api_key" and "openai_model" attributes) to allow free plan users to use the AI Asistant at their own expense [FA-201].
 Add double version of GPT Functions and LC Tools [FA-211].
 
 
