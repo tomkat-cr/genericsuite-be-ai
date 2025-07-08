@@ -34,6 +34,8 @@ cac = CommonAppContext()
 
 DUCKDUCKGO_MAX_ATTEMPTS = 3
 DUCKDUCKGO_MAX_RESULTS = 5
+DUCKDUCKGO_RATE_LIMIT_TOKEN = "202 Ratelimit"
+
 
 DEFAULT_MAX_RESULTS = 30
 
@@ -105,7 +107,8 @@ def web_search_func(params: Any) -> str:
         result = web_search_google(query, num_results)
     else:
         result = web_search_ddg_lc(query, num_results)
-        if not result or func_error_token in result:
+        if not result or func_error_token in result or \
+                DUCKDUCKGO_RATE_LIMIT_TOKEN in result:
             result = web_search_google(query, num_results)
 
     return result

@@ -36,7 +36,8 @@ Change "web_search.py" to use min() instead of max() to enforce a minimum betwee
 Fix "ERROR: Failed building wheel for pyreqwest-impersonate" error running "sam build" (with "make deploy_run_local_qa") when "duckduckgo-search" were updated to version "6.1.1" [GS-87].
 Fix text-to-audio generation with text_to_audio_response() because sometimes with some models it never generate a new audio.
 Fix the missing model_name parameter calling get_openai_api().
-Set the DUCKDUCKGO_MAX_RESULTS to 5 to avoid the error "error: https://lite.duckduckgo.com/lite/ 202 Ratelimit"
+Set the DUCKDUCKGO_MAX_RESULTS to 5 to avoid the error "error: https://lite.duckduckgo.com/lite/ 202 Ratelimit" [GS-87].
+Set the DUCKDUCKGO_RATE_LIMIT_TOKEN to check the "202 Ratelimit" and switch to google search in case WEBSEARCH_DEFAULT_PROVIDER is not "ddg" or "google" [GS-87].
 
 
 ## 0.1.12 (2025-02-19)
