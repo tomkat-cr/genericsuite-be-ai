@@ -28,7 +28,7 @@ from genericsuite_ai.lib.ai_utilities import (
 )
 from genericsuite_ai.config.config import Config
 
-DEBUG = Config().DEBUG == "1"
+DEBUG = Config().DEBUG
 
 cac = CommonAppContext()
 
