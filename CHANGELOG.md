@@ -17,7 +17,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## 0.1.13 (2025-07-05)
+## 0.1.13 (2025-07-08)
 ---
 
 ### New
@@ -30,6 +30,7 @@ Add envvar GET_MOCKS_DEBUG to test the text_to_audio_generator tool and save mon
 Tool web_search() updated to use DEFAULT_MAX_RESULTS=30 [GS-87].
 Add envvars to configure various parameters of the IBM WatsonX provider (IBM_WATSONX_REGION, IBM_WATSONX_TEMPERATURE, IBM_WATSONX_REPETITION_PENALTY, IBM_WATSONX_MAX_NEW_TOKENS, IBM_WATSONX_MIN_NEW_TOKENS, IBM_WATSONX_DECODING_METHOD, IBM_WATSONX_MODERATION_HAP_THRESHOLD) [GS-184].
 Implement calls to AppContext.get_env_var() when AppContext is passed to the CustomLLM class, otherwise it calls to os.environ.get() [GD-184].
+Change "web_search.py" to use min() instead of max() to enforce a minimum between the DEFAULT_MAX_RESULTS and the number of results requested by the user/model. If the request is higher than the DEFAULT_MAX_RESULTS, it will use that value.
 
 ### Fixes
 Fix "ERROR: Failed building wheel for pyreqwest-impersonate" error running "sam build" (with "make deploy_run_local_qa") when "duckduckgo-search" were updated to version "6.1.1" [GS-87].

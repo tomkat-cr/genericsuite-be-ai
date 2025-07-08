@@ -109,7 +109,8 @@ def web_search_func(params: Any) -> str:
     return result
 
 
-def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
+def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS
+                      ) -> str:
     """
     Return the results of a Google search with a call to
     the langchain wrapper.
@@ -131,7 +132,9 @@ def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str
     # https://stackoverflow.com/questions/76547862/why-is-my-google-custom-search-api-call-from-python-not-working
     # To fix the error "'Request contains an invalid argument.',
     #   'domain': 'global', 'reason': 'badRequest'"
-    max_results = max(int(num_results), DEFAULT_MAX_RESULTS)
+    max_results = min(int(num_results), DEFAULT_MAX_RESULTS)
+    if int(num_results) > max_results:
+        max_results = int(num_results)
 
     # https://python.langchain.com/docs/integrations/tools/google_search#number-of-results
     try:

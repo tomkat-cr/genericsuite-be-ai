@@ -522,7 +522,10 @@ def get_a_random_mock() -> str:
     """
     mock_files = get_mocks()
     import random
-    random_file = str(random.choice(mock_files))
+    if mock_files:
+        random_file = str(random.choice(mock_files))
+    else:
+        random_file = "/tmp/default_mock.mp3"
     _ = DEBUG and log_debug("GET_A_RANDOM_MOCK | random_file: " +
                             random_file)
     return random_file
@@ -560,7 +563,6 @@ def text_to_audio_generator(params: Any) -> dict:
     if not other_options:
         other_options = {}
 
-    # -------
     GET_MOCKS_DEBUG = cac.app_context.get_env_var("GET_MOCKS_DEBUG", "")
     if GET_MOCKS_DEBUG != "":
         mock_file_example = None
@@ -577,7 +579,6 @@ def text_to_audio_generator(params: Any) -> dict:
             f"\n | GET_MOCKS_DEBUG: {GET_MOCKS_DEBUG}" +
             f"\n | mock_file_example: {mock_file_example}"
             f"\n | other_options: {other_options}")
-    # -------
 
     if not target_lang:
         target_lang = get_user_lang_code(cac.get())
