@@ -2,7 +2,7 @@
 Web Search ability
 """
 
-from typing import Union, Any, Optional
+from typing import Dict, Union, Any, Optional
 import json
 import time
 # from itertools import islice
@@ -28,11 +28,16 @@ from genericsuite_ai.lib.ai_utilities import (
 )
 from genericsuite_ai.config.config import Config
 
-DEBUG = False
+DEBUG = Config().DEBUG
 
 cac = CommonAppContext()
 
 DUCKDUCKGO_MAX_ATTEMPTS = 3
+DUCKDUCKGO_MAX_RESULTS = 5
+DUCKDUCKGO_RATE_LIMIT_TOKEN = "202 Ratelimit"
+
+
+DEFAULT_MAX_RESULTS = 30
 
 
 # from ..registry import ability
@@ -58,17 +63,17 @@ class WebSearch(BaseModel):
     """
     query: str = Field(description="The search query")
     num_results: Optional[int] = Field(
-        default=20,
+        default=DEFAULT_MAX_RESULTS,
         description="The number of results to return.")
 
 
 @tool
-def web_search(params: Any) -> str:
+def web_search(params: Dict) -> str:
     """
 Useful when you need to perform a web search to have access to real-time information, and/or answer questions about recent events.
 Args: params (dict): Tool parameter. Must contain:
 "query" (str): The search query.
-"num_results" (int): number of results to return. Defaults to 20.
+"num_results" (int): number of results to return. Defaults to 30.
     """
     return web_search_func(params)
 
@@ -81,7 +86,7 @@ def web_search_func(params: Any) -> str:
     Args:
         params (dict): Tool parameter. Must contain:
             "query" (str): The search query.
-            "num_results" (int): number of results to return. Defaults to 20.
+            "num_results" (int): number of results to return.
 
     Returns:
         str: The results of the search or [FUNC+ERROR] {error_message}
@@ -102,13 +107,15 @@ def web_search_func(params: Any) -> str:
         result = web_search_google(query, num_results)
     else:
         result = web_search_ddg_lc(query, num_results)
-        if not result or func_error_token in result:
+        if not result or func_error_token in result or \
+                DUCKDUCKGO_RATE_LIMIT_TOKEN in result:
             result = web_search_google(query, num_results)
 
     return result
 
 
-def web_search_google(query: str, num_results: int = 20) -> str:
+def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS
+                      ) -> str:
     """
     Return the results of a Google search with a call to
     the langchain wrapper.
@@ -130,7 +137,9 @@ def web_search_google(query: str, num_results: int = 20) -> str:
     # https://stackoverflow.com/questions/76547862/why-is-my-google-custom-search-api-call-from-python-not-working
     # To fix the error "'Request contains an invalid argument.',
     #   'domain': 'global', 'reason': 'badRequest'"
-    max_results = max(int(num_results), 10)
+    max_results = min(int(num_results), DEFAULT_MAX_RESULTS)
+    if int(num_results) > max_results:
+        max_results = int(num_results)
 
     # https://python.langchain.com/docs/integrations/tools/google_search#number-of-results
     try:
@@ -151,7 +160,8 @@ def web_search_google(query: str, num_results: int = 20) -> str:
     return results
 
 
-def web_search_ddg_lc(query: str, num_results: int = 20) -> str:
+def web_search_ddg_lc(query: str, num_results: int = DEFAULT_MAX_RESULTS
+                      ) -> str:
     """
     Return the results of a DuckDuckGo search with a call to
     the langchain wrapper.
@@ -166,7 +176,11 @@ def web_search_ddg_lc(query: str, num_results: int = 20) -> str:
     if DEBUG:
         log_debug(f"\n\n>> WEB_SEARCH_LANGCHAIN_DDG | query: {query}\n\n")
 
-    wrapper = DuckDuckGoSearchAPIWrapper(max_results=num_results)
+    max_results = min(int(num_results), DUCKDUCKGO_MAX_RESULTS)
+    if int(num_results) > max_results:
+        max_results = DUCKDUCKGO_MAX_RESULTS
+
+    wrapper = DuckDuckGoSearchAPIWrapper(max_results=max_results)
     search = DuckDuckGoSearchResults(api_wrapper=wrapper)
     try:
         results_list = search.run(query)
@@ -183,7 +197,7 @@ def web_search_ddg_lc(query: str, num_results: int = 20) -> str:
     return results
 
 
-def web_search_ddg(query: str, num_results: int = 20) -> str:
+def web_search_ddg(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
     """
     Return the results of a DuckDuckGo search with a direct call to
     the duckduckgo_search.DDGS function.

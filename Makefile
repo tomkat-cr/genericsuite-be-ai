@@ -2,6 +2,10 @@
 .PHONY: lock update requirements lock-rebuild build publish-test publish dev-prepare-local dev-prepare-git dev-prepare-pypi dev-prepare-publish
 SHELL := /bin/bash
 
+# default show this file
+all:
+	@cat Makefile
+
 lock:
 	poetry lock
 

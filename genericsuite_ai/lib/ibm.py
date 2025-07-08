@@ -5,7 +5,6 @@ Reference:
 https://developer.ibm.com/tutorials/integrate-your-watson-assistant-chatbot-with-watsonxai-for-generative-ai/
 https://developer.ibm.com/
 """
-import os
 import requests
 
 from typing import Any, List, Optional
@@ -108,48 +107,104 @@ class IbmWatsonx(LLM):
 
         model_url = self.model_url
         if not model_url:
+            region = self._getenv('IBM_WATSONX_REGION', "us-south")
             model_url = \
-                "https://us-south.ml.cloud.ibm.com/ml/v1/text/generation?" \
+                f"https://{region}.ml.cloud.ibm.com/ml/v1/text/generation?" \
                 "version=2023-05-29"
 
         model_id = self._get_model_name()
         if model_id == "CustomChatModel":
             model_id = kwargs.get(
                 "model_name",
-                os.environ.get("IBM_WATSONX_MODEL_NAME", model_id))
+                self._getenv("IBM_WATSONX_MODEL_NAME", model_id))
+
         project_id = self.project_id
         if not project_id:
             project_id = kwargs.get(
                 "project_id",
-                os.environ.get("IBM_WATSONX_PROJECT_ID"))
+                self._getenv("IBM_WATSONX_PROJECT_ID"))
+
         api_key = self.api_key
         if not api_key:
             api_key = kwargs.get(
                 "api_key",
-                os.environ.get("IBM_WATSONX_API_KEY"))
+                self._getenv("IBM_WATSONX_API_KEY"))
+
+        temperature = kwargs.get(
+            "temperature",
+            self._getenv("IBM_WATSONX_TEMPERATURE", "0.5"))
+
+        repetition_penalty = kwargs.get(
+            "repetition_penalty",
+            self._getenv("IBM_WATSONX_REPETITION_PENALTY", "2"))
+
+        max_new_tokens = kwargs.get(
+            "max_new_tokens",
+            self._getenv("IBM_WATSONX_MAX_NEW_TOKENS", "200"))
+
+        min_new_tokens = kwargs.get(
+            "min_new_tokens",
+            self._getenv("IBM_WATSONX_MIN_NEW_TOKENS", "50"))
+
+        # Decoding method: available options are "sample" and "greedy"
+        decoding_method = kwargs.get(
+            "decoding_method",
+            self._getenv("IBM_WATSONX_DECODING_METHOD", "greedy"))
+        # self._getenv("IBM_WATSONX_DECODING_METHOD", "sample"))
+
+        moderation_hap_threshold = kwargs.get(
+            "moderation_hap_threshold",
+            self._getenv("IBM_WATSONX_MODERATION_HAP_THRESHOLD", "0.5"))
+
+        # moderation_pii_threshold = kwargs.get(
+        #     "moderation_pii_threshold",
+        #     self._getenv("IBM_WATSONX_MODERATION_PII_THRESHOLD", "0.5"))
+
+        parameters = {
+            "temperature": float(temperature),
+            "max_new_tokens": int(max_new_tokens),
+            "min_new_tokens": int(min_new_tokens),
+            "decoding_method": decoding_method,
+            "repetition_penalty": int(repetition_penalty)
+        }
+
+        _ = DEBUG and log_debug(
+            "IBM WatsonX (before _get_access_token):"
+            f"\n | parameters: {parameters}")
 
         access_token = self._get_access_token(api_key)
         if access_token:
             access_token = access_token.get("access_token")
 
-        parameters = {
-            "temperature": 0.7,
-            "max_new_tokens": 200,
-            "min_new_tokens": 50,
-            # "decoding_method": "greedy",
-            "decoding_method": "sample",
-            # "repetition_penalty": 1
-            "repetition_penalty": 2
-        }
+        # Input type: available options are "structured" and "chat"
+        input_type = kwargs.get(
+            "input_type",
+            self._getenv("IBM_WATSONX_INPUT_TYPE", "structured")
+            # self._getenv("IBM_WATSONX_INPUT_TYPE", "chat")
+        )
 
-        if DEBUG:
-            log_debug(f"IBM WatsonX model_id: {model_id}")
-            log_debug(f"IBM WatsonX project_id: {project_id}")
-            log_debug(f"IBM WatsonX api_key: {api_key}")
-            log_debug(f"IBM WatsonX access_token: {access_token}")
-            log_debug(f"IBM WatsonX model_url: {model_url}")
-            log_debug(f"IBM WatsonX kwargs: {kwargs}")
-            log_debug(f"IBM WatsonX prompt: {prompt}")
+        if input_type == "chat" and "granite" in model_id.lower():
+            user_prompt = prompt
+            input = ""
+            prompt_split = prompt.split("\n\nHuman:")
+            if len(prompt_split) > 1:
+                system_prompt = prompt_split[0]
+                system_prompt = system_prompt.replace("System: ", "")
+                user_prompt = " ".join(prompt_split[1:]).strip()
+                input += "<|start_of_role|>system<|end_of_role|>"
+                input += system_prompt.strip()
+                input += "<|end_of_text|>\n"
+            input += "<|start_of_role|>user<|end_of_role|>"
+            input += user_prompt
+            input += "<|end_of_text|>\n"
+            input += "<|start_of_role|>assistant<|end_of_role|>"
+            parameters["stop_sequences"] = []
+            parameters["decoding_method"] = "greedy"
+        else:
+            input = f"Input: {prompt}\nOutput:"
+
+        if parameters["decoding_method"] == "greedy":
+            del parameters["temperature"]
 
         # "input" attribute example for one-shot or few-shot learning.
         # If no Input/Output combinations in the prompt, the zero-shot
@@ -168,8 +223,7 @@ class IbmWatsonx(LLM):
         """
 
         body = {
-            "input": f"""Input: {prompt}
-Output:""",
+            "input": input,
             "model_id": model_id,
             "project_id": project_id,
             "parameters": parameters,
@@ -177,14 +231,14 @@ Output:""",
                 "hap": {
                     "input": {
                         "enabled": True,
-                        "threshold": 0.5,
+                        "threshold": float(moderation_hap_threshold),
                         "mask": {
                             "remove_entity_value": True
                         }
                     },
                     "output": {
                         "enabled": True,
-                        "threshold": 0.5,
+                        "threshold": float(moderation_hap_threshold),
                         "mask": {
                             "remove_entity_value": True
                         }
@@ -193,14 +247,14 @@ Output:""",
                 "pii": {
                     "input": {
                         "enabled": True,
-                        "threshold": 0.5,
+                        # "threshold": float(moderation_pii_threshold),
                         "mask": {
                             "remove_entity_value": True
                         }
                     },
                     "output": {
                         "enabled": True,
-                        "threshold": 0.5,
+                        # "threshold": float(moderation_pii_threshold),
                         "mask": {
                             "remove_entity_value": True
                         }
@@ -216,6 +270,17 @@ Output:""",
             "Authorization": f"Bearer {access_token}"
         }
 
+        _ = DEBUG and log_debug(
+            "IBM WatsonX | _inference_call:"
+            f"\n | input_type: {input_type}"
+            f"\n | model_url: {model_url}"
+            f"\n | kwargs:\n{kwargs}"
+            f"\n\n | headers:\n{headers}"
+            # f"\n\n | os.environ:\n{os.environ}"
+            f"\n\n | body:\n{body}"
+            f"\n"
+        )
+
         response = requests.post(
             model_url,
             headers=headers,
@@ -227,7 +292,7 @@ Output:""",
                             str(response.text))
 
         data = response.json()
-        _ = DEBUG and log_debug(f">> IBM WatsonX response: {data}")
+        _ = DEBUG and log_debug(f">> IBM WatsonX response:\n{data}")
 
         """
         Response example:
@@ -296,20 +361,29 @@ Output:""",
             identity_token_url = "https://iam.cloud.ibm.com/identity/token"
 
         headers = {
-            "Content-Type": "application/json",
+            "content-type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/x-www-form-urlencoded",
         }
 
-        body = "grant_type=urn:ibm:params:oauth:grant-type:apikey" \
+        body = f"grant_type=urn:ibm:params:oauth:grant-type:apikey" \
                f"&apikey={api_key}"
+
+        _ = DEBUG and log_debug(
+            "IBM WatsonX _get_access_token:"
+            f"\n | identity_token_url: {identity_token_url}"
+            f"\n | headers:\n{headers}"
+            f"\n | body:\n{body}"
+            f"\n"
+        )
 
         response = requests.post(
             identity_token_url,
             headers=headers,
-            json=body
+            data=body
         )
 
         if response.status_code != 200:
-            raise Exception("GS-IBM-E010: Non-200 response: " +
+            raise Exception("GS-IBM-E020: Non-200 response: " +
                             str(response.text))
 
         data = response.json()

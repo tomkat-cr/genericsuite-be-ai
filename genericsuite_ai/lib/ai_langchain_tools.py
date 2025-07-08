@@ -182,7 +182,8 @@ def load_conversarion_messages_to_buffer(
 def interpret_tool_params(
     tool_params: Any,
     schema: Any = None,
-    first_param_name: str = None) -> dict:
+    first_param_name: str = None
+) -> dict:
     """
     Interpret tool params from LangChain. It's suppose to be a dict
     and some times comes as a string.

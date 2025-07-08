@@ -2,7 +2,7 @@
 AI Vision Library: processing images and generate text
 and knowledge with its content.
 """
-from typing import Optional, Any
+from typing import Dict, Optional, Any
 import os
 import base64
 
@@ -56,7 +56,8 @@ class VisionParams(BaseModel):
     image_path: str = Field(description="The path to the image.")
     question: str = Field(description="A question about the image specified.")
     other: Optional[dict] = Field(
-        description="Additional parametes. Defaults to {}")
+        description="Additional parametes. Defaults to {}",
+        default=None)
 
 
 def encode_image(image_path: str) -> str:
@@ -479,7 +480,7 @@ def vision_image_analyzer(params: dict) -> dict:
 
 
 @tool
-def vision_image_analyzer_text_response(params: Any) -> str:
+def vision_image_analyzer_text_response(params: Dict) -> str:
     """
 Useful to process an specified image and answer a question about it. There must be an explitcit image URL specified by the Human or in the conversation.
 Args: params (dict): Tool parameters. Must contain:

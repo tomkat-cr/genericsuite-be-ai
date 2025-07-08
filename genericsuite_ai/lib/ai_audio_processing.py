@@ -55,9 +55,11 @@ class TextToAudio(BaseModel):
     """
     input_text: str = Field(description="text to speech out")
     target_lang: Optional[str] = Field(
-        description="target language. Defaults to user's preferred language")
+        description="target language. Defaults to user's preferred language",
+        default=None)
     other_options: Optional[dict] = Field(
-        description="Other options for the model")
+        description="Other options for the model",
+        default=None)
 
 
 # Audio-to-text / Speech-to-text
@@ -313,7 +315,7 @@ def audio_to_text_transcript(params: Any) -> dict:
 
 
 @tool
-def audio_processing_text_response(params: Any) -> str:
+def audio_processing_text_response(params: Dict) -> str:
     """
 Useful when you need to transcribe audio files with an audio to text generator.
 Args: params (dict): Tool parameters. It must have: "sound_filespec" (str): sound file path.
@@ -503,6 +505,32 @@ def get_tta_response(
     return response
 
 
+def get_mocks() -> list:
+    """
+    Returns a list of mock audio files.
+    """
+    import glob
+    # Get the mock audio files from "/tmp/openai_tts_*.mp3"
+    mock_files = glob.glob("/tmp/openai_tts_*.mp3")
+    _ = DEBUG and log_debug("GET_MOCKS | mock_files: " + str(mock_files))
+    return mock_files
+
+
+def get_a_random_mock() -> str:
+    """
+    Returns a random mock audio file.
+    """
+    mock_files = get_mocks()
+    import random
+    if mock_files:
+        random_file = str(random.choice(mock_files))
+    else:
+        random_file = "/tmp/default_mock.mp3"
+    _ = DEBUG and log_debug("GET_A_RANDOM_MOCK | random_file: " +
+                            random_file)
+    return random_file
+
+
 def text_to_audio_generator(params: Any) -> dict:
     """
     Generate an audio file from a given text.
@@ -511,11 +539,13 @@ def text_to_audio_generator(params: Any) -> dict:
         params (dict): parameters for the function. It must contain:
             "input_text" (str): text to speech out.
             "target_lang" (Optional[str]): target language.
-                Defaults to user's preferred language.
+                Defaults to None, meaning the user's preferred language will
+                be used.
             "other_options" (Optional[dict]): other options. Available options:
                 "speaker_voice": "male" or "female". Defaults to female.
                 "mock_response": local file path with a mocked audio file.
                     e.g. '/tmp/9acd5e877ac44980b3604069e9b0d8df.wav'
+                Defaults to None.
 
     Returns:
         dict: a standard response with the model response.
@@ -532,11 +562,23 @@ def text_to_audio_generator(params: Any) -> dict:
 
     if not other_options:
         other_options = {}
+
+    GET_MOCKS_DEBUG = cac.app_context.get_env_var("GET_MOCKS_DEBUG", "")
+    if GET_MOCKS_DEBUG != "":
         mock_file_example = None
-        # mock_file_example = '/tmp/xxx.wav'
-        # mock_file_example = "/tmp/openai_tts_xxxxx.mp3"
+        if GET_MOCKS_DEBUG == "1":
+            mock_file_example = get_a_random_mock()
+        elif GET_MOCKS_DEBUG != "0":
+            mock_file_example = GET_MOCKS_DEBUG
+
         if mock_file_example and os.path.isfile(mock_file_example):
             other_options["mock_response"] = mock_file_example
+
+        _ = DEBUG and log_debug(
+            ">> text_to_audio_generator:" +
+            f"\n | GET_MOCKS_DEBUG: {GET_MOCKS_DEBUG}" +
+            f"\n | mock_file_example: {mock_file_example}"
+            f"\n | other_options: {other_options}")
 
     if not target_lang:
         target_lang = get_user_lang_code(cac.get())
@@ -564,9 +606,8 @@ def text_to_audio_generator(params: Any) -> dict:
     return response
 
 
-# @tool("text_to_audio_response", return_direct=True, args_schema=TextToAudio)
 @tool("text_to_audio_response", return_direct=True)
-def text_to_audio_response(params: Any) -> str:
+def text_to_audio_response(params: Dict) -> str:
     """
 Useful when you need to generate audio files from a given text. Call this tool when the Human question includes one of these text:
 "/TTS:", "/tts:", "Say it:", "Say it loud:", "Speak it:", "Speak it loud:", "Dimelo:", "Dime esto:", "Di esto en voz alta:", "Di este texto:", "Hablame:", "Habla esto:", "habla este texto:", etc.
@@ -584,24 +625,29 @@ def text_to_audio_response_func(params: Any) -> str:
         params (dict): Tool parameters. It must have:
             "input_text" (str): text to speech out. Don't translate it!
             "target_lang" (Optional[str]): target language.
-                Defaults to user's preferred language.
+                Defaults to None, meaning the user's preferred language will
+                be used.
             "other_options" (Optional[dict]): other options. Available options:
-                "speaker_voice": "male" or "female". Defaults to female.
+                "speaker_voice": "male" or "female". Defaults to male.
                 "mock_response": local file path with a mocked audio file.
                     e.g. '/tmp/9acd5e877ac44980b3604069e9b0d8df.wav'
+                Defaults to None.
 
     Returns:
         str: A local file path to send back to the user.
             e.g. [SEND_FILE_BACK]=/tmp/9acd5e877ac44980b3604069e9b0d8df.wav
             or [FUNC+ERROR] {error_message}
     """
+    self_debug = DEBUG
+    # self_debug = True
+
     model_response = text_to_audio_generator(params)
     if model_response["error"]:
         response = gpt_func_error(model_response["error_message"])
     else:
         response = f'[SEND_FILE_BACK]={model_response["response"]}'
 
-    if DEBUG:
+    if self_debug:
         log_debug("Answer from TEXT_TO_AUDIO_GENERATOR:")
         log_debug(response)
 

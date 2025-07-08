@@ -17,13 +17,39 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.13 (2025-07-08)
+---
+
+### New
+Implement OpenRouter AI provider and models [GS-182].
+Implement Vertex AI provider and models [GS-183].
+Add AI Endpoints for Flask [GS-15].
+Add envvar GET_MOCKS_DEBUG to test the text_to_audio_generator tool and save money in the sound AI API bill by using existing audio files already generated in the /tmp directory (GET_MOCKS_DEBUG="1") or a specific file path (GET_MOCKS_DEBUG="/path/to/file.mp3") [GS-185].
+
+### Changes
+Tool web_search() updated to use DEFAULT_MAX_RESULTS=30 [GS-87].
+Add envvars to configure various parameters of the IBM WatsonX provider (IBM_WATSONX_REGION, IBM_WATSONX_TEMPERATURE, IBM_WATSONX_REPETITION_PENALTY, IBM_WATSONX_MAX_NEW_TOKENS, IBM_WATSONX_MIN_NEW_TOKENS, IBM_WATSONX_DECODING_METHOD, IBM_WATSONX_MODERATION_HAP_THRESHOLD) [GS-184].
+Implement calls to AppContext.get_env_var() when AppContext is passed to the CustomLLM class, otherwise it calls to os.environ.get() [GD-184].
+Change "web_search.py" to use min() instead of max() to enforce a minimum between the DEFAULT_MAX_RESULTS and the number of results requested by the user/model. If the request is higher than the DEFAULT_MAX_RESULTS, it will use that value.
+Change "ADDITIONAL GUIDELINES:\n" to "REQUIREMENTS:\n" and add "* " (bulletpoints) to each line in build_gs_prompt (ai_chatbot_main_langchain) to have a better system prompt for AI model.
+Change "DEBUG" to use Config().DEBUG == "1" in web_search [GS-185].
+
+
+### Fixes
+Fix "ERROR: Failed building wheel for pyreqwest-impersonate" error running "sam build" (with "make deploy_run_local_qa") when "duckduckgo-search" were updated to version "6.1.1" [GS-87].
+Fix text-to-audio generation with text_to_audio_response() because sometimes with some models it never generate a new audio.
+Fix the missing model_name parameter calling get_openai_api().
+Set the DUCKDUCKGO_MAX_RESULTS to 5 to avoid the error "error: https://lite.duckduckgo.com/lite/ 202 Ratelimit" [GS-87].
+Set the DUCKDUCKGO_RATE_LIMIT_TOKEN to check the "202 Ratelimit" and switch to google search in case WEBSEARCH_DEFAULT_PROVIDER is not "ddg" or "google" [GS-87].
+
+
 ## 0.1.12 (2025-02-19)
 ---
 
 ### New
 Implement Together AI provider and models [GS-158].
 Implement xAI Grok model [GS-157].
-Implement IBM watsonx provider [GS-155].
+Implement IBM WatsonX provider [GS-155] [GS-184].
 Implement generic Langchain model abstract interface [GS-155].
 Implement Nvidia API / NIM / Nemotron [GS-93].
 Implement Rhymes.ai Aria chat model [GS-152].
@@ -40,7 +66,7 @@ Change "black-forest-labs/FLUX.1-schnell" image generation model by default.
 Change OPENAI_MAX_TOKENS and AIMLAPI_MAX_TOKENS to have '' by default to get the maximum tokens possible [GS-157].
 Change "grok-beta" changed to "grok-2" as default model for xAI [GS-157].
 Change "openai" instead of "openai_chat" to get the default OpenAI provider in the LANGCHAIN_DEFAULT_MODEL parameter.
-"get_openai_api()" function was added to standarize LLM client creation for providers compatible with the OpenAI completions API [GS-157].
+"get_openai_api()" function was added to standardize LLM client creation for providers compatible with the OpenAI completions API [GS-157].
 
 ### Fixes
 Fix the "ValueError: invalid literal for int() with base 10: ''" error in get_vision_response() when OPENAI_MAX_TOKENS is empty [GS-152].
@@ -257,7 +283,7 @@ Implement Clarifai models and embeddings [FA-182].
 Add web search capability to the AI Asistant [FA-159].
 Chats stored in the DB [FA-119].
 Add the Billing Plan ("plan" attribute) to the user profile [FA-200].
-Add the OpenAI API key and model name ("openai_api_key" and "openai_model" attributes) to allow free plan users to use the AI Asistant at their own expenses [FA-201].
+Add the OpenAI API key and model name ("openai_api_key" and "openai_model" attributes) to allow free plan users to use the AI Asistant at their own expense [FA-201].
 Add double version of GPT Functions and LC Tools [FA-211].
 
 

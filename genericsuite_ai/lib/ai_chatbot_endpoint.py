@@ -80,7 +80,7 @@ def ai_chatbot_endpoint(
         additional_callable(app_context)
 
     # In endpoints handlers, the value must be taken first from os.environ,
-    # then from Config(). e.g. 
+    # then from Config(). e.g.
     #   ai_technology = os.environ.get('AI_TECHNOLOGY', settings.AI_TECHNOLOGY)
     # This is because the value is set in the database
     # when Config() was already initialized in the import statement.
@@ -88,7 +88,7 @@ def ai_chatbot_endpoint(
     # it's ok to take params from Config() directly because
     # app_context_and_set_env() has been called before in the
     # endpoint handler, then the os.environ variable is already set.
-    # The other way to do it is to assing `settings = Config()` 
+    # The other way to do it is to assing `settings = Config()`
     # after the app_context_and_set_env(request)
     settings = Config(app_context)
     billing = BillingUtilities(app_context)
@@ -136,16 +136,29 @@ def ai_chatbot_endpoint(
         log_debug('AICBEP-2) AI_CHATBOT_ENDPOINT' +
                   f' - Response: {ai_chatbot_response}')
 
-    if '[SEND_FILE_BACK]' in ai_chatbot_response.get('response'):
-        file_to_send = ai_chatbot_response['response'].split('=')[1]
+    if '[SEND_FILE_BACK]' in ai_chatbot_response.get('response') or \
+       ai_chatbot_response.get('response').startswith('/tmp/'):
+        # Send the file back to the user.
+        file_to_send = \
+            ai_chatbot_response['response'].split('=')[1] \
+            if '[SEND_FILE_BACK]' in ai_chatbot_response.get('response') \
+            else ai_chatbot_response['response']
+        if file_to_send.endswith('\n') or file_to_send.endswith('\r'):
+            # Some LLMs generate a \n at the end
+            file_to_send = file_to_send[:-1]
         _ = DEBUG and log_debug(
-            'AICBEP-3) AI_CHATBOT_ENDPOINT' +
-            f' - Sending file: {file_to_send}')
+            'AICBEP-3.1) AI_CHATBOT_ENDPOINT' +
+            f'\n | Sending file: {file_to_send}' +
+            f'\n | Original response: {ai_chatbot_response["response"]}')
         if sendfile_callable:
+            _ = DEBUG and log_debug('AICBEP-3.2) AI_CHATBOT_ENDPOINT'
+                                    ' - sendfile_callable()...')
             return sendfile_callable(
                 file_to_send=file_to_send,
                 background_tasks=background_tasks,
             )
+        _ = DEBUG and log_debug('AICBEP-3.3) AI_CHATBOT_ENDPOINT'
+                                ' - send_file()...')
         return send_file(
             file_to_send=file_to_send,
         )

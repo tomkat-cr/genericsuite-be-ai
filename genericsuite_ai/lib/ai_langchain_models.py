@@ -38,6 +38,7 @@ from genericsuite_ai.lib.huggingface_chat_model import (
     GsChatHuggingFace,
 )
 from genericsuite_ai.lib.ibm import IbmWatsonx
+from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
 
 DEBUG = False
 
@@ -195,12 +196,12 @@ def get_model(
                 "user_plan",
                 "Unknown or N/A")
             manufacturer = "OpenAI"
+            model_name = model_params.get("model_name", settings.OPENAI_MODEL)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "api_key": model_params.get(
                     "api_key", settings.OPENAI_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.OPENAI_MODEL),
+                "model_name": model_name,
                 "temperature": settings.OPENAI_TEMPERATURE,
                 "top_p": settings.OPENAI_TOP_P,
                 "max_tokens": settings.OPENAI_MAX_TOKENS,
@@ -223,6 +224,53 @@ def get_model(
                 google_api_key=settings.GOOGLE_API_KEY,
                 convert_system_message_to_human=True,
             )
+
+        # Google VertexAI
+        if model_type == "vertexai":
+            # https://python.langchain.com/docs/integrations/chat/google_vertex_ai_palm/
+            # https://python.langchain.com/api_reference/google_vertexai/index.html
+            # https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference
+            # https://console.cloud.google.com/vertex-ai/studio/freeform
+            # https://cloud.google.com/docs/authentication/application-default-credentials#GAC
+            # https://cloud.google.com/vertex-ai/generative-ai/docs/start/express-mode/overview
+            from langchain_google_vertexai import ChatVertexAI
+
+            manufacturer = "Google Vertex AI"
+            model_name = settings.VERTEXAI_MODEL
+            model_config = {
+                'model': model_name,
+            }
+
+            if settings.GOOGLE_APPLICATION_CREDENTIALS:
+                model_config["credentials"] = get_gcp_vertexai_credentials(
+                    settings.GOOGLE_APPLICATION_CREDENTIALS)
+            model_config["project"] = settings.GOOGLE_CLOUD_PROJECT
+            model_config["location"] = settings.GOOGLE_CLOUD_LOCATION
+
+            model_config["max_tokens"] = model_params.get(
+                "max_tokens", settings.VERTEXAI_MAX_TOKENS)
+            if model_config["max_tokens"]:
+                model_config["max_tokens"] = int(model_config["max_tokens"])
+            else:
+                del model_config["max_tokens"]
+
+            model_config["max_retries"] = model_params.get(
+                "max_retries", settings.VERTEXAI_MAX_RETRIES)
+            if model_config["max_retries"]:
+                model_config["max_retries"] = int(model_config["max_retries"])
+            else:
+                del model_config["max_retries"]
+
+            model_config["temperature"] = model_params.get(
+                "temperature", settings.VERTEXAI_TEMPERATURE)
+            if model_config["temperature"]:
+                model_config["temperature"] = float(
+                    model_config["temperature"])
+            else:
+                del model_config["temperature"]
+
+            _ = DEBUG and log_debug(f"VERTEXAI | model_config: {model_config}")
+            model_object = ChatVertexAI(**model_config)
 
         # Ollama
         if model_type == "ollama":
@@ -450,16 +498,40 @@ def get_model(
             # https://python.langchain.com/api_reference/openai/llms/langchain_openai.llms.base.OpenAI.html
             # https://docs.aimlapi.com/api-overview/model-database/text-models
             manufacturer = "AI/ML API"
+            model_name = model_params.get(
+                "model_name", settings.AIMLAPI_MODEL_NAME)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "base_url": settings.AIMLAPI_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.AIMLAPI_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.AIMLAPI_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.AIMLAPI_TEMPERATURE,
                 "top_p": settings.AIMLAPI_TOP_P,
                 "max_tokens": settings.AIMLAPI_MAX_TOKENS,
+                "streaming": settings.AI_STREAMING,
+            })
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
+
+        # Openrouter
+        if model_type == "openrouter":
+            # https://openrouter.ai/docs/quickstart
+            # https://openrouter.ai/models
+            manufacturer = "OpenRouter"
+            model_name = model_params.get(
+                "model_name", settings.OPENROUTER_MODEL_NAME)
+            openai_model = get_openai_api({
+                "provider": manufacturer,
+                "base_url": settings.OPENROUTER_BASE_URL,
+                "api_key": model_params.get(
+                    "api_key", settings.OPENROUTER_API_KEY),
+                "model_name": model_name,
+                "temperature": settings.OPENAI_TEMPERATURE,
+                "top_p": settings.OPENAI_TOP_P,
+                "max_tokens": settings.OPENAI_MAX_TOKENS,
                 "streaming": settings.AI_STREAMING,
             })
             if openai_model["error"]:
@@ -471,13 +543,14 @@ def get_model(
         if model_type == "nvidia":
             # https://build.nvidia.com/nvidia/llama-3_1-nemotron-70b-instruct
             manufacturer = "Nvidia"
+            model_name = model_params.get(
+                "model_name", settings.NVIDIA_MODEL_NAME)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "base_url": settings.NVIDIA_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.NVIDIA_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.NVIDIA_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.NVIDIA_TEMPERATURE,
                 "top_p": settings.NVIDIA_TOP_P,
                 "max_tokens": settings.NVIDIA_MAX_TOKENS,
@@ -492,13 +565,14 @@ def get_model(
         if model_type == "rhymes":
             # https://lablab.ai/t/aria-api-tutorial
             manufacturer = "Rhymes.ai"
+            model_name = model_params.get(
+                "model_name", settings.RHYMES_CHAT_MODEL_NAME)
             openai_model = get_openai_api({
                 "provider": manufacturer,
                 "base_url": settings.RHYMES_CHAT_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.RHYMES_CHAT_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.RHYMES_CHAT_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.RHYMES_CHAT_TEMPERATURE,
                 "top_p": settings.RHYMES_CHAT_TOP_P,
                 "max_tokens": settings.RHYMES_CHAT_MAX_TOKENS,
@@ -514,13 +588,14 @@ def get_model(
         if model_type == "xai":
             # https://docs.x.ai/api/integrations#openai-sdk
             manufacturer = "xAI"
+            model_name = model_params.get(
+                "model_name", settings.XAI_MODEL_NAME)
             model_config = {
                 "provider": manufacturer,
                 "base_url": settings.XAI_BASE_URL,
                 "api_key": model_params.get(
                     "api_key", settings.XAI_API_KEY),
-                "model_name": model_params.get(
-                    "model_name", settings.XAI_MODEL_NAME),
+                "model_name": model_name,
                 "temperature": settings.XAI_TEMPERATURE,
                 "top_p": settings.XAI_TOP_P,
                 "max_tokens": settings.XAI_MAX_TOKENS,
@@ -543,6 +618,7 @@ def get_model(
             api_key = settings.IBM_WATSONX_API_KEY
             project_id = settings.IBM_WATSONX_PROJECT_ID
             model_url = settings.IBM_WATSONX_URL
+            identity_token_url = settings.IBM_WATSONX_IDENTITY_TOKEN_URL
             # n = int(settings.IBM_WATSONX_N)
             if not api_key:
                 error = "ERROR [GET_MODEL-IBM-010] - Missing" \
@@ -562,7 +638,9 @@ def get_model(
                     api_key=api_key,
                     project_id=project_id,
                     model_url=model_url,
+                    identity_token_url=identity_token_url,
                     # n=n,
+                    app_context=app_context,
                 )
         # Together
         if model_type == "together":
@@ -573,7 +651,7 @@ def get_model(
             api_key = model_params.get("api_key") or settings.TOGETHER_API_KEY
             if not api_key:
                 error = \
-                    "ERROR [GET_MODEL-GENEX-010] - Missing TOGETHER_API_KEY"
+                    "ERROR [GET_MODEL-TOGETHER-010] - Missing TOGETHER_API_KEY"
             else:
                 model_config = {
                     "together_api_key": api_key,
