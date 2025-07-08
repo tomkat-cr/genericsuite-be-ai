@@ -33,6 +33,8 @@ DEBUG = False
 cac = CommonAppContext()
 
 DUCKDUCKGO_MAX_ATTEMPTS = 3
+DUCKDUCKGO_MAX_RESULTS = 5
+
 DEFAULT_MAX_RESULTS = 30
 
 
@@ -155,7 +157,8 @@ def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS
     return results
 
 
-def web_search_ddg_lc(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
+def web_search_ddg_lc(query: str, num_results: int = DEFAULT_MAX_RESULTS
+                      ) -> str:
     """
     Return the results of a DuckDuckGo search with a call to
     the langchain wrapper.
@@ -170,7 +173,11 @@ def web_search_ddg_lc(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str
     if DEBUG:
         log_debug(f"\n\n>> WEB_SEARCH_LANGCHAIN_DDG | query: {query}\n\n")
 
-    wrapper = DuckDuckGoSearchAPIWrapper(max_results=num_results)
+    max_results = min(int(num_results), DUCKDUCKGO_MAX_RESULTS)
+    if int(num_results) > max_results:
+        max_results = DUCKDUCKGO_MAX_RESULTS
+
+    wrapper = DuckDuckGoSearchAPIWrapper(max_results=max_results)
     search = DuckDuckGoSearchResults(api_wrapper=wrapper)
     try:
         results_list = search.run(query)
