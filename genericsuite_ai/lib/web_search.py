@@ -5,17 +5,15 @@ Web Search ability
 from typing import Dict, Union, Any, Optional
 import json
 import time
-# from itertools import islice
+import os
 
-# from httpx._exceptions import HTTPError
-
-# Pypi: pip install duckduckgo-search
-from duckduckgo_search import DDGS
+from ddgs import DDGS
+from googleapiclient.discovery import build
 
 from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchResults
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
-from langchain_google_community import GoogleSearchAPIWrapper
 from langchain.agents import tool
+
 from pydantic import BaseModel, Field
 
 from genericsuite.util.app_logger import log_debug
@@ -32,29 +30,17 @@ DEBUG = Config().DEBUG
 
 cac = CommonAppContext()
 
+DUCKDUCKGO_METHOD = os.getenv("WEBSEARCH_DUCKDUCKGO_METHOD", "ddgs")
 DUCKDUCKGO_MAX_ATTEMPTS = 3
 DUCKDUCKGO_MAX_RESULTS = 5
 DUCKDUCKGO_RATE_LIMIT_TOKEN = "202 Ratelimit"
+DUCKDUCKGO_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64;" + \
+                        " rv:124.0) Gecko/20100101 Firefox/124.0"
 
+GOOGLE_MAX_RESULTS = 100
+GOOGLE_MAX_PAGINATED_RESULTS = 10
 
-DEFAULT_MAX_RESULTS = 30
-
-
-# from ..registry import ability
-# @ability(
-#     name="web_search",
-#     description="Searches the web",
-#     parameters=[
-#         {
-#             "name": "query",
-#             "description": "The search query",
-#             "type": "string",
-#             "required": True,
-#         }
-#     ],
-#     output_type="list[str]",
-# )
-# async def web_search(agent, task_id: str, query: str) -> str:
+DEFAULT_MAX_RESULTS = 15
 
 
 class WebSearch(BaseModel):
@@ -102,11 +88,17 @@ def web_search_func(params: Any) -> str:
     func_error_token = gpt_func_error('').strip()
 
     if settings.WEBSEARCH_DEFAULT_PROVIDER == "ddg":
-        result = web_search_ddg_lc(query, num_results)
+        if DUCKDUCKGO_METHOD == "ddgs":
+            result = web_search_ddg(query, num_results)
+        else:
+            result = web_search_ddg_lc(query, num_results)
     elif settings.WEBSEARCH_DEFAULT_PROVIDER == "google":
         result = web_search_google(query, num_results)
     else:
-        result = web_search_ddg_lc(query, num_results)
+        if DUCKDUCKGO_METHOD == "ddgs":
+            result = web_search_ddg(query, num_results)
+        else:
+            result = web_search_ddg_lc(query, num_results)
         if not result or func_error_token in result or \
                 DUCKDUCKGO_RATE_LIMIT_TOKEN in result:
             result = web_search_google(query, num_results)
@@ -132,23 +124,19 @@ def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS
         log_debug(
             f">> 1) WEB_SEARCH_GOOGLE | query: {query}" +
             f"\ngoogle_api_key: {settings.GOOGLE_API_KEY}" +
-            f"\ngoogle_cse_id: {settings.GOOGLE_CSE_ID}")
+            f"\ngoogle_cse_id: {settings.GOOGLE_CSE_ID}" +
+            f"\nnum_results: {num_results}")
 
     # https://stackoverflow.com/questions/76547862/why-is-my-google-custom-search-api-call-from-python-not-working
     # To fix the error "'Request contains an invalid argument.',
     #   'domain': 'global', 'reason': 'badRequest'"
-    max_results = min(int(num_results), DEFAULT_MAX_RESULTS)
-    if int(num_results) > max_results:
-        max_results = int(num_results)
+    max_results = min(int(num_results), GOOGLE_MAX_RESULTS)
 
     # https://python.langchain.com/docs/integrations/tools/google_search#number-of-results
     try:
-        search = GoogleSearchAPIWrapper(
-            google_api_key=settings.GOOGLE_API_KEY,
-            google_cse_id=settings.GOOGLE_CSE_ID,
-            k=max_results
-        )
-        results_list = search.results(query, max_results)
+        results_list = google_search_paginated(query, settings.GOOGLE_API_KEY,
+                                               settings.GOOGLE_CSE_ID,
+                                               num_results=max_results)
         results = safe_google_results(results_list)
     except Exception as error:
         results = gpt_func_error(error)
@@ -158,6 +146,61 @@ def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS
                   f" results: {results}\n\n")
 
     return results
+
+
+def google_search_paginated(search_term: str, api_key: str, cse_id: str,
+                            num_results: int = DEFAULT_MAX_RESULTS,
+                            **kwargs) -> list:
+    service = build("customsearch", "v1", developerKey=api_key)
+    start_index = 1
+    all_results = []
+
+    max_results = min(
+        int(num_results),
+        # (100 - 10 + 1) to ensure that start + num does not exceed 100
+        GOOGLE_MAX_RESULTS-GOOGLE_MAX_PAGINATED_RESULTS+1
+    )
+
+    while True:
+        # Makes the API call with the 'start' parameter and 'num=10'
+        # The 'num' parameter is set to 10 to comply with the API limit
+        res = service.cse().list(q=search_term, cx=cse_id, start=start_index,
+                                 num=GOOGLE_MAX_PAGINATED_RESULTS,
+                                 **kwargs).execute()
+
+        _ = DEBUG and log_debug(f"google_search_paginated | res: {res}")
+
+        # Adds the results of the current page to the total list
+        if 'items' in res:
+            all_results.extend(res['items'])
+
+        _ = DEBUG and log_debug(
+            f"google_search_paginated | all_results: {all_results}")
+
+        # Verifies if there is a next page.
+        # The method.get() is used to avoid errors if 'queries' does not exist.
+        queries_info = res.get('queries', {})
+        if 'nextPage' not in queries_info:
+            break   # No more pages; exit loop
+
+        _ = DEBUG and log_debug(
+            f"google_search_paginated | queries_info: {queries_info}")
+
+        # Updates the start index for the next request
+        # The startIndex for the next page is found in the first
+        # element of the nextPage array
+        start_index = queries_info['nextPage'][0]['startIndex']
+
+        _ = DEBUG and log_debug(
+            f"google_search_paginated | start_index: {start_index}")
+
+        # Includes a verification to not exceed the total limit of 100 results
+        # If the next start_index would lead to a sum of start + num exceeding
+        # 100, it stops.
+        if start_index > max_results:
+            break
+
+    return all_results
 
 
 def web_search_ddg_lc(query: str, num_results: int = DEFAULT_MAX_RESULTS
@@ -185,7 +228,6 @@ def web_search_ddg_lc(query: str, num_results: int = DEFAULT_MAX_RESULTS
     try:
         results_list = search.run(query)
         results = safe_ddg_results(results_list)
-    # except HTTPError as error:
     except Exception as error:
         log_debug("\n\n>> WEB_SEARCH_LANGCHAIN_DDG" +
                   f" | error: {error}\n\n")
@@ -211,6 +253,9 @@ def web_search_ddg(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
     """
     search_results: list[Any] = []
     attempts = 0
+    headers = {
+        "User-Agent": DUCKDUCKGO_USER_AGENT
+    }
 
     if DEBUG:
         log_debug("")
@@ -222,8 +267,12 @@ def web_search_ddg(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
             if not query:
                 return json.dumps(search_results)
             with DDGS() as ddgs:
-                search_results = list(ddgs.text(query,
-                                      max_results=num_results))
+                num_results = min(int(num_results), DUCKDUCKGO_MAX_RESULTS)
+                search_results = list(ddgs.text(
+                    query,
+                    max_results=num_results,
+                    search_headers=headers
+                ))
             if search_results:
                 break
             time.sleep(1)
@@ -253,8 +302,6 @@ def safe_google_results(results: Union[str, list]) -> str:
         log_debug(f">> 1) SAFE_GOOGLE_RESULTS | results: {results}")
     if isinstance(results, list):
         safe_message = json.dumps({
-            # "results": [result.encode("utf-8", "ignore").decode("utf-8")
-            #             for result in results],
             "results": [{
                 'Result': result.get('Result', '').encode(
                     "utf-8", "ignore").decode("utf-8"),
@@ -263,7 +310,7 @@ def safe_google_results(results: Union[str, list]) -> str:
                     "utf-8", "ignore").decode("utf-8"),
                 'title': result.get('title', '').encode(
                     "utf-8", "ignore").decode("utf-8"),
-                'link': result.get('link', '').encode(
+                'link': result.get('href', '').encode(
                     "utf-8", "ignore").decode("utf-8"),
             } for result in results],
         })

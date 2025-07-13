@@ -1,7 +1,7 @@
 from setuptools import setup
 
-version = '0.1.13'
-description = 'The GenericSuite AI for Python (backend version).'
+version = '0.1.14'
+description = 'The GenericSuite AI for Python (backend version)'
 long_description = '''
 The GenericSuite AI
 ===================
@@ -33,7 +33,7 @@ setup(
     description=description,
     long_description=long_description,
     author='Carlos J. Ramirez',
-    author_email='tomkat_cr@yahoo.com',
+    author_email='info@genericsuite.com',
     url='https://github.com/tomkat-cr/genericsuite-be-ai',
     license='ISC License',
     py_modules=['genericsuite_ai'],

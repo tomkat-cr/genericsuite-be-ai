@@ -17,6 +17,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
+## 0.1.14 (2025-07-12)
+---
+
+### Fixes
+Fix DuckDuckGo Search "202 Ratelimit error" [GS-224].
+Fix Google Search API requests from referer empty are blocked error [GS-223].
+
+
 ## 0.1.13 (2025-07-08)
 ---
 
