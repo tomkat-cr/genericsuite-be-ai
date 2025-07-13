@@ -30,11 +30,12 @@ DEBUG = Config().DEBUG
 
 cac = CommonAppContext()
 
+DUCKDUCKGO_METHOD = os.getenv("WEBSEARCH_DUCKDUCKGO_METHOD", "ddgs")
 DUCKDUCKGO_MAX_ATTEMPTS = 3
 DUCKDUCKGO_MAX_RESULTS = 5
 DUCKDUCKGO_RATE_LIMIT_TOKEN = "202 Ratelimit"
-WEBSEARCH_DUCKDUCKGO_METHOD = os.getenv("WEBSEARCH_DUCKDUCKGO_METHOD", "ddgs")
-
+DUCKDUCKGO_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64;" + \
+                        " rv:124.0) Gecko/20100101 Firefox/124.0"
 
 GOOGLE_MAX_RESULTS = 100
 GOOGLE_MAX_PAGINATED_RESULTS = 10
@@ -87,14 +88,14 @@ def web_search_func(params: Any) -> str:
     func_error_token = gpt_func_error('').strip()
 
     if settings.WEBSEARCH_DEFAULT_PROVIDER == "ddg":
-        if WEBSEARCH_DUCKDUCKGO_METHOD == "ddgs":
+        if DUCKDUCKGO_METHOD == "ddgs":
             result = web_search_ddg(query, num_results)
         else:
             result = web_search_ddg_lc(query, num_results)
     elif settings.WEBSEARCH_DEFAULT_PROVIDER == "google":
         result = web_search_google(query, num_results)
     else:
-        if WEBSEARCH_DUCKDUCKGO_METHOD == "ddgs":
+        if DUCKDUCKGO_METHOD == "ddgs":
             result = web_search_ddg(query, num_results)
         else:
             result = web_search_ddg_lc(query, num_results)
@@ -180,7 +181,7 @@ def google_search_paginated(search_term: str, api_key: str, cse_id: str,
         # The method.get() is used to avoid errors if 'queries' does not exist.
         queries_info = res.get('queries', {})
         if 'nextPage' not in queries_info:
-            break   # No hay más páginas, salir del bucle
+            break   # No more pages; exit loop
 
         _ = DEBUG and log_debug(
             f"google_search_paginated | queries_info: {queries_info}")
@@ -253,8 +254,7 @@ def web_search_ddg(query: str, num_results: int = DEFAULT_MAX_RESULTS) -> str:
     search_results: list[Any] = []
     attempts = 0
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64;" +
-                      " rv:124.0) Gecko/20100101 Firefox/124.0"
+        "User-Agent": DUCKDUCKGO_USER_AGENT
     }
 
     if DEBUG:
