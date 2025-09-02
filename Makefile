@@ -6,6 +6,9 @@ SHELL := /bin/bash
 all:
 	@cat Makefile
 
+install:
+	poetry install
+
 lock:
 	poetry lock
 
@@ -23,17 +26,16 @@ lock-rebuild:
 build:
 	# Build 'dist' directory needed for the Pypi publish
 	poetry lock
-	# poetry lock --no-update
 	rm -rf dist
-	python3 -m build
+	poetry run python3 -m build
 
 publish-test: dev-prepare-publish requirements build
 	# Pypi Test publish
-	python3 -m twine upload --repository testpypi dist/*
+	poetry run python3 -m twine upload --repository testpypi dist/*
 
 publish: dev-prepare-publish requirements build
 	# Production Pypi publish
-	python3 -m twine upload dist/*
+	poetry run python3 -m twine upload dist/*
 
 dev-prepare-local:
 	poetry add --group dev ../genericsuite-be
