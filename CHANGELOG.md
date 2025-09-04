@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 
 
-## [Unreleased] - Date
+## [Unreleased] (Date)
 
 ### Added
 
@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Removed
 
 
-## [0.2.0] - 2025-08-02
+## [0.2.0] (2025-09-03)
 
 ### Added
 - Add: Install command to Makefile for easier dependency management.  
@@ -36,14 +36,14 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Update "transformers" to "^4.55.0" to fix the "Regular Expression Denial of Service (ReDoS)", CVE-2025-5197 and CWE-1333 [GS-219].
 
 
-## [0.1.14] - 2025-07-12
+## [0.1.14] (2025-07-12)
 
 ### Fixed
 - Fix DuckDuckGo Search "202 Ratelimit error" [GS-224].
 - Fix Google Search API requests from referer empty are blocked error [GS-223].
 
 
-## [0.1.13] - 2025-07-08
+## [0.1.13] (2025-07-08)
 
 ### Added
 - Implement OpenRouter AI provider and models [GS-182].
@@ -67,7 +67,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Set the DUCKDUCKGO_RATE_LIMIT_TOKEN to check the "202 Ratelimit" and switch to google search in case WEBSEARCH_DEFAULT_PROVIDER is not "ddg" or "google" [GS-87].
 
 
-## [0.1.12] - 2025-02-19
+## [0.1.12] (2025-02-19)
 
 ### Added
 - Implement Together AI provider and models [GS-158].
@@ -97,7 +97,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Fix "'License :: OSI Approved :: ISC License' is not a valid classifier" error running "python3 -m twine upload dist/*" [FA-84].
 
 
-## [0.1.11] - 2024-10-17
+## [0.1.11] (2024-10-17)
 
 ### Added
 - Implement preamble model to run OpenAI o1-mini/o1-preview models with Tools and System messages [GS-140].
@@ -112,7 +112,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Fix Tools make Agent returns empty responses in LCEL chains. Now Agent returns the result when there're no more Tools to call [GS-143].
 
 
-## [0.1.10] - 2024-10-07
+## [0.1.10] (2024-10-07)
 
 ### Added
 - Implement HF (HuggingFace) local pipelines [GS-59].
@@ -144,7 +144,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - The "langchain_hugginface" dependency is not longer included in this package. It must be imported in the App's project [GS-136].
 
 
-## [0.1.9] - 2024-07-27
+## [0.1.9] (2024-07-27)
 
 ### Added
 - Add: ".nvmrc" file to set the repo default node version.
@@ -153,7 +153,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Fix: typing in create_app() parameters.
 
 
-## [0.1.8] - 2024-07-18
+## [0.1.8] (2024-07-18)
 
 ### Added
 - Add "langchain-google-community" due to a deprecation notice about GoogleSearchAPIWrapper [GS-66].
@@ -170,7 +170,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Change: minor linting changes.
 
 
-## [0.1.7] - 2024-06-06
+## [0.1.7] (2024-06-06)
 
 ### Added
 - Add AI Endpoints and create_app for FastAPI [FA-246].
@@ -190,7 +190,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Fix LCEL non-agent compatibility by removing "args_schema" from text_to_audio_response() Tool decorator [GS-66].
 
 
-## [0.1.6] - 2024-05-28
+## [0.1.6] (2024-05-28)
 
 ### Added
 - Implement new OpenAI model gpt-4o [GS-78].
@@ -213,13 +213,13 @@ Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as defaul
 - Implement non-agent LCEL chains to solve issue getting AI assistant responses in deployed environments [GS-66].
 
 
-## [0.1.5] - 2024-04-20
+## [0.1.5] (2024-04-20)
 
 ### Changed
 - Updated genericsuite = "0.1.5" with "mangum" to make FastAPI work on AWS Lambda [FA-246].
 
 
-## [0.1.4] - 2024-04-20
+## [0.1.4] (2024-04-20)
 
 ### Changed
 - Updated genericsuite = "0.1.4" with FastAPI enhanced support [FA-246].
@@ -228,7 +228,7 @@ Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as defaul
 - License changed to ISC in "pyproject.toml" [FA-244].
 
 
-## [0.1.3] - 2024-04-09
+## [0.1.3] (2024-04-09)
 
 ### Changed
 - Updated genericsuite = "0.1.3".
@@ -236,7 +236,7 @@ Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as defaul
 - Remove deprecated FRONTEND_AUDIENCE.
 
 
-## [0.1.2] - 2024-04-01
+## [0.1.2] (2024-04-01)
 
 ### Added
 - Add stage "demo" to APP_DB_ENGINE, APP_DB_NAME, APP_DB_URI, APP_CORS_ORIGIN, and AWS_S3_CHATBOT_ATTACHMENTS_BUCKET [FA-213].
@@ -249,7 +249,7 @@ Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as defaul
 - License changed to ISC [FA-244].
 
 
-## [0.1.1] - 2024-03-19
+## [0.1.1] (2024-03-19)
 
 ### Added
 - Add Makefile with `build, `publish` and `publish-test` options.
@@ -259,27 +259,27 @@ Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as defaul
 - Updated genericsuite = "0.1.1"
 
 
-## [0.1.0] - 2024-03-14
+## [0.1.0] (2024-03-14)
 
 ### Added
 - Publish to Pypi
 
 
-## [0.0.4] - 2024-03-03
+## [0.0.4] (2024-03-03)
 
 ### Added
 - Separate BE Generic Suite to publish on PyPi [FA-219].
 - Initial commit as an independent repository.
 
 
-## [0.0.3] - 2024-02-19
+## [0.0.3] (2024-02-19)
 
 ### Added
 - Add LC HuggingFace chat models [FA-233].
 - Add Web scrapping module.
 
 
-## [0.0.2] - 2024-02-18
+## [0.0.2] (2024-02-18)
 
 ### Added
 - Implement GPT4 Vision [FA-144].
@@ -295,7 +295,7 @@ Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as defaul
 - Add double version of GPT Functions and LC Tools [FA-211].
 
 
-## [0.0.1] - 2023-07-21
+## [0.0.1] (2023-07-21)
 
 ### Added
 - Add `ai_chatbot` endpoint to handle the AI Assistant based on OpenAI functions call [FA-93].
