@@ -223,7 +223,8 @@ class Config(ConfigSuperClass):
             'OPENAI_MODEL_NAME',
             self.get_env(
                 'OPENAI_MODEL',
-                'gpt-5-nano'
+                'gpt-4o-mini'
+                # 'gpt-5-nano'
                 # 'gpt-5-mini'
                 # 'gpt-5'
                 # 'gpt-4o-mini'

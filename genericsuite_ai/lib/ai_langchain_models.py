@@ -6,7 +6,6 @@ from typing import Union, Optional, Any
 import json
 
 from langchain_anthropic import ChatAnthropic
-from langchain_aws import ChatBedrock
 from langchain_groq import ChatGroq
 from langchain_openai import OpenAI
 from langchain_openai import ChatOpenAI
@@ -444,6 +443,7 @@ def get_model(
         if model_type == "bedrock":
             # https://python.langchain.com/docs/integrations/llms/bedrock/
             # https://python.langchain.com/docs/how_to/response_metadata/#bedrock-anthropic
+            from langchain_aws import ChatBedrock    # type: ignore[import]
             manufacturer = "AWS"
             model_name = settings.AWS_BEDROCK_MODEL_ID
             if 'model_name' in model_params:

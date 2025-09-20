@@ -16,7 +16,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Removed
 
 
-## [0.2.0] - 2025-09-04
+## [0.2.0] - 2025-09-20
 
 ### Added
 - Add: Install command to Makefile for easier dependency management.  
@@ -25,7 +25,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Update README for clarity and accuracy.
 - Update CHANGELOG format to be more semantic.
 - Update author email in pyproject.toml and setup.py.
-- Set "gpt-5-mini" as default OpenAI model [GS-226].
+- Bump urllib3 to 2.5.0 and numpy to 2.0.2 to have compatibility with GS BE Core.
+- Refactor imports in ai_langchain_models.py to include ChatBedrock (AWS Bedrock) and langchain-aws conditionally.
 
 ### Fixed
 - Fix the "langchain_community not found" by adding the "langchain-community" dependency. This addition required the upgrade of dependencies "langchain" to "0.3.26" and "faiss-cpu" to "^1.11.0.post1".
@@ -34,6 +35,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ### Security
 - Update "transformers" to "^4.55.0" to fix the "Regular Expression Denial of Service (ReDoS)", CVE-2025-5197 and CWE-1333 [GS-219].
+
+### Removed
+- Remove "langchain-aws" to enable upgrade urllib3, so ChatBedrock (AWS Bedrock) is not available temporarily.
 
 
 ## [0.1.14] - 2025-07-12

@@ -41,7 +41,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.10,<4.0"
 openai = "^1.7.2"
 langchain = "0.3.26"
 click = "^8.1.7"
@@ -62,8 +62,7 @@ text-generation = "^0.6.1"
 langchain-core = "^0.3.5"
 langchain-anthropic = "^0.2.1"
 langchain-groq = "^0.2.0"
-urllib3 = "1.26"
-langchain-aws = "^0.2.1"
+urllib3 = "^2.5.0"
 clarifai = "10.1.0"
 transformers = "^4.55.0"
 langchain-ollama = "^0.2.0"
