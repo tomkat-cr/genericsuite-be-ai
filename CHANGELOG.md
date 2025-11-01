@@ -15,6 +15,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ### Removed
 
+### Security
+
 
 ## [0.2.0] - 2025-09-20
 
@@ -34,7 +36,38 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Add new development dependencies including build and twine to fix a "make publish" error.
 
 ### Security
-- Update "transformers" to "^4.55.0" to fix the "Regular Expression Denial of Service (ReDoS)", CVE-2025-5197 and CWE-1333 [GS-219].
+- Update "transformers" to "^4.55.0" to fix security vulnerabilities [GS-219]:
+    * "Regular Expression Denial of Service (ReDoS)", CVE-2025-5197 and CWE-1333
+    * "Hugging Face Transformers Regular Expression Denial of Service (ReDoS) vulnerability"
+    * "Hugging Face Transformers vulnerable to Regular Expression Denial of Service (ReDoS) in the AdamWeightDecay optimizer"
+    * "Hugging Face Transformers library has Regular Expression Denial of Service"
+    * "Hugging Face Transformers is vulnerable to ReDoS through its MarianTokenizer "
+    * "Transformers is vulnerable to ReDoS attack through its DonutProcessor class"
+    "Transformers's Improper Input Validation vulnerability can be exploited through username injection"
+- Update "urllib3" to "^2.5.0" to fix security vulnerabilities [GS-219]:
+    * "Catastrophic backtracking in URL authority parser when passed URL containing many @ characters"
+    * "`Cookie` HTTP header isn't stripped on cross-origin redirects"
+    * "urllib3 redirects are not disabled when retries are disabled on PoolManager instantiation"
+    * "urllib3's Proxy-Authorization request header isn't stripped during cross-origin redirects"
+    * "urllib3's request body not stripped after redirect from 303 status changes request method to GET"
+    * "Using default SSLContext for HTTPS requests in an HTTPS proxy doesn't verify certificate hostname for proxy connection"
+    * "`Cookie` HTTP header isn't stripped on cross-origin redirects"
+- Update "setuptools" to "^78.1.1" to fix the security vulnerability [GS-219]:
+    * "setuptools has a path traversal vulnerability in PackageIndex.download that leads to Arbitrary File Write"
+- Remove "text-generation" to fix the security vulnerability (and it's not used in this project) [GS-219]:
+    * "Code injection vulnerability exists in the huggingface/text-generation-inference repository"
+- Update "clarifai" to "^11.9.0" to fix security vulnerabilities ("llama-index-core" is not longer a dependency of clarifi) [GS-219]:
+    * "llama-index-core insecurely handles temporary files"
+    * "LlamaIndex affected by a Denial of Service (DOS) in JSONReader"
+    * "LlamaIndex vulnerable to Path Traversal attack through its encode_image function"
+    * "LlamaIndex vulnerable to DoS attack through uncontrolled recursive JSON parsing"
+    * "LlamaIndex has Incomplete Documentation of Program Execution related to JsonPickleSerializer "
+- Install "pypdf" latest version "^6.1.3" to fix security vulnerabilities (it was a dependency of clarifai) [GS-219]:
+    * "pypdf possibly loops infinitely when reading DCT inline images without EOF marker"
+    * "pypdf can exhaust RAM via manipulated LZWDecode streams"
+    * "PyPDF's Manipulated FlateDecode streams can exhaust RAM"
+- Update "langchain-text-splitters" to "^0.3.9" and "langchain-core" to "0.3.79" to fix security vulnerabilities [GS-219]:
+    * "LangChain Text Splitters is vulnerable to XML External Entity (XXE) attacks due to unsafe XSLT parsing"
 
 ### Removed
 - Remove "langchain-aws" to enable upgrade urllib3, so ChatBedrock (AWS Bedrock) is not available temporarily.
