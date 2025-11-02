@@ -66,7 +66,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
     * "pypdf possibly loops infinitely when reading DCT inline images without EOF marker"
     * "pypdf can exhaust RAM via manipulated LZWDecode streams"
     * "PyPDF's Manipulated FlateDecode streams can exhaust RAM"
-- Update "langchain-text-splitters" to "^0.3.9" and "langchain-core" to "0.3.79" to fix security vulnerabilities [GS-219]:
+- Update all langchain dependencies to latest versions to fix security vulnerabilities [GS-219]:
     * "LangChain Text Splitters is vulnerable to XML External Entity (XXE) attacks due to unsafe XSLT parsing"
 
 ### Removed
