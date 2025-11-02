@@ -7,10 +7,8 @@ import json
 
 from langchain_anthropic import ChatAnthropic
 from langchain_groq import ChatGroq
-from langchain_openai import OpenAI
-from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAI, ChatOpenAI
 from langchain_ollama import ChatOllama
-from langchain_together import ChatTogether
 from langchain_community.llms import Clarifai
 
 from langchain_core.callbacks import AsyncCallbackHandler
@@ -32,6 +30,7 @@ from genericsuite_ai.lib.clarifai import (
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 from genericsuite_ai.lib.huggingface_endpoint import (
     GsHuggingFaceEndpoint,
+    DEFAULT_TASK as HF_DEFAULT_TASK,
 )
 from genericsuite_ai.lib.huggingface_chat_model import (
     GsChatHuggingFace,
@@ -39,7 +38,7 @@ from genericsuite_ai.lib.huggingface_chat_model import (
 from genericsuite_ai.lib.ibm import IbmWatsonx
 from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
 
-DEBUG = False
+DEBUG = True
 
 
 class BedrockAsyncCallbackHandler(AsyncCallbackHandler):
@@ -291,9 +290,11 @@ def get_model(
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
             if 'model_name' in model_params:
                 model_name = model_params['model_name']
+            model_task = model_params.get(
+                'model_task', HF_DEFAULT_TASK)  # 'text-generation'
             model_object = GsHuggingFaceEndpoint(
                 repo_id=model_name,
-                task="text-generation",
+                task=model_task,
                 do_sample=False,
                 max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
                 top_k=int(settings.HUGGINGFACE_TOP_K),
@@ -335,7 +336,7 @@ def get_model(
                 model_name = model_params['model_name']
             model_object = HuggingFaceEndpoint(
                 repo_id=model_name,
-                task="text-generation",
+                task=HF_DEFAULT_TASK,
                 do_sample=False,
                 max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
                 top_k=int(settings.HUGGINGFACE_TOP_K),
@@ -344,6 +345,7 @@ def get_model(
                     settings.HUGGINGFACE_REPETITION_PENALTY),
                 huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
                 timeout=float(settings.HUGGINGFACE_TIMEOUT),
+                provider=settings.HUGGINGFACE_PROVIDER,
             )
             # 0 = use HuggingFaceEndpoint + LangChain Agent
             # 1 = use ChatHuggingFace + LangChain LCEL
@@ -388,7 +390,7 @@ def get_model(
                 model_config["device"] = settings.HUGGINGFACE_PIPELINE_DEVICE
             # Pipeline() reference:
             # https://huggingface.co/transformers/v3.0.2/main_classes/pipelines.html
-            pipe = pipeline("text-generation", **model_config)
+            pipe = pipeline(HF_DEFAULT_TASK, **model_config)
             model_object = HuggingFacePipeline(
                 pipeline=pipe,
                 # timeout=float(settings.HUGGINGFACE_TIMEOUT),
@@ -654,9 +656,10 @@ def get_model(
                     "ERROR [GET_MODEL-TOGETHER-010] - Missing TOGETHER_API_KEY"
             else:
                 model_config = {
-                    "together_api_key": api_key,
+                    "api_key": api_key,
                     "model": model_name,
                     "stop": ["<|eot_id|>", "<|eom_id|>"],
+                    "base_url": "https://api.together.xyz/v1",
                 }
                 if settings.TOGETHER_TEMPERATURE:
                     model_config["temperature"] = \
@@ -666,7 +669,7 @@ def get_model(
                 if settings.TOGETHER_MAX_TOKENS:
                     model_config["max_tokens"] = \
                         int(settings.TOGETHER_MAX_TOKENS)
-                model_object = ChatTogether(**model_config)
+                model_object = ChatOpenAI(**model_config)
 
     except Exception as err:
         error = f"[GET_MODEL-GENEX-010] - {err}"

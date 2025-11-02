@@ -36,7 +36,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Add new development dependencies including build and twine to fix a "make publish" error.
 
 ### Security
-- Update "transformers" to "^4.55.0" to fix security vulnerabilities [GS-219]:
+- Update "transformers" to "^4.57.1" to fix security vulnerabilities [GS-219]:
     * "Regular Expression Denial of Service (ReDoS)", CVE-2025-5197 and CWE-1333
     * "Hugging Face Transformers Regular Expression Denial of Service (ReDoS) vulnerability"
     * "Hugging Face Transformers vulnerable to Regular Expression Denial of Service (ReDoS) in the AdamWeightDecay optimizer"
@@ -54,7 +54,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
     * "`Cookie` HTTP header isn't stripped on cross-origin redirects"
 - Update "setuptools" to "^78.1.1" to fix the security vulnerability [GS-219]:
     * "setuptools has a path traversal vulnerability in PackageIndex.download that leads to Arbitrary File Write"
-- Remove "text-generation" to fix the security vulnerability (and it's not used in this project) [GS-219]:
+- Remove "text-generation" to fix the security vulnerability (also it's not used in this project) [GS-219]:
     * "Code injection vulnerability exists in the huggingface/text-generation-inference repository"
 - Update "clarifai" to "^11.9.0" to fix security vulnerabilities ("llama-index-core" is not longer a dependency of clarifi) [GS-219]:
     * "llama-index-core insecurely handles temporary files"
@@ -70,7 +70,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
     * "LangChain Text Splitters is vulnerable to XML External Entity (XXE) attacks due to unsafe XSLT parsing"
 
 ### Removed
-- Remove "langchain-aws" to enable upgrade urllib3, so ChatBedrock (AWS Bedrock) is not available temporarily.
+- Remove "langchain-together" to enable upgrade of all other langchain dependencies, and routes Together AI calls through the OpenAI API.
 
 
 ## [0.1.14] - 2025-07-12

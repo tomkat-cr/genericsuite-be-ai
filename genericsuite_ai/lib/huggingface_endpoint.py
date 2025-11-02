@@ -1,17 +1,18 @@
-import json  # type: ignore[import-not-found]
-import logging
-import os
-from typing import Any, AsyncIterator, Dict, Iterator, List, Mapping, Optional
-
+from typing_extensions import Self
+from pydantic import ConfigDict, Field, model_validator
+from langchain_core.utils import from_env, get_pydantic_field_names
+from langchain_core.outputs import GenerationChunk
+from langchain_core.language_models.llms import LLM
 from langchain_core.callbacks import (
     AsyncCallbackManagerForLLMRun,
     CallbackManagerForLLMRun,
 )
-from langchain_core.language_models.llms import LLM
-from langchain_core.outputs import GenerationChunk
-from langchain_core.utils import from_env, get_pydantic_field_names
-from pydantic import ConfigDict, Field, model_validator
-from typing_extensions import Self
+import json  # type: ignore[import-not-found]
+import logging
+import os
+from typing import Any, AsyncIterator, Dict, Iterator, List, Mapping, \
+    Optional, Callable
+
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,8 @@ VALID_TASKS = (
     "summarization",
     "conversational",
 )
+
+DEFAULT_TASK = "conversational"  # "text-generation"
 
 
 class GsHuggingFaceEndpoint(LLM):
@@ -68,10 +71,11 @@ class GsHuggingFaceEndpoint(LLM):
     """  # noqa: E501
 
     endpoint_url: Optional[str] = None
-    """Endpoint URL to use. If repo_id is not specified then this needs to given or 
-    should be pass as env variable in `HF_INFERENCE_ENDPOINT`"""
+    """Endpoint URL to use. If repo_id is not specified then this needs to
+    given or should be pass as env variable in `HF_INFERENCE_ENDPOINT`"""
     repo_id: Optional[str] = None
-    """Repo to use. If endpoint_url is not specified then this needs to given"""
+    """Repo to use. If endpoint_url is not specified then this needs to
+    given"""
     huggingfacehub_api_token: Optional[str] = Field(
         default_factory=from_env("HUGGINGFACEHUB_API_TOKEN", default=None)
     )
@@ -81,8 +85,8 @@ class GsHuggingFaceEndpoint(LLM):
     """The number of highest probability vocabulary tokens to keep for
     top-k-filtering."""
     top_p: Optional[float] = 0.95
-    """If set to < 1, only the smallest set of most probable tokens with probabilities
-    that add up to `top_p` or higher are kept for generation."""
+    """If set to < 1, only the smallest set of most probable tokens with
+    probabilities that add up to `top_p` or higher are kept for generation."""
     typical_p: Optional[float] = 0.95
     """Typical Decoding mass. See [Typical Decoding for Natural Language
     Generation](https://arxiv.org/abs/2202.00666) for more information."""
@@ -111,7 +115,8 @@ class GsHuggingFaceEndpoint(LLM):
     """Watermarking with [A Watermark for Large Language Models]
     (https://arxiv.org/abs/2301.10226)"""
     server_kwargs: Dict[str, Any] = Field(default_factory=dict)
-    """Holds any text-generation-inference server parameters not explicitly specified"""
+    """Holds any text-generation-inference server parameters not explicitly
+    specified"""
     model_kwargs: Dict[str, Any] = Field(default_factory=dict)
     """Holds any model parameters valid for `call` not explicitly specified"""
     model: str
@@ -142,11 +147,13 @@ class GsHuggingFaceEndpoint(LLM):
                 )
                 extra[field_name] = values.pop(field_name)
 
-        invalid_model_kwargs = all_required_field_names.intersection(extra.keys())
+        invalid_model_kwargs = all_required_field_names.intersection(
+            extra.keys())
         if invalid_model_kwargs:
             raise ValueError(
-                f"Parameters {invalid_model_kwargs} should be specified explicitly. "
-                f"Instead they were passed in as part of `model_kwargs` parameter."
+                f"Parameters {invalid_model_kwargs} should be specified"
+                f" explicitly. Instead they were passed in as part of"
+                " `model_kwargs` parameter."
             )
 
         values["model_kwargs"] = extra
@@ -155,10 +162,10 @@ class GsHuggingFaceEndpoint(LLM):
         # in validate_environment, we need to populate values["model"].
         # from InferenceClient docstring:
         # model (`str`, `optional`):
-        #     The model to run inference with. Can be a model id hosted on the Hugging
-        #       Face Hub, e.g. `bigcode/starcoder`
-        #     or a URL to a deployed Inference Endpoint. Defaults to None, in which
-        #       case a recommended model is
+        #     The model to run inference with. Can be a model id hosted on the
+        #       Hugging Face Hub, e.g. `bigcode/starcoder`
+        #     or a URL to a deployed Inference Endpoint. Defaults to None, in
+        #       which case a recommended model is
         #     automatically selected for the task.
 
         # this string could be in 3 places of descending priority:
@@ -172,22 +179,24 @@ class GsHuggingFaceEndpoint(LLM):
 
         if sum([bool(model), bool(endpoint_url), bool(repo_id)]) > 1:
             raise ValueError(
-                "Please specify either a `model` OR an `endpoint_url` OR a `repo_id`,"
-                "not more than one."
+                "Please specify either a `model` OR an `endpoint_url` OR a"
+                " `repo_id`, not more than one."
             )
         values["model"] = (
-            model or endpoint_url or repo_id or os.environ.get("HF_INFERENCE_ENDPOINT")
+            model or endpoint_url or repo_id or os.environ.get(
+                "HF_INFERENCE_ENDPOINT")
         )
         if not values["model"]:
             raise ValueError(
-                "Please specify a `model` or an `endpoint_url` or a `repo_id` for the "
-                "model."
+                "Please specify a `model` or an `endpoint_url` or a `repo_id`"
+                " for the model."
             )
         return values
 
     @model_validator(mode="after")
     def validate_environment(self) -> Self:
-        """Validate that package is installed and that the API token is valid."""
+        """Validate that package is installed and that the API token is
+        valid."""
         try:
             from huggingface_hub import login  # type: ignore[import]
 
@@ -212,24 +221,29 @@ class GsHuggingFaceEndpoint(LLM):
 
         from huggingface_hub import AsyncInferenceClient, InferenceClient
 
+        client_args = self.server_kwargs.copy()
+        if "stop_sequences" in client_args:
+            client_args["stop"] = client_args["stop_sequences"]
+            del client_args["stop_sequences"]
         self.client = InferenceClient(
             model=self.model,
             timeout=self.timeout,
             token=huggingfacehub_api_token,
-            **self.server_kwargs,
+            **client_args,
         )
         self.async_client = AsyncInferenceClient(
             model=self.model,
             timeout=self.timeout,
             token=huggingfacehub_api_token,
-            **self.server_kwargs,
+            **client_args,
         )
 
         return self
 
     @property
     def _default_params(self) -> Dict[str, Any]:
-        """Get the default parameters for calling text generation inference API."""
+        """Get the default parameters for calling text generation inference
+         API."""
         return {
             "max_new_tokens": self.max_new_tokens,
             "top_k": self.top_k,
@@ -260,11 +274,38 @@ class GsHuggingFaceEndpoint(LLM):
         """Return type of llm."""
         return "huggingface_endpoint"
 
+    def _get_callable_method(self, client: Any) -> Callable:
+        if self.task == "text-generation":
+            callable_method = client.text_generation
+        elif self.task == "conversational":
+            callable_method = client.chat_completion
+        else:
+            raise ValueError(f"Invalid task: {self.task}")
+        return callable_method
+
     def _invocation_params(
         self, runtime_stop: Optional[List[str]], **kwargs: Any
     ) -> Dict[str, Any]:
         params = {**self._default_params, **kwargs}
-        params["stop_sequences"] = params["stop_sequences"] + (runtime_stop or [])
+        params["stop_sequences"] = params["stop_sequences"] + \
+            (runtime_stop or [])
+
+        if self.task == "conversational":
+            replacements = {
+                "max_new_tokens": "max_tokens",
+                "repetition_penalty": "frequency_penalty",
+                "stop_sequences": "stop"
+            }
+            for param_name, param_replace in replacements.items():
+                if param_name in params:
+                    params[param_replace] = params[param_name]
+                    del params[param_name]
+            for param_name in ["top_k", "do_sample", "timeout", "typical_p",
+                               "return_full_text", "truncate",
+                               "inference_server_url", "streaming",
+                               "watermark", "server_kwargs"]:
+                if param_name in params:
+                    del params[param_name]
         return params
 
     def _call(
@@ -278,7 +319,8 @@ class GsHuggingFaceEndpoint(LLM):
         invocation_params = self._invocation_params(stop, **kwargs)
         if self.streaming:
             completion = ""
-            for chunk in self._stream(prompt, stop, run_manager, **invocation_params):
+            for chunk in self._stream(prompt, stop, run_manager,
+                                      **invocation_params):
                 completion += chunk.text
             return completion
         else:
@@ -293,9 +335,10 @@ class GsHuggingFaceEndpoint(LLM):
             response_text = json.loads(response.decode())[0]["generated_text"]
 
             # Maybe the generation has stopped at one of the stop sequences:
-            # then we remove this stop sequence from the end of the generated text
+            # then we remove this stop sequence from the end of the generated
+            # text
             for stop_seq in invocation_params["stop_sequences"]:
-                if response_text[-len(stop_seq) :] == stop_seq:
+                if response_text[-len(stop_seq):] == stop_seq:
                     response_text = response_text[: -len(stop_seq)]
             return response_text
 
@@ -326,7 +369,7 @@ class GsHuggingFaceEndpoint(LLM):
             # Maybe the generation has stopped at one of the stop sequences:
             # then remove this stop sequence from the end of the generated text
             for stop_seq in invocation_params["stop_sequences"]:
-                if response_text[-len(stop_seq) :] == stop_seq:
+                if response_text[-len(stop_seq):] == stop_seq:
                     response_text = response_text[: -len(stop_seq)]
             return response_text
 
@@ -338,8 +381,9 @@ class GsHuggingFaceEndpoint(LLM):
         **kwargs: Any,
     ) -> Iterator[GenerationChunk]:
         invocation_params = self._invocation_params(stop, **kwargs)
+        callable_method = self._get_callable_method(self.client)
 
-        for response in self.client.text_generation(
+        for response in callable_method(
             prompt, **invocation_params, stream=True
         ):
             # identify stop sequence in generated text, if any
@@ -375,7 +419,8 @@ class GsHuggingFaceEndpoint(LLM):
         **kwargs: Any,
     ) -> AsyncIterator[GenerationChunk]:
         invocation_params = self._invocation_params(stop, **kwargs)
-        async for response in await self.async_client.text_generation(
+        callable_method = self._get_callable_method(self.async_client)
+        async for response in callable_method(
             prompt, **invocation_params, stream=True
         ):
             # identify stop sequence in generated text, if any

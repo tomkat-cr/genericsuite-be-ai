@@ -418,6 +418,16 @@ class Config(ConfigSuperClass):
             "0" if "-Instruct" in self.HUGGINGFACE_DEFAULT_CHAT_MODEL else "1"
         )
 
+        self.HUGGINGFACE_PROVIDER = self.get_env(
+            'HUGGINGFACE_PROVIDER',
+            "auto"
+            # set your provider here:
+            #   https://hf.co/settings/inference-providers
+            # provider="hyperbolic",
+            # provider="nebius",
+            # provider="together",
+        )
+
         self.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL = self.get_env(
             'HUGGINGFACE_DEFAULT_IMG_GEN_MODEL',
             "black-forest-labs/FLUX.1-schnell"
