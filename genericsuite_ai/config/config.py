@@ -457,10 +457,16 @@ class Config(ConfigSuperClass):
 
         # HF Options and general parameters
 
-        self.HUGGINGFACE_ENDPOINT_URL = self.get_env(
-            'HUGGINGFACE_ENDPOINT_URL',
-            "https://api-inference.huggingface.co/models"
+        self.HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT = self.get_env(
+            'HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT',
+            "https://router.huggingface.co/v1/chat/completions"
         )
+
+        self.HUGGINGFACE_TEXT_TO_IMAGE_ENDPOINT = self.get_env(
+            'HUGGINGFACE_TEXT_TO_IMAGE_ENDPOINT',
+            "https://router.huggingface.co/hf-inference/models"
+        )
+
         self.HUGGINGFACE_VERBOSE = self.get_env(
             "HUGGINGFACE_VERBOSE", "0")
 

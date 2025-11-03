@@ -163,6 +163,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Implement GS Huggingface lightweight model, identified by model_types "huggingface_remote" or "gs_huggingface". The model_types "huggingface" and "huggingface_pipeline" use the "langchain_hugginface" dependency that required "sentence-transformers", making imposible to deploy the project AWS Lambda Functions [GS-136].
 - Implement Falcon Mamba with HF [GS-118].
 - Implement Meta Llama 3.1 with HF [GS-119].
+- Implement HuggingFaceChatModel langchain model class that uses the HF fetch/post endpoint [GS-59].
+- Add HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT envvar [GS-59].
+
 
 ### Changed
 - Langchain upgraded to "^0.3.0" [GS-131].
@@ -171,6 +174,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Config class accepts both OPENAI_MODEL_NAME and OPENAI_MODEL envvars [GS-128].
 - get_model() "billing" verification logic moved to get_model_middleware() [GS-128].
 - The user with free plan can only use the "gpt-4o-mini" model with their own API Key, regardless of what is configured in LANGCHAIN_DEFAULT_MODEL [FA-233].
+- Rename HUGGINGFACE_ENDPOINT_URL to HUGGINGFACE_TEXT_TO_IMAGE_ENDPOINT [GS-59].
+- Add app_context to the IbmWatsonx langchain model class.
 
 ### Fixed
 - Fix Anthropic Claude2 API Error since large prompt change, replacing Claude2 with Claude 3.5 Sonnet [GS-33].

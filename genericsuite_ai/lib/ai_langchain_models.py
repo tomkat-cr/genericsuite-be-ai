@@ -28,6 +28,7 @@ from genericsuite_ai.lib.clarifai import (
     get_model_config,
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
+
 from genericsuite_ai.lib.huggingface_endpoint import (
     GsHuggingFaceEndpoint,
     DEFAULT_TASK as HF_DEFAULT_TASK,
@@ -35,6 +36,8 @@ from genericsuite_ai.lib.huggingface_endpoint import (
 from genericsuite_ai.lib.huggingface_chat_model import (
     GsChatHuggingFace,
 )
+from genericsuite_ai.lib.huggingface import HuggingFaceChatModel
+
 from genericsuite_ai.lib.ibm import IbmWatsonx
 from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
 
@@ -284,8 +287,7 @@ def get_model(
             model_object = ChatOllama(**model_config)
 
         # Genericsuite's Hugging Face lightweight Inference API
-        if model_type == "huggingface_remote" or \
-           model_type == "gs_huggingface":
+        if model_type == "gs_huggingface":
             manufacturer = "GS Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
             if 'model_name' in model_params:
@@ -317,6 +319,24 @@ def get_model(
             else:
                 # Instruct models or pure LLMs Doesn't work with LCEL
                 pref_agent_type = 'react_chat_agent'
+
+        if model_type == "huggingface_remote":
+            manufacturer = "GS Hugging Face (Remote Chat Model)"
+            tools_permitted = False
+            pref_agent_type = 'react_chat_agent'
+            model_name = model_params.get(
+                "model_name") or settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
+            api_key = model_params.get(
+                "api_key") or settings.HUGGINGFACE_API_KEY
+            if not api_key:
+                error = "ERROR [GET_MODEL-HF-010] - Missing" \
+                    " HUGGINGFACE_API_KEY"
+            else:
+                model_object = HuggingFaceChatModel(
+                    model_name=model_name,
+                    api_key=api_key,
+                    app_context=app_context,
+                )
 
         if model_type == "huggingface":
             # https://python.langchain.com/docs/integrations/platforms/huggingface/
@@ -644,6 +664,7 @@ def get_model(
                     # n=n,
                     app_context=app_context,
                 )
+
         # Together
         if model_type == "together":
             # https://python.langchain.com/docs/integrations/chat/together/
