@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
-## [0.2.0] - 2025-09-20
+## [0.2.0] - 2025-11-07
 
 ### Added
 - Add: Install command to Makefile for easier dependency management.  
