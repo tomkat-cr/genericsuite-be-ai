@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 from openai import OpenAI
 from openai.resources.images import ImagesResponse
 
-from langchain.agents import tool
+from langchain.tools import tool
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -253,7 +253,8 @@ def get_img_gen_response(response: dict, other: dict) -> dict:
             # and extract the URLs from the 'data' attribute
             if isinstance(ig_response, ImagesResponse):
                 # Assuming each 'Image' object in the 'data' list has a 'url' attribute
-                image_urls = [image.url for image in ig_response.data if hasattr(image, 'url')]
+                image_urls = [
+                    image.url for image in ig_response.data if hasattr(image, 'url')]
                 response['response'] = image_urls
             else:
                 # Handle other types of responses or raise an error
@@ -348,12 +349,12 @@ def image_generator(params: Any) -> dict:
     other["mock_error"] = get_default_value("mock_error", other, "0")
 
     _ = DEBUG and log_debug(
-            "\nGS Image Generator\n" +
-            f"Image size: {other['size']}\n" +
-            f"Image quality: {other['quality']}\n" +
-            f"Question: {question}\n" +
-            f"Other parameters: {other}\n"
-            f"OPENAI_IMAGE_GEN_MODEL: {settings.OPENAI_IMAGE_GEN_MODEL}")
+        "\nGS Image Generator\n" +
+        f"Image size: {other['size']}\n" +
+        f"Image quality: {other['quality']}\n" +
+        f"Question: {question}\n" +
+        f"Other parameters: {other}\n"
+        f"OPENAI_IMAGE_GEN_MODEL: {settings.OPENAI_IMAGE_GEN_MODEL}")
 
     response["question"] = question
 
@@ -432,7 +433,7 @@ def update_img_and_conversation(response: dict, other: dict) -> dict:
                     "attachment_url": item["public_url"],
                     "final_filename": item["final_filename"],
                 }
-            for item in public_url_list]
+                for item in public_url_list]
             _ = DEBUG and log_debug(
                 "\nIMAGE_GENERATOR | Answer fixed for" +
                 " 'update_conversation_db':\n" +
@@ -459,7 +460,7 @@ Args: params (dict): Tool parameters. Must contain: "question" (str): a question
 def image_generator_text_response_func(params: Any) -> str:
     """
     Performs text to image generation.
-    
+
     Args:
         params (dict): Tool parameters. Must contain:
             "question" (str): a question about the image specified.

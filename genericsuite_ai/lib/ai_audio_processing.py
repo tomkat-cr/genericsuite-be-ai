@@ -9,7 +9,7 @@ import urllib.parse
 from openai import OpenAI
 from openai.types.audio.transcription import Transcription
 
-from langchain.agents import tool
+from langchain.tools import tool
 from pydantic import BaseModel, Field
 
 from genericsuite.util.aws import upload_nodup_file_to_s3, remove_from_s3

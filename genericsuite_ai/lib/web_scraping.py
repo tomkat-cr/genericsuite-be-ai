@@ -7,11 +7,11 @@ import importlib
 
 from langchain_community.document_loaders.web_base import WebBaseLoader
 
-# from langchain.embeddings import OpenAIEmbeddings
-# from langchain.vectorstores import Chroma
-from langchain.chains.retrieval_qa.base import RetrievalQA
-# from langchain.chains.retrieval_qa.base import BaseRetrievalQA
-from langchain.agents import tool
+# from langchain_classic.embeddings import OpenAIEmbeddings
+# from langchain_classic.vectorstores import Chroma
+from langchain_classic.chains.retrieval_qa.base import RetrievalQA
+# from langchain_classic.chains.retrieval_qa.base import BaseRetrievalQA
+from langchain.tools import tool
 from pydantic import BaseModel, Field
 
 from genericsuite.util.app_context import CommonAppContext
@@ -191,7 +191,7 @@ def webpage_analyzer(
                 f"\n | qa_chain: {qa_chain}"
                 # f'\n | qa_chain_result["qa_chain"]:
                 # {qa_chain_result["qa_chain"]}'
-                )
+            )
 
         # loop = asyncio.get_event_loop()
         # result["answer"] = \

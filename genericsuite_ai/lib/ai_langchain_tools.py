@@ -1,13 +1,13 @@
 """
 Langchain tools
 """
-from typing import Union, Any
+from typing import Any
 import json
 
-from langchain.schema.messages import (
-    HumanMessage, SystemMessage, AIMessage   #  AnyMessage
+from langchain_classic.schema.messages import (
+    HumanMessage, SystemMessage, AIMessage  # AnyMessage
 )
-from langchain.memory import ConversationBufferMemory
+from langchain_classic.memory import ConversationBufferMemory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import BaseMessage
 
@@ -24,6 +24,7 @@ class ExistingChatMessageHistory(BaseChatMessageHistory):
     """
     Creates a chat message history from a existing conversation.
     """
+
     def __init__(self, messages: list[BaseMessage]):
         self.messages = []
         self.add_messages(messages=messages)
@@ -78,7 +79,8 @@ def messages_to_langchain_fmt(messages: list, message_format: str = None
                 AIMessage(content=v["attachment_url"])
             ) if v["role"] == 'attachment' else
             None
-            # Throws Cannot instantiate typing.Union, <class 'TypeError'> [AIRCLC-E020]
+            # Throws Cannot instantiate typing.Union, <class 'TypeError'>
+            #   [AIRCLC-E020]
             # AnyMessage(content=v["content"])
             for v in messages
         ]
@@ -205,7 +207,7 @@ def interpret_tool_params(
     _ = self_debug and \
         log_debug(
             "INTERPRET_TOOL_PARAMS" +
-            f"\n | tool_params: {tool_params}" + 
+            f"\n | tool_params: {tool_params}" +
             f"\n | tool_params type: {type(tool_params)}"
             f"\n | schema: {schema}" +
             f"\n | first_param_name: {first_param_name}")

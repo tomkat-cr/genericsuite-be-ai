@@ -12,7 +12,7 @@ from googleapiclient.discovery import build
 
 from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchResults
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
-from langchain.agents import tool
+from langchain.tools import tool
 
 from pydantic import BaseModel, Field
 

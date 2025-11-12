@@ -6,12 +6,12 @@ from typing import Union
 # import pinecone
 # import weaviate
 
-from langchain.chains.conversational_retrieval.base import (
+from langchain_classic.chains.conversational_retrieval.base import (
     ConversationalRetrievalChain
 )
-from langchain.indexes.vectorstore import VectorStoreIndexWrapper
-from langchain.schema import Document
-from langchain.text_splitter import CharacterTextSplitter
+from langchain_classic.indexes.vectorstore import VectorStoreIndexWrapper
+from langchain_classic.schema import Document
+from langchain_classic.text_splitter import CharacterTextSplitter
 
 from langchain_community.vectorstores import MongoDBAtlasVectorSearch
 from langchain_community.vectorstores import Chroma
@@ -154,7 +154,8 @@ def get_vector_index(
     embeddings = {}
     try:
         # Get Embeddings engine
-        _ = DEBUG and log_debug("GVI2_1) GET_VECTOR_INDEX | Get Embeddings engine...")
+        _ = DEBUG and log_debug(
+            "GVI2_1) GET_VECTOR_INDEX | Get Embeddings engine...")
         embeddings = get_embeddings_engine(app_context)
         if embeddings["error"]:
             result["error"] = True
@@ -165,7 +166,8 @@ def get_vector_index(
             get_standard_base_exception_msg(err, "GVI2-E010")
     if not result["error"]:
         # Get Vector engine and additional vector engine parameters
-        _ = DEBUG and log_debug("GVI2_2) GET_VECTOR_INDEX | get Vector engine...")
+        _ = DEBUG and log_debug(
+            "GVI2_2) GET_VECTOR_INDEX | get Vector engine...")
         try:
             vector_engine, other_params = get_vector_engine(app_context)
         except Exception as err:
@@ -179,7 +181,7 @@ def get_vector_index(
         # Create a Vectorstore from a list of splitted documents
         try:
             _ = DEBUG and log_debug("GVI2_3) GET_VECTOR_INDEX | " +
-                "get Vectorstore from a list of documents...")
+                                    "get Vectorstore from a list of documents...")
             vectorstore = vector_engine.from_documents(
                 documents=texts,
                 embedding=embeddings["engine"],
@@ -197,9 +199,10 @@ def get_vector_index(
     if not result["error"]:
         # Returns the vector store index.
         _ = DEBUG and log_debug("GVI2_4) GET_VECTOR_INDEX | " +
-            "create the Vectorstore index...")
+                                "create the Vectorstore index...")
         result["index"] = VectorStoreIndexWrapper(vectorstore=vectorstore)
-    _ = DEBUG and log_debug("GVI2_4) GET_VECTOR_INDEX | index creation finished...")
+    _ = DEBUG and log_debug(
+        "GVI2_4) GET_VECTOR_INDEX | index creation finished...")
     return result
 
 
@@ -226,7 +229,8 @@ def get_vector_store(
     embeddings = {}
     try:
         # Get Embeddings engine
-        _ = DEBUG and log_debug("GVS_1) GET_VECTOR_STORE | Get Embeddings engine...")
+        _ = DEBUG and log_debug(
+            "GVS_1) GET_VECTOR_STORE | Get Embeddings engine...")
         embeddings = get_embeddings_engine(app_context)
         if embeddings["error"]:
             result["error"] = True
@@ -237,7 +241,8 @@ def get_vector_store(
             get_standard_base_exception_msg(err, "GVS-E010")
     if not result["error"]:
         # Get Vector engine and additional vector engine parameters
-        _ = DEBUG and log_debug("GVS_2) GET_VECTOR_STORE | get Vector engine...")
+        _ = DEBUG and log_debug(
+            "GVS_2) GET_VECTOR_STORE | get Vector engine...")
         try:
             vector_engine, other_params = get_vector_engine(app_context)
         except Exception as err:
@@ -248,7 +253,7 @@ def get_vector_store(
         # Create a Vectorstore from a list of splitted documents
         try:
             _ = DEBUG and log_debug("GVS_3) GET_VECTOR_STORE | " +
-                "get Vectorstore from a list of documents...")
+                                    "get Vectorstore from a list of documents...")
             vectorstore = vector_engine.from_documents(
                 documents=documents_list,
                 embedding=embeddings["engine"],
@@ -266,7 +271,7 @@ def get_vector_store(
     if not result["error"]:
         # Returns the vector store index.
         _ = DEBUG and log_debug("GVS_4) GET_VECTOR_STORE | " +
-            "create the Vectorstore...")
+                                "create the Vectorstore...")
         result["vector_store"] = vectorstore
     _ = DEBUG and log_debug("GVS_4) GET_VECTOR_STORE creation finished...")
     return result
@@ -317,8 +322,8 @@ def get_conversation_chain(
         ConversationalRetrievalChain: The created conversation chain.
     """
     _ = DEBUG and log_debug('AI_GCC_1 ) GET_CONVERSATION_CHAIN' +
-        f'\n | retriever: {retriever}' +
-        f'\n | prompt: {prompt}')
+                            f'\n | retriever: {retriever}' +
+                            f'\n | prompt: {prompt}')
 
     model = get_model_obj(app_context)
     if not model:
@@ -329,7 +334,7 @@ def get_conversation_chain(
         raise Exception(error_message)
 
     _ = DEBUG and log_debug('AI_GCC_2 ) GET_CONVERSATION_CHAIN' +
-        f'\n | model: {model}')
+                            f'\n | model: {model}')
 
     chain = (
         {"context": retriever, "question": RunnablePassthrough()}
@@ -339,6 +344,6 @@ def get_conversation_chain(
     )
 
     _ = DEBUG and log_debug('AI_GCC_3 ) GET_CONVERSATION_CHAIN' +
-        f'\n | chain: {chain}')
+                            f'\n | chain: {chain}')
 
     return chain

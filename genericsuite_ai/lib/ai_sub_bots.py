@@ -4,8 +4,8 @@ Sub Bots module, to ask quick questions to the model using vectors
 from typing import List
 import json
 
-from langchain.indexes.vectorstore import VectorStoreIndexWrapper
-from langchain.schema import Document
+from langchain_classic.indexes.vectorstore import VectorStoreIndexWrapper
+from langchain_classic.schema import Document
 from langchain_core.prompts import ChatPromptTemplate
 
 from genericsuite.util.app_context import AppContext
@@ -79,7 +79,7 @@ Question: {question}
         else:
             # Response type == "list"
             retriever = get_vector_retriever(app_context,
-                documents_list)
+                                             documents_list)
             docs: List[Document] = retriever.get_relevant_documents(question)
             result["resultset"] = json.dumps([d.page_content for d in docs])
     except Exception as error:

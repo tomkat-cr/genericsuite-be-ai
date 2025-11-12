@@ -4,8 +4,8 @@ Implementation of the AI Chatbot API using Langchain - LCEL or Agents.
 from typing import Any, Union, Dict, Tuple
 import os
 
-from langchain import hub
-from langchain.agents import (
+from langchain_classic import hub
+from langchain_classic.agents import (
     AgentExecutor,
     create_structured_chat_agent,
     create_react_agent,
@@ -13,7 +13,7 @@ from langchain.agents import (
     # create_openai_tools_agent,
     # create_self_ask_with_search_agent,
 )
-from langchain.prompts import PromptTemplate
+from langchain_classic.prompts import PromptTemplate
 # from langchain_community.chat_message_histories import ChatMessageHistory
 # from langchain_core.output_parsers.openai_tools import PydanticToolsParser
 from langchain_core.output_parsers import StrOutputParser
@@ -142,7 +142,7 @@ def translate_using(input_text: str, llm: Any) -> dict:
             " [TA-E020]"
     _ = DEBUG and log_debug(
         'TRANSLATE_USING |' +
-        f' trans_method: {trans_method}' + 
+        f' trans_method: {trans_method}' +
         f'\n | target "lang": {lang}' +
         f'\n | target "lang_code": {lang_code}' +
         f'\n | input_text: {input_text}' +
@@ -154,7 +154,7 @@ def translate_using(input_text: str, llm: Any) -> dict:
 def needs_answer_translation() -> bool:
     """
     Check if the response needs to be translated
-    
+
     Returns:
         bool: True if the user's prefferred language is not English
     """
@@ -509,7 +509,8 @@ def get_lcel_chain(
         new_prompt = build_gs_prompt(get_self_base_prompt(NON_AGENT_PROMPT))
         messages.append(("system", new_prompt,))
     messages.append(MessagesPlaceholder(variable_name="messages"))
-    _ = self_debug and log_debug('Start call to ChatPromptTemplate.from_messages()')
+    _ = self_debug and log_debug(
+        'Start call to ChatPromptTemplate.from_messages()')
     prompt = ChatPromptTemplate.from_messages(messages)
     _ = self_debug and log_debug('Start chain = prompt | llm_with_tools')
     # Build a Chatbot

@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 
 
-## [Unreleased] - Date
+## [Unreleased]
 
 ### Added
 
@@ -18,10 +18,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
-## [0.2.0] - 2025-11-07
+## [0.2.0] - 2025-11-12
 
 ### Added
-- Add: Install command to Makefile for easier dependency management.  
+- Add "install" command to Makefile for easier dependency management.  
+- Add PEM_TOOL envvar to .env.example, to select the Python package and dependency management tool (uv, pipenv, and poetry), default to "uv" [GS-77].
+- Add AUTO_RELOAD envvar to .env.example, to fix some issues with the "--auto-reload" / "--reload" option running the app in "run_aws.sh", Turborepo and "uv", default to "1" [GS-77].
 
 ### Changed
 - Update README for clarity and accuracy.
@@ -34,6 +36,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Fix the "langchain_community not found" by adding the "langchain-community" dependency. This addition required the upgrade of dependencies "langchain" to "0.3.26" and "faiss-cpu" to "^1.11.0.post1".
 - Use Poetry to run build and publish commands in Makefile to fix a "make publish" error. 
 - Add new development dependencies including build and twine to fix a "make publish" error.
+- Fix the issues with the new langchain 1.0.x migrating some langchain.* imports to langchain_classic.* imports.
 
 ### Security
 - Update "transformers" to "^4.57.1" to fix security vulnerabilities [GS-219]:

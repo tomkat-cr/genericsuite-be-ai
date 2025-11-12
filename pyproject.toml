@@ -6,7 +6,7 @@ authors = [
 ]
 description = "The GenericSuite AI for Python (backend version)"
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Environment :: Console',

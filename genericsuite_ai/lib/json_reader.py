@@ -7,13 +7,14 @@ import json
 from uuid import uuid4
 
 from langchain_community.document_loaders.json_loader import JSONLoader
-from langchain.schema import Document
+from langchain_classic.schema import Document
 
 from genericsuite.util.app_logger import log_debug
 
 
 DEBUG = False
 REMOVE_JSON_TMP_FILES = True
+
 
 def index_json_files(
     json_files: list,
@@ -118,8 +119,8 @@ def index_dict(
         return metadata
 
     _ = DEBUG and log_debug("INDEX_DICT" +
-        f"| Creating json_filename {json_filename}"
-        f"\n| json_metadata: {json_metadata}\n")
+                            f"| Creating json_filename {json_filename}"
+                            f"\n| json_metadata: {json_metadata}\n")
 
     output_file_spec = f"/tmp/{str(uuid4())}{json_filename}"
     if not output_file_spec.endswith(".json"):

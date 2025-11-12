@@ -4,10 +4,11 @@ GPT Functions / Langchain Tools to handle embeddings
 from typing import Any, Dict
 from datetime import datetime
 
-from langchain.agents import tool
-from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate
-from langchain.memory import ReadOnlySharedMemory
+from langchain.tools import tool
+from langchain_classic.chains.llm import LLMChain
+
+from langchain_core.prompts import PromptTemplate
+from langchain_classic.memory import ReadOnlySharedMemory
 
 from genericsuite.util.app_context import CommonAppContext
 from genericsuite.util.utilities import log_debug

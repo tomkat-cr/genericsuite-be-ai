@@ -8,7 +8,7 @@ import base64
 
 from openai import OpenAI
 
-from langchain.agents import tool
+from langchain.tools import tool
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI

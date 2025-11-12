@@ -7,17 +7,17 @@ from typing import Union, Callable
 
 from openai import PermissionDeniedError
 
-# from langchain import hub
-from langchain.agents import (
+# from langchain_classic import hub
+from langchain_classic.agents import (
     AgentExecutor,
     # create_structured_chat_agent,
     AgentOutputParser,
     LLMSingleActionAgent,
     Tool,
 )
-from langchain.chains import LLMChain
-from langchain.prompts import StringPromptTemplate
-from langchain.schema import AgentAction, AgentFinish, Document
+from langchain_classic.chains.llm import LLMChain
+from langchain_core.prompts import StringPromptTemplate
+from langchain_classic.schema import AgentAction, AgentFinish, Document
 
 from genericsuite.util.app_logger import log_debug
 from genericsuite.util.utilities import (
@@ -109,6 +109,7 @@ class CustomOutputParser(AgentOutputParser):
     Custom output parser for parsing LLM output
     [Deprecated]
     """
+
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         # Check if agent should finish
         if "Final Answer:" in text:
