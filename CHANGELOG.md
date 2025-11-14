@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
-## [0.2.0] - 2025-11-12
+## [0.2.0] - 2025-11-14
 
 ### Added
 - Add "install" command to Makefile for easier dependency management.  
@@ -46,7 +46,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
     * "Hugging Face Transformers library has Regular Expression Denial of Service"
     * "Hugging Face Transformers is vulnerable to ReDoS through its MarianTokenizer "
     * "Transformers is vulnerable to ReDoS attack through its DonutProcessor class"
-    "Transformers's Improper Input Validation vulnerability can be exploited through username injection"
+    * "Transformers's Improper Input Validation vulnerability can be exploited through username injection"
 - Update "urllib3" to "^2.5.0" to fix security vulnerabilities [GS-219]:
     * "Catastrophic backtracking in URL authority parser when passed URL containing many @ characters"
     * "`Cookie` HTTP header isn't stripped on cross-origin redirects"
