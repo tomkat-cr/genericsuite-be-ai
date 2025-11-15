@@ -607,7 +607,7 @@ def text_to_audio_generator(params: Any) -> dict:
 
 
 @tool("text_to_audio_response", return_direct=True)
-def text_to_audio_response(params: Dict) -> str:
+def text_to_audio_response(params: Any) -> str:
     """
 Useful when you need to generate audio files from a given text. Call this tool when the Human question includes one of these text:
 "/TTS:", "/tts:", "Say it:", "Say it loud:", "Speak it:", "Speak it loud:", "Dimelo:", "Dime esto:", "Di esto en voz alta:", "Di este texto:", "Hablame:", "Habla esto:", "habla este texto:", etc.

@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
-## [0.2.0] - 2025-11-14
+## [0.2.0] - 2025-11-15
 
 ### Added
 - Add "install" command to Makefile for easier dependency management.  
@@ -74,6 +74,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ### Removed
 - Remove "langchain-together" to enable upgrade of all other langchain dependencies, and routes Together AI calls through the OpenAI API.
+- Remove "clarifai" to make it optional by default [GS-219].
 
 
 ## [0.1.14] - 2025-07-12
