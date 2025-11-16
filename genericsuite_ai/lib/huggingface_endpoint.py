@@ -1,5 +1,12 @@
-from typing_extensions import Self
+from typing import Any, AsyncIterator, Dict, Iterator, List, Mapping, \
+    Optional, Callable, Self
+
+import os
+import json  # type: ignore[import-not-found]
+import logging
+
 from pydantic import ConfigDict, Field, model_validator
+
 from langchain_core.utils import from_env, get_pydantic_field_names
 from langchain_core.outputs import GenerationChunk
 from langchain_core.language_models.llms import LLM
@@ -7,11 +14,6 @@ from langchain_core.callbacks import (
     AsyncCallbackManagerForLLMRun,
     CallbackManagerForLLMRun,
 )
-import json  # type: ignore[import-not-found]
-import logging
-import os
-from typing import Any, AsyncIterator, Dict, Iterator, List, Mapping, \
-    Optional, Callable
 
 
 logger = logging.getLogger(__name__)

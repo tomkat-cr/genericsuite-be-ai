@@ -32,6 +32,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Update author email in pyproject.toml and setup.py.
 - Bump urllib3 to 2.5.0 and numpy to 2.0.2 to have compatibility with GS BE Core.
 - Refactor imports in ai_langchain_models.py to include ChatBedrock (AWS Bedrock) and langchain-aws conditionally.
+- Enhance HuggingFace text query functions ("huggingface_remote" model type) to support OpenAI API integration.
 
 ### Fixed
 - Fix the "langchain_community not found" by adding the "langchain-community" dependency. This addition required the upgrade of dependencies "langchain" to "0.3.26" and "faiss-cpu" to "^1.11.0.post1".

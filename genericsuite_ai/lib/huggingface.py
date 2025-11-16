@@ -7,6 +7,9 @@ import requests
 import uuid
 import json
 
+from openai import OpenAI
+from openai.types.chat.chat_completion import ChatCompletion
+
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 from langchain_core.outputs import GenerationChunk
 
@@ -24,6 +27,7 @@ from genericsuite_ai.lib.ai_langchain_models_abstract import CustomLLM as LLM
 
 DEBUG = os.environ.get("AI_HUGGINGFACE_DEBUG", "0") == "1"
 
+HF_TEXT_API_METHOD = os.environ.get("AI_HUGGINGFACE_TEXT_API_METHOD", "openai")
 cac = CommonAppContext()
 
 
@@ -48,10 +52,10 @@ def hf_text_to_image_query(repo_id: str, payload: dict) -> Any:
     return requests.post(api_url, headers=headers, json=payload)
 
 
-def hf_text_to_text_query(repo_id: str, api_key: str, payload: dict,
-                          stream: bool = False) -> Any:
+def hf_text_to_text_query_openai(repo_id: str, api_key: str, payload: dict,
+                                 stream: bool = False) -> ChatCompletion:
     """
-    Perform a HuggingFace text to text query
+    Perform a HuggingFace text to text query using the OpenAI API
 
     Args:
         repo_id (str): HuggingFace model repository ID
@@ -59,7 +63,33 @@ def hf_text_to_text_query(repo_id: str, api_key: str, payload: dict,
         payload (dict): HuggingFace payload
 
     Returns:
-        Any: HuggingFace response
+        ChatCompletion: OpenAI response
+    """
+    client = OpenAI(
+        base_url="https://router.huggingface.co/v1",
+        api_key=api_key,
+    )
+    completion = client.chat.completions.create(
+        model=repo_id,
+        messages=payload['messages'],
+        stream=stream,
+    )
+    return completion
+
+
+def hf_text_to_text_query_request(repo_id: str, api_key: str, payload: dict,
+                                  stream: bool = False) -> requests.Response:
+    """
+    Perform a HuggingFace text to text query request
+
+    Args:
+        repo_id (str): HuggingFace model repository ID
+        api_key (str): HuggingFace API key
+        payload (dict): HuggingFace payload
+        stream (bool): Whether to stream the response
+
+    Returns:
+        requests.Response: HuggingFace response
     """
     # https://huggingface.co/docs/inference-providers/tasks/chat-completion
     # https://huggingface.co/docs/api-inference/detailed_parameters
@@ -70,7 +100,30 @@ def hf_text_to_text_query(repo_id: str, api_key: str, payload: dict,
     }
     api_url = settings.HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT
     payload['model'] = repo_id
-    return requests.post(api_url, headers=headers, json=payload, stream=True)
+    return requests.post(api_url, headers=headers, json=payload, stream=stream)
+
+
+def hf_text_to_text_query(repo_id: str, api_key: str, payload: dict,
+                          stream: bool = False) -> requests.Response:
+    """
+    Perform a HuggingFace text to text query request
+    using the HuggingFace API or the OpenAI API
+    depending on the AI_HUGGINGFACE_TEXT_API_METHOD environment variable
+
+    Args:
+        repo_id (str): HuggingFace model repository ID
+        api_key (str): HuggingFace API key
+        payload (dict): HuggingFace payload
+        stream (bool): Whether to stream the response
+
+    Returns:
+        requests.Response or ChatCompletion: HuggingFace response or
+        OpenAI response
+    """
+    if HF_TEXT_API_METHOD == "openai":
+        return hf_text_to_text_query_openai(repo_id, api_key, payload, stream)
+    else:
+        return hf_text_to_text_query_request(repo_id, api_key, payload, stream)
 
 
 def hf_text_to_text_stream(repo_id: str, api_key: str, payload: dict
@@ -87,7 +140,12 @@ def hf_text_to_text_stream(repo_id: str, api_key: str, payload: dict
         Iterator[dict]: HuggingFace response as a dictionary, one dictionary
             per line
     """
-    response = hf_text_to_text_query(repo_id, api_key, payload, stream=True)
+    response = hf_text_to_text_query(
+        repo_id=repo_id,
+        api_key=api_key,
+        payload=payload,
+        stream=True,
+    )
     for line in response.iter_lines():
         if not line.startswith(b"data:"):
             continue
@@ -197,7 +255,9 @@ def huggingface_chat(
     )
 
     chat_response['resultset'] = {
-        'content': completion.choices[0].message.content
+        'content': completion.choices[0].message
+        if isinstance(completion, ChatCompletion)
+        else completion.choices[0].message.content
     }
 
     return chat_response
