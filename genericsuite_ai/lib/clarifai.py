@@ -15,7 +15,7 @@ from genericsuite.util.generic_db_middleware import (
 )
 from genericsuite.util.utilities import get_default_resultset
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CLARIFAI_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 

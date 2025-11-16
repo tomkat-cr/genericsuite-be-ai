@@ -36,7 +36,7 @@ from genericsuite_ai.lib.clarifai import (
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
 
-DEBUG = False
+DEBUG = os.environ.get("AI_AUDIO_PROCESSING_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 
@@ -319,7 +319,7 @@ def audio_processing_text_response(params: Dict) -> str:
     """
 Useful when you need to transcribe audio files with an audio to text generator.
 Args: params (dict): Tool parameters. It must have: "sound_filespec" (str): sound file path.
-    """
+    """  # noqa: E501
     return audio_processing_text_response_func(params)
 
 
@@ -613,7 +613,7 @@ Useful when you need to generate audio files from a given text. Call this tool w
 "/TTS:", "/tts:", "Say it:", "Say it loud:", "Speak it:", "Speak it loud:", "Dimelo:", "Dime esto:", "Di esto en voz alta:", "Di este texto:", "Hablame:", "Habla esto:", "habla este texto:", etc.
 Return exactly what this Tool returns, with no added comments. E.g. [SEND_FILE_BACK]=/tmp/openai_tts_`uuid4`.mp3
 Args: params (dict): Tool parameters. It must have: "input_text" (str): text to speech out. Don't translate it!
-    """
+    """  # noqa: E501
     return text_to_audio_response_func(params)
 
 

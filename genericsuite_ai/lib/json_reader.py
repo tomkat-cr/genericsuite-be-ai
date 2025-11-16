@@ -12,7 +12,8 @@ from langchain_classic.schema import Document
 from genericsuite.util.app_logger import log_debug
 
 
-DEBUG = False
+DEBUG = os.environ.get("AI_JSON_READER_DEBUG", "0") == "1"
+
 REMOVE_JSON_TMP_FILES = True
 
 

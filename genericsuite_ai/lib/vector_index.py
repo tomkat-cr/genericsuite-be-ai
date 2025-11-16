@@ -1,10 +1,8 @@
 """
 Conversation Management with LangChain
 """
-from typing import Union
-
-# import pinecone
-# import weaviate
+from typing import Union, Any
+import os
 
 from langchain_classic.chains.conversational_retrieval.base import (
     ConversationalRetrievalChain
@@ -13,12 +11,6 @@ from langchain_classic.indexes.vectorstore import VectorStoreIndexWrapper
 from langchain_classic.schema import Document
 from langchain_classic.text_splitter import CharacterTextSplitter
 
-from langchain_community.vectorstores import MongoDBAtlasVectorSearch
-from langchain_community.vectorstores import Chroma
-from langchain_community.vectorstores import Clarifai
-# from langchain_community.vectorstores import Pinecone
-from langchain_community.vectorstores import Vectara
-from langchain_community.vectorstores import Weaviate
 from langchain_community.vectorstores import FAISS
 
 from langchain_core.prompts import ChatPromptTemplate
@@ -46,19 +38,20 @@ from genericsuite_ai.lib.ai_langchain_models import (
 )
 from genericsuite_ai.lib.ai_embeddings import get_embeddings_engine
 
-DEBUG = False
+DEBUG = os.environ.get("AI_VECTOR_INDEX_DEBUG", "0") == "1"
 
 
 def get_vector_engine(
     app_context: AppContext,
     engine_type: str = None
 ) -> (Union[
-    MongoDBAtlasVectorSearch,
-    Chroma,
-    Clarifai,
+    # MongoDBAtlasVectorSearch,
+    # Chroma,
+    # Clarifai,
+    # Vectara,
     # Pinecone,
-    Vectara,
-    Weaviate,
+    # Weaviate,
+    Any,
     FAISS,
 ], dict):
     """
@@ -80,6 +73,7 @@ def get_vector_engine(
     other_params = {}
     if engine_type == 'mongo':
         # https://python.langchain.com/docs/integrations/vectorstores/mongodb_atlas
+        from langchain_community.vectorstores import MongoDBAtlasVectorSearch
         vector_engine = MongoDBAtlasVectorSearch
         other_params = {
             "collection": settings.MONGODB_VS_COLLECTION,
@@ -88,39 +82,49 @@ def get_vector_engine(
     elif engine_type == "chroma":
         # https://python.langchain.com/docs/integrations/vectorstores/chroma
         # NOTE: compatible only with python versions up to 3.9
+        from langchain_community.vectorstores import Chroma
         vector_engine = Chroma
     elif engine_type == "clarifai":
         # https://python.langchain.com/docs/integrations/vectorstores/clarifai
+        from langchain_community.vectorstores import Clarifai
         vector_engine = Clarifai(
             user_id=settings.CLARIFAI_USER_ID,
             app_id=settings.CLARIFAI_APP_ID,
             # number_of_docs=NUMBER_OF_DOCS,
         )
-    # elif engine_type == "Pinecone":
+    elif engine_type == "Pinecone":
         # https://python.langchain.com/docs/integrations/vectorstores/pinecone
-        # pinecone.init(
-        #     api_key=settings.PINECONE_API_KEY,  # find at app.pinecone.io
-        #     environment=settings.PINECONE_ENV,  # next to api key in console
-        # )
-        # engine = Pinecone
+        import pinecone
+        from langchain_community.vectorstores import Pinecone
+        pinecone.init(
+            api_key=settings.PINECONE_API_KEY,  # find at app.pinecone.io
+            environment=settings.PINECONE_ENV,  # next to api key in console
+        )
+        vector_engine = Pinecone
     elif engine_type == "vectara":
         # https://python.langchain.com/docs/integrations/vectorstores/vectara
+        from langchain_community.vectorstores import Vectara
         vector_engine = Vectara(
             vectara_customer_id=settings.VECTARA_CUSTOMER_ID,
             vectara_corpus_id=settings.VECTARA_CORPUS_ID,
             vectara_api_key=settings.VECTARA_API_KEY
         )
-    # elif engine_type == "weaviate":
-    #     # https://python.langchain.com/docs/integrations/vectorstores/weaviate
-    #     vector_engine = Weaviate
-    #     client = weaviate.Client(
-    #         url=settings.WEAVIATE_URL,
-    #         auth_client_secret=weaviate.AuthApiKey(settings.WEAVIATE_API_KEY),
-    #     )
-    #     other_params = {
-    #         "client": client,
-    #         "by_text": False,
-    #     }
+    elif engine_type == "weaviate":
+        # https://python.langchain.com/docs/integrations/vectorstores/weaviate
+        import weaviate
+        from langchain_community.vectorstores import Weaviate
+        client = weaviate.Client(
+            url=settings.WEAVIATE_URL,
+            auth_client_secret=weaviate.AuthApiKey(
+                settings.WEAVIATE_API_KEY),
+        )
+        vector_engine = Weaviate(
+            client=client,
+        )
+        other_params = {
+            "client": client,
+            "by_text": False,
+        }
     else:
         vector_engine = FAISS
 
@@ -162,8 +166,8 @@ def get_vector_index(
             result["error_message"] = embeddings["error"]
     except Exception as err:
         result["error"] = True
-        result["error_message"] = \
-            get_standard_base_exception_msg(err, "GVI2-E010")
+        result["error_message"] = get_standard_base_exception_msg(
+            err, "GVI2-E010")
     if not result["error"]:
         # Get Vector engine and additional vector engine parameters
         _ = DEBUG and log_debug(
@@ -172,16 +176,17 @@ def get_vector_index(
             vector_engine, other_params = get_vector_engine(app_context)
         except Exception as err:
             result["error"] = True
-            result["error_message"] = \
-                get_standard_base_exception_msg(err, "GVI2-E020")
+            result["error_message"] = get_standard_base_exception_msg(
+                err, "GVI2-E020")
     if not result["error"]:
         text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
         texts = text_splitter.split_documents(documents_list)
     if not result["error"]:
         # Create a Vectorstore from a list of splitted documents
         try:
-            _ = DEBUG and log_debug("GVI2_3) GET_VECTOR_INDEX | " +
-                                    "get Vectorstore from a list of documents...")
+            _ = DEBUG and log_debug(
+                "GVI2_3) GET_VECTOR_INDEX | " +
+                "get Vectorstore from a list of documents...")
             vectorstore = vector_engine.from_documents(
                 documents=texts,
                 embedding=embeddings["engine"],
@@ -189,12 +194,12 @@ def get_vector_index(
             )
         except PermissionDeniedError as err:
             result["error"] = True
-            result["error_message"] = \
-                get_standard_base_exception_msg(err, "GVI2-E030")
+            result["error_message"] = get_standard_base_exception_msg(
+                err, "GVI2-E030")
         except Exception as err:
             result["error"] = True
-            result["error_message"] = \
-                get_standard_base_exception_msg(err, "GVI2-E035")
+            result["error_message"] = get_standard_base_exception_msg(
+                err, "GVI2-E035")
             # raise e
     if not result["error"]:
         # Returns the vector store index.
@@ -237,8 +242,8 @@ def get_vector_store(
             result["error_message"] = embeddings["error"]
     except Exception as err:
         result["error"] = True
-        result["error_message"] = \
-            get_standard_base_exception_msg(err, "GVS-E010")
+        result["error_message"] = get_standard_base_exception_msg(
+            err, "GVS-E010")
     if not result["error"]:
         # Get Vector engine and additional vector engine parameters
         _ = DEBUG and log_debug(
@@ -247,13 +252,14 @@ def get_vector_store(
             vector_engine, other_params = get_vector_engine(app_context)
         except Exception as err:
             result["error"] = True
-            result["error_message"] = \
-                get_standard_base_exception_msg(err, "GVS-E020")
+            result["error_message"] = get_standard_base_exception_msg(
+                err, "GVS-E020")
     if not result["error"]:
         # Create a Vectorstore from a list of splitted documents
         try:
-            _ = DEBUG and log_debug("GVS_3) GET_VECTOR_STORE | " +
-                                    "get Vectorstore from a list of documents...")
+            _ = DEBUG and log_debug(
+                "GVS_3) GET_VECTOR_STORE | " +
+                "get Vectorstore from a list of documents...")
             vectorstore = vector_engine.from_documents(
                 documents=documents_list,
                 embedding=embeddings["engine"],
@@ -261,12 +267,12 @@ def get_vector_store(
             )
         except PermissionDeniedError as err:
             result["error"] = True
-            result["error_message"] = \
-                get_standard_base_exception_msg(err, "GVS-E030")
+            result["error_message"] = get_standard_base_exception_msg(
+                err, "GVS-E030")
         except Exception as err:
             result["error"] = True
-            result["error_message"] = \
-                get_standard_base_exception_msg(err, "GVS-E035")
+            result["error_message"] = get_standard_base_exception_msg(
+                err, "GVS-E035")
             # raise e
     if not result["error"]:
         # Returns the vector store index.

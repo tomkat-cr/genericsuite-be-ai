@@ -22,7 +22,8 @@ from genericsuite.util.aws import upload_nodup_file_to_s3
 from genericsuite_ai.config.config import Config
 from genericsuite_ai.lib.ai_langchain_models_abstract import CustomLLM as LLM
 
-DEBUG = False
+DEBUG = os.environ.get("AI_HUGGINGFACE_DEBUG", "0") == "1"
+
 cac = CommonAppContext()
 
 

@@ -3,6 +3,7 @@ Chatbot run conversation common functions.
 """
 from typing import Union
 import json
+import os
 
 from genericsuite.util.utilities import get_default_resultset, get_request_body
 from genericsuite.util.app_logger import log_debug
@@ -23,7 +24,7 @@ from genericsuite_ai.lib.ai_gpt_fn_conversations import (
     get_current_date_time
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CHATBOT_COMMONS_DEBUG", "0") == "1"
 
 
 def get_role(v):

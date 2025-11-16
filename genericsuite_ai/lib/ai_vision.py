@@ -45,7 +45,7 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-DEBUG = False
+DEBUG = os.environ.get("AI_VISION_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 
@@ -486,7 +486,7 @@ Useful to process an specified image and answer a question about it. There must 
 Args: params (dict): Tool parameters. Must contain:
 "image_path" (str): image URL.
 "question" (str): question about the image.
-    """
+    """  # noqa: E501
     return vision_image_analyzer_text_response_func(params)
 
 

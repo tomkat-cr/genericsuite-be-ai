@@ -4,6 +4,7 @@ Langchain models
 """
 from typing import Union, Optional, Any
 import json
+import os
 
 from langchain_anthropic import ChatAnthropic
 from langchain_groq import ChatGroq
@@ -41,7 +42,7 @@ from genericsuite_ai.lib.huggingface import HuggingFaceChatModel
 from genericsuite_ai.lib.ibm import IbmWatsonx
 from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
 
-DEBUG = False
+DEBUG = os.environ.get("AI_MODELS_DEBUG", "0") == "1"
 
 
 class BedrockAsyncCallbackHandler(AsyncCallbackHandler):

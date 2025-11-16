@@ -24,6 +24,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Add "install" command to Makefile for easier dependency management.  
 - Add PEM_TOOL envvar to .env.example, to select the Python package and dependency management tool (uv, pipenv, and poetry), default to "uv" [GS-77].
 - Add AUTO_RELOAD envvar to .env.example, to fix some issues with the "--auto-reload" / "--reload" option running the app in "run_aws.sh", Turborepo and "uv", default to "1" [GS-77].
+- Add DEBUG envvars to all AI modules to enable debug logging, default to "0" (they must be set on the .env file) [GS-230].
 
 ### Changed
 - Update README for clarity and accuracy.

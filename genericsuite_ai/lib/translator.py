@@ -1,6 +1,7 @@
 """
 Translation module
 """
+import os
 import re
 import html
 import urllib.request
@@ -9,7 +10,7 @@ import urllib.parse
 from genericsuite.util.utilities import get_default_resultset
 from genericsuite.util.app_logger import log_debug
 
-DEBUG = False
+DEBUG = os.environ.get("AI_TRANSLATOR_DEBUG", "0") == "1"
 
 
 def lang_code_equivalence(lang_code: str) -> str:
@@ -47,7 +48,7 @@ def translate(
     dest_lang = lang_code_equivalence(dest)
     try:
         gta_url = f"http://translate.google.com/m?tl={dest_lang}&" + \
-                f"sl={src}&q={urllib.parse.quote(text)}"
+            f"sl={src}&q={urllib.parse.quote(text)}"
         headers = {
             'User-Agent':
             "Mozilla/4.0 (compatible;MSIE 6.0;Windows NT 5.1;SV1;.NET" +

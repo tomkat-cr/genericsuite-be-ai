@@ -25,6 +25,7 @@ class UnmaskedUrlConversion:
     """
     Conversation messages handling
     """
+
     def __init__(self, bucket_name: str, user_id: str, hostname: str):
         self.bucket_name = bucket_name
         self.user_id = user_id
@@ -42,8 +43,10 @@ class UnmaskedUrlConversion:
         """
         Get the unmasked URL filename.
         """
-        # Get the unmasked URL, until the end of line, space, comma, or other punctuation
-        url = message[message.find(self.public_url) + len(self.public_url):].split()[0]
+        # Get the unmasked URL, until the end of line, space, comma, or other
+        # punctuation
+        url = message[message.find(self.public_url) +
+                      len(self.public_url):].split()[0]
         # Remove any other punctuation
         url = url.split(",")[0]
         url = url.split(";")[0]
@@ -60,7 +63,8 @@ class UnmaskedUrlConversion:
         """
         Get the masked URL from the message.
         """
-        unmasked_url = f'{self.public_url}{self.unmasked_url_filename(message)}'
+        unmasked_url = \
+            f"{self.public_url}{self.unmasked_url_filename(message)}"
         return unmasked_url
 
     def get_masked_url(self, message):
@@ -85,10 +89,11 @@ class UnmaskedUrlConversion:
             if masked_url:
                 self.changed = True
                 unmasked_url = self.get_unmasked_url(message["content"])
-                message["content"] = message["content"].replace(unmasked_url, masked_url)
+                message["content"] = message["content"].replace(
+                    unmasked_url, masked_url)
                 log_debug("\n>-->> [content]" +
-                    f"\n| unmasked_url: {unmasked_url}" +
-                    f"\n| masked_url: {masked_url}\n")
+                          f"\n| unmasked_url: {unmasked_url}" +
+                          f"\n| masked_url: {masked_url}\n")
 
         if "attachment_url" in message:
             masked_url = self.get_masked_url(message["attachment_url"])
@@ -97,8 +102,8 @@ class UnmaskedUrlConversion:
                 unmasked_url = self.get_unmasked_url(message["attachment_url"])
                 message["attachment_url"] = masked_url
                 log_debug("\n>-->> [attachment_url]" +
-                    f"\n| unmasked_url: {unmasked_url}" +
-                    f"\n| masked_url: {masked_url}\n")
+                          f"\n| unmasked_url: {unmasked_url}" +
+                          f"\n| masked_url: {masked_url}\n")
         return message
 
 
@@ -121,7 +126,8 @@ def mask_all_conversations(app_context: AppContext):
     query_params = get_query_params(app_context.get_request())
     log_debug(f">> MASK_ALL_CONVERSATIONS | query_params: {query_params}")
     save = query_params.get('save', "0") == "1"
-    bucket_name = query_params.get('bucket_name',
+    bucket_name = query_params.get(
+        'bucket_name',
         Config(app_context).AWS_S3_CHATBOT_ATTACHMENTS_BUCKET)
     hostname = query_params.get('hostname')
     # current_user_id = app_context.get_user_id()
@@ -129,14 +135,13 @@ def mask_all_conversations(app_context: AppContext):
         app_context=app_context,
         json_file='ai_chatbot_conversations_complete',
     )
-    # log_debug(f">> MASK_ALL_CONVERSATIONS | conversation_rs: {conversations_rs}")
     conversations = json.loads(conversations_rs['resultset'])
-    # log_debug(f">> MASK_ALL_CONVERSATIONS | conversations: {conversations_rs}")
     for conversation in conversations:
         prev_conv = dict(**conversation)
         conv_id = str(conversation['_id']['$oid'])
         conversation['user_id'] = clean_value(conversation['user_id'])
-        uuc = UnmaskedUrlConversion(bucket_name, conversation['user_id'], hostname)
+        uuc = UnmaskedUrlConversion(
+            bucket_name, conversation['user_id'], hostname)
         conversation['messages'] = [
             uuc.process_one_message(message)
             for message in conversation['messages']
@@ -145,10 +150,12 @@ def mask_all_conversations(app_context: AppContext):
             conversation['id'] = conv_id
             del conversation['_id']
 
-            log_debug(f">> MASK_ALL_CONVERSATIONS | Conversation ID {conv_id}:\n\n{prev_conv}\n")
+            log_debug(
+                f">> MASK_ALL_CONVERSATIONS | Conversation ID {conv_id}:" +
+                f"\n\n{prev_conv}\n")
 
             log_debug('>> MASK_ALL_CONVERSATIONS | NEW conversation:\n' +
-                f"\n{conversation}")
+                      f"\n{conversation}")
 
             save_result = modify_item_in_db(
                 app_context=app_context,
@@ -156,8 +163,8 @@ def mask_all_conversations(app_context: AppContext):
                 data=conversation,
             )
             log_debug(">> MASK_ALL_CONVERSATIONS | Conversation ID" +
-                f" {conv_id}" +
-                f"\n| SAVE_RESULT:\n{save_result}")
+                      f" {conv_id}" +
+                      f"\n| SAVE_RESULT:\n{save_result}")
             if save_result['error']:
                 return save_result
 

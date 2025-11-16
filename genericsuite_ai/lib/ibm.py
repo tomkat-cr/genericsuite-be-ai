@@ -5,6 +5,7 @@ Reference:
 https://developer.ibm.com/tutorials/integrate-your-watson-assistant-chatbot-with-watsonxai-for-generative-ai/
 https://developer.ibm.com/
 """
+import os
 import requests
 
 from typing import Any, List, Optional
@@ -17,7 +18,7 @@ from genericsuite.util.app_context import AppContext
 from genericsuite.util.app_logger import log_debug
 
 
-DEBUG = False
+DEBUG = os.environ.get("AI_IBM_DEBUG", "0") == "1"
 
 
 class IbmWatsonx(LLM):

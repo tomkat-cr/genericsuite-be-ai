@@ -2,6 +2,7 @@
 Web scrapping module
 """
 from typing import Any, Dict
+import os
 import importlib
 # import asyncio
 
@@ -30,7 +31,7 @@ from genericsuite_ai.lib.ai_utilities import (
     gpt_func_error,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_WEB_SCRAPPING_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 

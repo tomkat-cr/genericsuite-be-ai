@@ -3,6 +3,7 @@ Langchain tools
 """
 from typing import Any
 import json
+import os
 
 from langchain_classic.schema.messages import (
     HumanMessage, SystemMessage, AIMessage  # AnyMessage
@@ -16,7 +17,7 @@ from genericsuite.util.utilities import is_under_test
 
 # from genericsuite_ai.config.config import Config
 
-DEBUG = False
+DEBUG = os.environ.get("AI_TOOLS_DEBUG", "0") == "1"
 INPUT_KEY = "stop"
 
 

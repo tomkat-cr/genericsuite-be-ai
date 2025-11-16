@@ -16,6 +16,8 @@ from typing import Any, AsyncIterator, Dict, Iterator, List, Mapping, \
 
 logger = logging.getLogger(__name__)
 
+DEBUG = os.environ.get("AI_HUGGINGFACE_DEBUG", "0") == "1"
+
 VALID_TASKS = (
     "text2text-generation",
     "text-generation",

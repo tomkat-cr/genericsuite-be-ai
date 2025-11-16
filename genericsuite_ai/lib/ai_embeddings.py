@@ -2,6 +2,7 @@
 Embeddings engine
 """
 from typing import List
+import os
 
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -19,7 +20,7 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-DEBUG = False
+DEBUG = os.environ.get("AI_EMBEDDINGS_DEBUG", "0") == "1"
 
 
 def get_embeddings_engine(

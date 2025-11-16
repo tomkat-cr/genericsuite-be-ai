@@ -26,7 +26,7 @@ from genericsuite_ai.lib.ai_utilities import (
 )
 from genericsuite_ai.config.config import Config
 
-DEBUG = Config().DEBUG
+DEBUG = os.environ.get("AI_WEBSEARCH_DEBUG", "0") == "1"
 
 cac = CommonAppContext()
 
@@ -60,7 +60,7 @@ Useful when you need to perform a web search to have access to real-time informa
 Args: params (dict): Tool parameter. Must contain:
 "query" (str): The search query.
 "num_results" (int): number of results to return. Defaults to 30.
-    """
+    """  # noqa: E501
     return web_search_func(params)
 
 

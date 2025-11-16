@@ -1,9 +1,10 @@
 """
 Implementation of the AI Chatbot API using Langchain - Custom Agent (_ca).
 """
+from typing import Union, Callable
+import os
 import re
 import json
-from typing import Union, Callable
 
 from openai import PermissionDeniedError
 
@@ -65,7 +66,7 @@ from genericsuite_ai.lib.vector_index import (
     get_vector_engine,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CHATBOT_DEBUG", "0") == "1"
 PASS_ACTION_NOT_MATCH = True
 
 cac = CommonAppContext()
@@ -389,7 +390,7 @@ If the called tool result has '""" + gpt_func_error("") + """', stop processing 
 {chat_history}
 
 Question: {input}
-{agent_scratchpad}"""
+{agent_scratchpad}"""  # noqa: E501
     return template.strip()
 
 

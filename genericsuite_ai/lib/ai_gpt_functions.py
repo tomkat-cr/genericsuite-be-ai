@@ -1,8 +1,8 @@
 """
 ChatGPT functions management
 """
-# from typing import Union
 import json
+import os
 
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 
@@ -51,7 +51,7 @@ from genericsuite_ai.lib.web_scraping import (
     webpage_analyzer_text_response_func,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_GPT_FUNCTIONS_DEBUG", "0") == "1"
 
 
 def get_functions_dict(

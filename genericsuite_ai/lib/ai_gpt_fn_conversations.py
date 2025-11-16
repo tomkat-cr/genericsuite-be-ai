@@ -2,6 +2,7 @@
 GPT Functions / Langchain Tools to handle embeddings
 """
 from typing import Any, Dict
+import os
 from datetime import datetime
 
 from langchain.tools import tool
@@ -24,7 +25,7 @@ from genericsuite_ai.lib.ai_utilities import (
     gpt_func_error,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_GPT_FN_CONVERSATIONS_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 
@@ -33,7 +34,7 @@ def conversation_summary_tool(params: Dict = None) -> Any:
     """
 Useful when you need to summarize large Human and Assistant conversations.
 Args: params (dict): Tool parameters. Must have: "who_is_reading" (str): Who reads this summary
-    """
+    """  # noqa: E501
     return conversation_summary_tool_func(params)
 
 
@@ -95,15 +96,15 @@ def conversation_summary_tool_func(params: Any = None) -> Any:
 def get_current_date_time(params: Dict = None) -> str:
     """
 Useful when you need to get the current date and UTC time when a question refers for a specific date respect of today, e.g. today's date, today's calories consumed, today's meals, yesterday's meals, yesterday's calories.
-    """
+    """  # noqa: E501
     return get_current_date_time_func(params)
 
 
 def get_current_date_time_func(params: Any = None) -> str:
     """
-    Get the current date and UTC time when a question refers for a specific date
-    respect of today, e.g. today's date, today's calories consumed, today's
-    meals, yesterday's meals, yesterday's calories.
+    Get the current date and UTC time when a question refers for a specific
+    date reference of today, e.g. today's date, today's calories consumed,
+    today's meals, yesterday's meals, yesterday's calories.
     """
     params = interpret_tool_params(tool_params=params)
     result = "today is" + \

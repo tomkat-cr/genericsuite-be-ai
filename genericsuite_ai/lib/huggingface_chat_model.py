@@ -1,4 +1,5 @@
 """Hugging Face Chat Wrapper."""
+import os
 
 from dataclasses import dataclass
 from typing import (
@@ -41,7 +42,10 @@ from typing_extensions import Self
 #    HuggingFacePipeline
 from genericsuite_ai.lib.huggingface_endpoint import GsHuggingFaceEndpoint
 
-DEFAULT_SYSTEM_PROMPT = """You are a helpful, respectful, and honest assistant."""
+DEBUG = os.environ.get("AI_HUGGINGFACE_DEBUG", "0") == "1"
+
+DEFAULT_SYSTEM_PROMPT = \
+    """You are a helpful, respectful, and honest assistant."""
 
 
 @dataclass
@@ -118,9 +122,10 @@ def _convert_TGI_message_to_LC_message(
 
 def _is_huggingface_hub(llm: Any) -> bool:
     try:
-        from langchain_community.llms.huggingface_hub import (  # type: ignore[import-not-found]
-            HuggingFaceHub,
-        )
+        from langchain_community.llms.huggingface_hub \
+            import (  # type: ignore[import-not-found]
+                HuggingFaceHub,
+            )
 
         return isinstance(llm, HuggingFaceHub)
     except ImportError:
@@ -130,9 +135,10 @@ def _is_huggingface_hub(llm: Any) -> bool:
 
 def _is_huggingface_textgen_inference(llm: Any) -> bool:
     try:
-        from langchain_community.llms.huggingface_text_gen_inference import (  # type: ignore[import-not-found]
-            HuggingFaceTextGenInference,
-        )
+        from langchain_community.llms.huggingface_text_gen_inference \
+            import (  # type: ignore[import-not-found]
+                HuggingFaceTextGenInference,
+            )
 
         return isinstance(llm, HuggingFaceTextGenInference)
     except ImportError:
@@ -457,7 +463,8 @@ class GsChatHuggingFace(BaseChatModel):
     def _resolve_model_id(self) -> None:
         """Resolve the model_id from the LLM's inference_server_url"""
 
-        from huggingface_hub import list_inference_endpoints  # type: ignore[import]
+        # type: ignore[import]
+        from huggingface_hub import list_inference_endpoints
 
         if _is_huggingface_hub(self.llm) or (
             hasattr(self.llm, "repo_id") and self.llm.repo_id
@@ -488,7 +495,8 @@ class GsChatHuggingFace(BaseChatModel):
         self,
         tools: Sequence[Union[Dict[str, Any], Type, Callable, BaseTool]],
         *,
-        tool_choice: Optional[Union[dict, str, Literal["auto", "none"], bool]] = None,
+        tool_choice: Optional[Union[dict, str,
+                                    Literal["auto", "none"], bool]] = None,
         **kwargs: Any,
     ) -> Runnable[LanguageModelInput, BaseMessage]:
         """Bind tool-like objects to this chat model.

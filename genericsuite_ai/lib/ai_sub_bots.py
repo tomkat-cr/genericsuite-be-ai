@@ -2,6 +2,7 @@
 Sub Bots module, to ask quick questions to the model using vectors
 """
 from typing import List
+import os
 import json
 
 from langchain_classic.indexes.vectorstore import VectorStoreIndexWrapper
@@ -19,7 +20,7 @@ from genericsuite.util.utilities import (
     get_default_resultset,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_SUB_BOTS_DEBUG", "0") == "1"
 
 
 def ask_ai(

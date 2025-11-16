@@ -3,6 +3,7 @@ AI general utilities
 """
 from typing import Union, Optional
 import json
+import os
 
 from genericsuite.util.app_logger import (
     log_debug,
@@ -13,7 +14,7 @@ from genericsuite.constants.const_tables import get_constant
 
 from genericsuite_ai.config.config import Config
 
-DEBUG = False
+DEBUG = os.environ.get("AI_UTILITIES_DEBUG", "0") == "1"
 
 
 def standard_gpt_func_response(
@@ -67,7 +68,8 @@ def standard_gpt_func_response(
                 log_error('AI_SGFR-E010) STANDARD_GPT_FUNC_RESPONSE' +
                           f' | error: {err}')
         result_have_items = results_qty > 0
-        _ = DEBUG and log_debug('AI_SGFR-1) STANDARD_GPT_FUNC_RESPONSE' +
+        _ = DEBUG and log_debug(
+            'AI_SGFR-1) STANDARD_GPT_FUNC_RESPONSE' +
             f'\n | type(result["resultset"]): {type(result["resultset"])}' +
             f'\n | result["resultset"]: {result["resultset"]}' +
             f'\n | results_qty: {results_qty}' +
@@ -81,7 +83,7 @@ def standard_gpt_func_response(
         response = action_description
         if add_success_msg:
             msg_to_add = " " + ("was successful" if result_have_items
-                else "has no items") + ". "
+                                else "has no items") + ". "
             response += msg_to_add
             if not result_have_items:
                 include_resultset_int = False
@@ -113,7 +115,7 @@ def get_user_lang_code(app_context: AppContext) -> str:
     """
     settings = Config(app_context)
     user_lag_code = app_context.get_user_data().get('language',
-        settings.DEFAULT_LANG)
+                                                    settings.DEFAULT_LANG)
     if str(user_lag_code).strip() in ['', 'None']:
         user_lag_code = settings.DEFAULT_LANG
     _ = DEBUG and log_debug('AI_GULC-1) get_user_lang_code' +
@@ -131,7 +133,7 @@ def get_response_lang(app_context: AppContext) -> str:
         'Español': 'Spanish',
     }
     _ = DEBUG and log_debug('AI_GRL-1) get_response_lang' +
-        f' | lang_desc: {lang_desc}')
+                            f' | lang_desc: {lang_desc}')
     return lang_name_trans.get(lang_desc, lang_desc)
 
 
@@ -154,14 +156,15 @@ def get_response_lang_desc(app_context: AppContext) -> str:
     settings = Config(app_context)
     user_lang_code = get_user_lang_code(app_context)
     lang_desc = get_constant("LANGUAGES", user_lang_code,
-        settings.DEFAULT_LANG)
-    _ = DEBUG and log_debug('AI_GRLD-1) get_response_lang_desc' +
+                             settings.DEFAULT_LANG)
+    _ = DEBUG and log_debug(
+        'AI_GRLD-1) get_response_lang_desc' +
         f' | user_lang_code: {user_lang_code} | lang_desc: {lang_desc}')
     return lang_desc
 
 
 def standard_msg(content: str, role: str = "user",
-    other: Optional[Union[dict, None]] = None) -> dict:
+                 other: Optional[Union[dict, None]] = None) -> dict:
     """
     Create a standard message object.
 
