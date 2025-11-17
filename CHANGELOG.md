@@ -33,12 +33,15 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Bump urllib3 to 2.5.0 and numpy to 2.0.2 to have compatibility with GS BE Core.
 - Refactor imports in ai_langchain_models.py to include ChatBedrock (AWS Bedrock) and langchain-aws conditionally.
 - Enhance HuggingFace text query functions ("huggingface_remote" model type) to support OpenAI API integration.
+- Change "huggingface" model type to use OpenAI API instead of langchain's HuggingFaceEndpoint and ChatHuggingFace, so "langchain-huggingface" dependency is not required.
 
 ### Fixed
+- Fix AI tools calling error due to pydantic parameter type mismatch, chaging the type annotation from Dict to Any.
 - Fix the "langchain_community not found" by adding the "langchain-community" dependency. This addition required the upgrade of dependencies "langchain" to "0.3.26" and "faiss-cpu" to "^1.11.0.post1".
-- Use Poetry to run build and publish commands in Makefile to fix a "make publish" error. 
-- Add new development dependencies including build and twine to fix a "make publish" error.
+- Fix "huggingface_remote" text query functions streaming responses errors.
 - Fix the issues with the new langchain 1.0.x migrating some langchain.* imports to langchain_classic.* imports.
+- Add new development dependencies including build and twine to fix a "make publish" error.
+- Use Poetry to run build and publish commands in Makefile to fix a "make publish" error. 
 
 ### Security
 - Update "transformers" to "^4.57.1" to fix security vulnerabilities [GS-219]:

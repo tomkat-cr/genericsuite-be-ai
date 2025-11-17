@@ -315,7 +315,7 @@ def audio_to_text_transcript(params: Any) -> dict:
 
 
 @tool
-def audio_processing_text_response(params: Dict) -> str:
+def audio_processing_text_response(params: Any) -> str:
     """
 Useful when you need to transcribe audio files with an audio to text generator.
 Args: params (dict): Tool parameters. It must have: "sound_filespec" (str): sound file path.

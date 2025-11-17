@@ -1,7 +1,7 @@
 """
 AI Image Generation: processing text and generate images
 """
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 import os
 
 from openai import OpenAI
@@ -454,7 +454,7 @@ def update_img_and_conversation(response: dict, other: dict) -> dict:
 
 
 @tool
-def image_generator_text_response(params: Dict) -> str:
+def image_generator_text_response(params: Any) -> str:
     """
 Useful when you need to perform text to image generation. This Tool returns the generated image(s) URL(s) only.
 Args: params (dict): Tool parameters. Must contain: "question" (str): a question about the image specified.

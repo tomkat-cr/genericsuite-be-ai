@@ -1,7 +1,7 @@
 """
 Web scrapping module
 """
-from typing import Any, Dict
+from typing import Any
 import os
 import importlib
 # import asyncio
@@ -210,7 +210,7 @@ def webpage_analyzer(
 
 
 @tool
-def webpage_analyzer_text_response(params: Dict) -> str:
+def webpage_analyzer_text_response(params: Any) -> str:
     """
 Useful to answer a question about a given webpage URL.
 Args: params (dict): Tool parameters. Must contain:

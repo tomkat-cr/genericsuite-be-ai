@@ -2,7 +2,7 @@
 Web Search ability
 """
 
-from typing import Dict, Union, Any, Optional
+from typing import Union, Any, Optional
 import json
 import time
 import os
@@ -54,7 +54,7 @@ class WebSearch(BaseModel):
 
 
 @tool
-def web_search(params: Dict) -> str:
+def web_search(params: Any) -> str:
     """
 Useful when you need to perform a web search to have access to real-time information, and/or answer questions about recent events.
 Args: params (dict): Tool parameter. Must contain:

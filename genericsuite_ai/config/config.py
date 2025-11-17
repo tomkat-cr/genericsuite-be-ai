@@ -457,6 +457,11 @@ class Config(ConfigSuperClass):
 
         # HF Options and general parameters
 
+        self.HUGGINGFACE_BASE_URL = self.get_env(
+            'HUGGINGFACE_BASE_URL',
+            "https://router.huggingface.co/v1"
+        )
+
         self.HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT = self.get_env(
             'HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT',
             "https://router.huggingface.co/v1/chat/completions"

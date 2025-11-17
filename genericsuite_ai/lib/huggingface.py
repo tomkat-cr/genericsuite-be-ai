@@ -7,9 +7,6 @@ import requests
 import uuid
 import json
 
-from openai import OpenAI
-from openai.types.chat.chat_completion import ChatCompletion
-
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 from langchain_core.outputs import GenerationChunk
 
@@ -27,7 +24,6 @@ from genericsuite_ai.lib.ai_langchain_models_abstract import CustomLLM as LLM
 
 DEBUG = os.environ.get("AI_HUGGINGFACE_DEBUG", "0") == "1"
 
-HF_TEXT_API_METHOD = os.environ.get("AI_HUGGINGFACE_TEXT_API_METHOD", "openai")
 cac = CommonAppContext()
 
 
@@ -52,35 +48,58 @@ def hf_text_to_image_query(repo_id: str, payload: dict) -> Any:
     return requests.post(api_url, headers=headers, json=payload)
 
 
-def hf_text_to_text_query_openai(repo_id: str, api_key: str, payload: dict,
-                                 stream: bool = False) -> ChatCompletion:
+def hf_query(api_url: str, api_key: str, payload: dict
+             ) -> dict:
     """
-    Perform a HuggingFace text to text query using the OpenAI API
+    Perform a HuggingFace query
 
     Args:
-        repo_id (str): HuggingFace model repository ID
+        api_url (str): HuggingFace API URL
         api_key (str): HuggingFace API key
         payload (dict): HuggingFace payload
 
     Returns:
-        ChatCompletion: OpenAI response
+        dict: HuggingFace response
     """
-    client = OpenAI(
-        base_url="https://router.huggingface.co/v1",
-        api_key=api_key,
-    )
-    completion = client.chat.completions.create(
-        model=repo_id,
-        messages=payload['messages'],
-        stream=stream,
-    )
-    return completion
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+    }
+    response = requests.post(api_url, headers=headers, json=payload)
+    return response.json()
 
 
-def hf_text_to_text_query_request(repo_id: str, api_key: str, payload: dict,
-                                  stream: bool = False) -> requests.Response:
+def hf_query_stream(
+    api_url: str, api_key: str, payload: dict
+) -> Iterator[dict]:
     """
-    Perform a HuggingFace text to text query request
+    Perform a HuggingFace query and stream the response
+
+    Args:
+        api_url (str): HuggingFace API URL
+        api_key (str): HuggingFace API key
+        payload (dict): HuggingFace payload
+
+    Returns:
+        Iterator[dict]: HuggingFace stream response
+    """
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+    }
+    response = requests.post(
+        api_url, headers=headers, json=payload, stream=True)
+    for line in response.iter_lines():
+        _ = DEBUG and log_debug(f"hf_query_stream | line: {line}")
+        if not line.startswith(b"data:"):
+            continue
+        if line.strip() == b"data: [DONE]":
+            return
+        yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
+
+
+def hf_text_to_text_query(repo_id: str, api_key: str, payload: dict
+                          ) -> dict:
+    """
+    Perform a HuggingFace text to text query
 
     Args:
         repo_id (str): HuggingFace model repository ID
@@ -89,41 +108,16 @@ def hf_text_to_text_query_request(repo_id: str, api_key: str, payload: dict,
         stream (bool): Whether to stream the response
 
     Returns:
-        requests.Response: HuggingFace response
+        Any: HuggingFace response
     """
     # https://huggingface.co/docs/inference-providers/tasks/chat-completion
     # https://huggingface.co/docs/api-inference/detailed_parameters
     settings = Config(cac.get())
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
     api_url = settings.HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT
     payload['model'] = repo_id
-    return requests.post(api_url, headers=headers, json=payload, stream=stream)
-
-
-def hf_text_to_text_query(repo_id: str, api_key: str, payload: dict,
-                          stream: bool = False) -> requests.Response:
-    """
-    Perform a HuggingFace text to text query request
-    using the HuggingFace API or the OpenAI API
-    depending on the AI_HUGGINGFACE_TEXT_API_METHOD environment variable
-
-    Args:
-        repo_id (str): HuggingFace model repository ID
-        api_key (str): HuggingFace API key
-        payload (dict): HuggingFace payload
-        stream (bool): Whether to stream the response
-
-    Returns:
-        requests.Response or ChatCompletion: HuggingFace response or
-        OpenAI response
-    """
-    if HF_TEXT_API_METHOD == "openai":
-        return hf_text_to_text_query_openai(repo_id, api_key, payload, stream)
-    else:
-        return hf_text_to_text_query_request(repo_id, api_key, payload, stream)
+    response = hf_query(
+        api_url, api_key or settings.HUGGINGFACE_API_KEY, payload)
+    return response
 
 
 def hf_text_to_text_stream(repo_id: str, api_key: str, payload: dict
@@ -140,18 +134,20 @@ def hf_text_to_text_stream(repo_id: str, api_key: str, payload: dict
         Iterator[dict]: HuggingFace response as a dictionary, one dictionary
             per line
     """
-    response = hf_text_to_text_query(
-        repo_id=repo_id,
-        api_key=api_key,
-        payload=payload,
-        stream=True,
-    )
-    for line in response.iter_lines():
-        if not line.startswith(b"data:"):
-            continue
-        if line.strip() == b"data: [DONE]":
+    settings = Config(cac.get())
+    api_url = settings.HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT
+    payload['model'] = repo_id
+    payload['stream'] = True
+    chuncks = hf_query_stream(
+        api_url, api_key or settings.HUGGINGFACE_API_KEY, payload)
+    for chunk in chuncks:
+        _ = DEBUG and log_debug(f"hf_text_to_text_stream | chunk: {chunk}")
+        if 'content' in chunk["choices"][0]["delta"]:
+            yield chunk["choices"][0]["delta"]["content"]
+        else:
+            _ = DEBUG and log_debug(
+                f"hf_text_to_text_stream | no content in chunk: {chunk}")
             return
-        yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
 
 
 def huggingface_img_gen(question: str, image_extension: str = 'jpg') -> dict:
@@ -255,9 +251,7 @@ def huggingface_chat(
     )
 
     chat_response['resultset'] = {
-        'content': completion.choices[0].message
-        if isinstance(completion, ChatCompletion)
-        else completion.choices[0].message.content
+        'content': completion["choices"][0]["message"]
     }
 
     return chat_response
@@ -329,6 +323,11 @@ class HuggingFaceChatModel(LLM):
         Returns:
             An iterator of GenerationChunks.
         """
+        _ = DEBUG and log_debug(
+            ">> HuggingFaceChatModel | _stream"
+            f"| model_name: {self._get_model_name()}"
+            f"| stop: {stop}"
+            f" | prompt: {prompt}")
         payload = {
             'messages': [
                 {
@@ -339,14 +338,13 @@ class HuggingFaceChatModel(LLM):
         }
         for chunk in hf_text_to_text_stream(self.model_name, self.api_key,
                                             payload):
-            yield GenerationChunk(
-                text=chunk['choices'][0]['message']['content'])
-            if run_manager:
-                run_manager.on_llm_new_token(
-                    chunk['choices'][0]['message']['content'])
-            if stop and \
-                    chunk['choices'][0]['message']['content'].endswith(stop):
-                break
+            yield GenerationChunk(text=chunk)
+            # if run_manager:
+            #     run_manager.on_llm_new_token(
+            #         chunk)
+            # if stop and \
+            #         chunk.endswith(stop):
+            #     break
 
     @property
     def _llm_type(self) -> str:

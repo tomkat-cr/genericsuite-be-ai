@@ -127,15 +127,21 @@ def get_openai_api(model_params: dict) -> ChatOpenAI:
         "model": model_name,
         "openai_api_key": openai_api_key,
     }
+    renamed_pars = {
+        "inference_provider": "provider"
+    }
     for key in ["base_url", "stop"]:
         if model_params.get(key):
             model_config[key] = model_params[key]
     for key in ["temperature"]:
         if model_params.get(key):
             model_config[key] = float(model_params[key])
-    for key in ["top_p", "max_tokens"]:
+    for key in ["top_p", "top_k", "max_tokens"]:
         if model_params.get(key):
             model_config[key] = int(model_params[key])
+    for key, new_key in renamed_pars.items():
+        if model_params.get(key):
+            model_config[new_key] = model_params[key]
     if model_params.get("streaming", "0") == "1":
         model_config["streaming"] = True
         model_config["n"] = 1
@@ -340,47 +346,77 @@ def get_model(
                 )
 
         if model_type == "huggingface":
-            # https://python.langchain.com/docs/integrations/platforms/huggingface/
-            # https://python.langchain.com/docs/integrations/llms/huggingface_endpoint/
-            # https://python.langchain.com/docs/integrations/chat/huggingface/
-            #
-            from langchain_huggingface \
-                import HuggingFaceEndpoint  # type: ignore[import]
-            from langchain_huggingface \
-                import ChatHuggingFace  # type: ignore[import]
-            #
+            # https://huggingface.co/inference/get-started
             manufacturer = "Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            # if 'url' in model_params:
-            #     model_name = model_params['url']
-            if 'model_name' in model_params:
-                model_name = model_params['model_name']
-            model_object = HuggingFaceEndpoint(
-                repo_id=model_name,
-                task=HF_DEFAULT_TASK,
-                do_sample=False,
-                max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
-                top_k=int(settings.HUGGINGFACE_TOP_K),
-                temperature=float(settings.HUGGINGFACE_TEMPERATURE),
-                repetition_penalty=float(
-                    settings.HUGGINGFACE_REPETITION_PENALTY),
-                huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
-                timeout=float(settings.HUGGINGFACE_TIMEOUT),
-                provider=settings.HUGGINGFACE_PROVIDER,
-            )
+            openai_model = get_openai_api({
+                "provider": manufacturer,
+                "base_url": settings.HUGGINGFACE_BASE_URL,
+                "api_key": model_params.get(
+                    "api_key", settings.HUGGINGFACE_API_KEY),
+                "model_name": model_name,
+                "temperature": settings.HUGGINGFACE_TEMPERATURE,
+                # "top_k": settings.HUGGINGFACE_TOP_K,
+                "max_tokens": settings.HUGGINGFACE_MAX_NEW_TOKENS,
+                "streaming": settings.AI_STREAMING,
+                "timeout": float(settings.HUGGINGFACE_TIMEOUT),
+                # "inference_provider": settings.HUGGINGFACE_PROVIDER,
+            })
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
+
             # 0 = use HuggingFaceEndpoint + LangChain Agent
             # 1 = use ChatHuggingFace + LangChain LCEL
             other_data["HUGGINGFACE_USE_CHAT_HF"] = \
                 settings.HUGGINGFACE_USE_CHAT_HF
 
-            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
-                model_object = ChatHuggingFace(
-                    llm=model_object,
-                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
-                )
-            else:
+            if settings.HUGGINGFACE_USE_CHAT_HF != "1":
                 # Instruct models or pure LLMs Doesn't work with LCEL
                 pref_agent_type = 'react_chat_agent'
+
+            # https://python.langchain.com/docs/integrations/platforms/huggingface/
+            # https://python.langchain.com/docs/integrations/llms/huggingface_endpoint/
+            # https://python.langchain.com/docs/integrations/chat/huggingface/
+            #
+            # from langchain_huggingface \
+            #     import HuggingFaceEndpoint  # type: ignore[import]
+            # from langchain_huggingface \
+            #     import ChatHuggingFace  # type: ignore[import]
+            #
+            # manufacturer = "Hugging Face"
+            # model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
+            # # if 'url' in model_params:
+            # #     model_name = model_params['url']
+            # if 'model_name' in model_params:
+            #     model_name = model_params['model_name']
+            # model_object = HuggingFaceEndpoint(
+            #     repo_id=model_name,
+            #     task=HF_DEFAULT_TASK,
+            #     do_sample=False,
+            #     max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
+            #     top_k=int(settings.HUGGINGFACE_TOP_K),
+            #     temperature=float(settings.HUGGINGFACE_TEMPERATURE),
+            #     repetition_penalty=float(
+            #         settings.HUGGINGFACE_REPETITION_PENALTY),
+            #     huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
+            #     timeout=float(settings.HUGGINGFACE_TIMEOUT),
+            #     provider=settings.HUGGINGFACE_PROVIDER,
+            # )
+            # # 0 = use HuggingFaceEndpoint + LangChain Agent
+            # # 1 = use ChatHuggingFace + LangChain LCEL
+            # other_data["HUGGINGFACE_USE_CHAT_HF"] = \
+            #     settings.HUGGINGFACE_USE_CHAT_HF
+
+            # if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+            #     model_object = ChatHuggingFace(
+            #         llm=model_object,
+            #         verbose=settings.HUGGINGFACE_VERBOSE == "1",
+            #     )
+            # else:
+            #     # Instruct models or pure LLMs Doesn't work with LCEL
+            #     pref_agent_type = 'react_chat_agent'
 
         # Hugging Face Pipelines
         if model_type == "huggingface_pipeline":

@@ -1,7 +1,7 @@
 """
 GPT Functions / Langchain Tools to handle embeddings
 """
-from typing import Any, Dict
+from typing import Any
 import os
 from datetime import datetime
 
@@ -30,7 +30,7 @@ cac = CommonAppContext()
 
 
 @tool
-def conversation_summary_tool(params: Dict = None) -> Any:
+def conversation_summary_tool(params: Any = None) -> Any:
     """
 Useful when you need to summarize large Human and Assistant conversations.
 Args: params (dict): Tool parameters. Must have: "who_is_reading" (str): Who reads this summary
@@ -93,7 +93,7 @@ def conversation_summary_tool_func(params: Any = None) -> Any:
 
 
 @tool
-def get_current_date_time(params: Dict = None) -> str:
+def get_current_date_time(params: Any = None) -> str:
     """
 Useful when you need to get the current date and UTC time when a question refers for a specific date respect of today, e.g. today's date, today's calories consumed, today's meals, yesterday's meals, yesterday's calories.
     """  # noqa: E501
