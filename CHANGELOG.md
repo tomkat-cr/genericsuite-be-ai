@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
-## [0.2.0] - 2025-11-15
+## [0.2.0] - 2025-11-17
 
 ### Added
 - Add "install" command to Makefile for easier dependency management.  
@@ -34,11 +34,11 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Refactor imports in ai_langchain_models.py to include ChatBedrock (AWS Bedrock) and langchain-aws conditionally.
 - Enhance HuggingFace text query functions ("huggingface_remote" model type) to support OpenAI API integration.
 - Change "huggingface" model type to use OpenAI API instead of langchain's HuggingFaceEndpoint and ChatHuggingFace, so "langchain-huggingface" dependency is not required.
-- The old "hugginface" model type is now "langchain_huggingface" and requires the "langchain-huggingface" dependency, which is optional by default.
+- The old "huggingface" model type is now "langchain_huggingface" and requires the "langchain-huggingface" dependency, which is optional by default.
 - The "gs_huggingface" model type is the same as the "huggingface_remote" model type, calling Hugging Face with requests.
 
 ### Fixed
-- Fix AI tools calling error due to pydantic parameter type mismatch, chaging the type annotation from Dict to Any.
+- Fix AI tools calling error due to pydantic parameter type mismatch, changing the type annotation from Dict to Any.
 - Fix the "langchain_community not found" by adding the "langchain-community" dependency. This addition required the upgrade of dependencies "langchain" to "0.3.26" and "faiss-cpu" to "^1.11.0.post1".
 - Fix "huggingface_remote" text query functions streaming responses errors.
 - Fix the issues with the new langchain 1.0.x migrating some langchain.* imports to langchain_classic.* imports.
@@ -66,7 +66,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
     * "setuptools has a path traversal vulnerability in PackageIndex.download that leads to Arbitrary File Write"
 - Remove "text-generation" to fix the security vulnerability (also it's not used in this project) [GS-219]:
     * "Code injection vulnerability exists in the huggingface/text-generation-inference repository"
-- "llama-index-core" vulnerabilities are solved because it's not longer a dependency of this project (since clarifai is not longer a dependency):
+- "llama-index-core" vulnerabilities are solved because it's no longer a dependency of this project (due to clarifai removal):
     * "llama-index-core insecurely handles temporary files"
     * "LlamaIndex affected by a Denial of Service (DOS) in JSONReader"
     * "LlamaIndex vulnerable to Path Traversal attack through its encode_image function"
