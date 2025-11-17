@@ -34,6 +34,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Refactor imports in ai_langchain_models.py to include ChatBedrock (AWS Bedrock) and langchain-aws conditionally.
 - Enhance HuggingFace text query functions ("huggingface_remote" model type) to support OpenAI API integration.
 - Change "huggingface" model type to use OpenAI API instead of langchain's HuggingFaceEndpoint and ChatHuggingFace, so "langchain-huggingface" dependency is not required.
+- The old "hugginface" model type is now "langchain_huggingface" and requires the "langchain-huggingface" dependency, which is optional by default.
+- The "gs_huggingface" model type is the same as the "huggingface_remote" model type, calling Hugging Face with requests.
 
 ### Fixed
 - Fix AI tools calling error due to pydantic parameter type mismatch, chaging the type annotation from Dict to Any.
@@ -64,7 +66,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
     * "setuptools has a path traversal vulnerability in PackageIndex.download that leads to Arbitrary File Write"
 - Remove "text-generation" to fix the security vulnerability (also it's not used in this project) [GS-219]:
     * "Code injection vulnerability exists in the huggingface/text-generation-inference repository"
-- Update "clarifai" to "^11.9.0" to fix security vulnerabilities ("llama-index-core" is not longer a dependency of clarifi) [GS-219]:
+- "llama-index-core" vulnerabilities are solved because it's not longer a dependency of this project (since clarifai is not longer a dependency):
     * "llama-index-core insecurely handles temporary files"
     * "LlamaIndex affected by a Denial of Service (DOS) in JSONReader"
     * "LlamaIndex vulnerable to Path Traversal attack through its encode_image function"
@@ -80,7 +82,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Removed
 - Remove "langchain-together" to enable upgrade of all other langchain dependencies, and routes Together AI calls through the OpenAI API.
 - Remove "clarifai" to make it optional by default [GS-219].
-
+- Remove GsHuggingFaceEndpoint and GsChatHuggingFace classes because they were replaced by the new Hugging Face with OpenAI API calls.
 
 ## [0.1.14] - 2025-07-12
 

@@ -30,14 +30,10 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-from genericsuite_ai.lib.huggingface_endpoint import (
-    GsHuggingFaceEndpoint,
+from genericsuite_ai.lib.huggingface import (
+    HuggingFaceChatModel,
     DEFAULT_TASK as HF_DEFAULT_TASK,
 )
-from genericsuite_ai.lib.huggingface_chat_model import (
-    GsChatHuggingFace,
-)
-from genericsuite_ai.lib.huggingface import HuggingFaceChatModel
 
 from genericsuite_ai.lib.ibm import IbmWatsonx
 from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
@@ -294,41 +290,8 @@ def get_model(
             model_object = ChatOllama(**model_config)
 
         # Genericsuite's Hugging Face lightweight Inference API
-        if model_type == "gs_huggingface":
+        if model_type in ["huggingface_remote", "gs_huggingface"]:
             manufacturer = "GS Hugging Face"
-            model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            if 'model_name' in model_params:
-                model_name = model_params['model_name']
-            model_task = model_params.get(
-                'model_task', HF_DEFAULT_TASK)  # 'text-generation'
-            model_object = GsHuggingFaceEndpoint(
-                repo_id=model_name,
-                task=model_task,
-                do_sample=False,
-                max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
-                top_k=int(settings.HUGGINGFACE_TOP_K),
-                temperature=float(settings.HUGGINGFACE_TEMPERATURE),
-                repetition_penalty=float(
-                    settings.HUGGINGFACE_REPETITION_PENALTY),
-                huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
-                timeout=float(settings.HUGGINGFACE_TIMEOUT),
-            )
-            # 0 = use HuggingFaceEndpoint + LangChain Agent
-            # 1 = use ChatHuggingFace + LangChain LCEL
-            other_data["HUGGINGFACE_USE_CHAT_HF"] = \
-                settings.HUGGINGFACE_USE_CHAT_HF
-
-            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
-                model_object = GsChatHuggingFace(
-                    llm=model_object,
-                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
-                )
-            else:
-                # Instruct models or pure LLMs Doesn't work with LCEL
-                pref_agent_type = 'react_chat_agent'
-
-        if model_type == "huggingface_remote":
-            manufacturer = "GS Hugging Face (Remote Chat Model)"
             tools_permitted = False
             pref_agent_type = 'react_chat_agent'
             model_name = model_params.get(
@@ -345,6 +308,7 @@ def get_model(
                     app_context=app_context,
                 )
 
+        # Hugging Face with OpenAI API
         if model_type == "huggingface":
             # https://huggingface.co/inference/get-started
             manufacturer = "Hugging Face"
@@ -376,47 +340,46 @@ def get_model(
                 # Instruct models or pure LLMs Doesn't work with LCEL
                 pref_agent_type = 'react_chat_agent'
 
+        if model_type == "langchain_huggingface":
             # https://python.langchain.com/docs/integrations/platforms/huggingface/
             # https://python.langchain.com/docs/integrations/llms/huggingface_endpoint/
             # https://python.langchain.com/docs/integrations/chat/huggingface/
             #
-            # from langchain_huggingface \
-            #     import HuggingFaceEndpoint  # type: ignore[import]
-            # from langchain_huggingface \
-            #     import ChatHuggingFace  # type: ignore[import]
-            #
-            # manufacturer = "Hugging Face"
-            # model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            # # if 'url' in model_params:
-            # #     model_name = model_params['url']
-            # if 'model_name' in model_params:
-            #     model_name = model_params['model_name']
-            # model_object = HuggingFaceEndpoint(
-            #     repo_id=model_name,
-            #     task=HF_DEFAULT_TASK,
-            #     do_sample=False,
-            #     max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
-            #     top_k=int(settings.HUGGINGFACE_TOP_K),
-            #     temperature=float(settings.HUGGINGFACE_TEMPERATURE),
-            #     repetition_penalty=float(
-            #         settings.HUGGINGFACE_REPETITION_PENALTY),
-            #     huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
-            #     timeout=float(settings.HUGGINGFACE_TIMEOUT),
-            #     provider=settings.HUGGINGFACE_PROVIDER,
-            # )
-            # # 0 = use HuggingFaceEndpoint + LangChain Agent
-            # # 1 = use ChatHuggingFace + LangChain LCEL
-            # other_data["HUGGINGFACE_USE_CHAT_HF"] = \
-            #     settings.HUGGINGFACE_USE_CHAT_HF
+            from langchain_huggingface \
+                import HuggingFaceEndpoint  # type: ignore[import]
+            from langchain_huggingface \
+                import ChatHuggingFace  # type: ignore[import]
 
-            # if settings.HUGGINGFACE_USE_CHAT_HF == "1":
-            #     model_object = ChatHuggingFace(
-            #         llm=model_object,
-            #         verbose=settings.HUGGINGFACE_VERBOSE == "1",
-            #     )
-            # else:
-            #     # Instruct models or pure LLMs Doesn't work with LCEL
-            #     pref_agent_type = 'react_chat_agent'
+            manufacturer = "Hugging Face"
+            model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
+            if 'model_name' in model_params:
+                model_name = model_params['model_name']
+            model_object = HuggingFaceEndpoint(
+                repo_id=model_name,
+                task=HF_DEFAULT_TASK,
+                do_sample=False,
+                max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
+                top_k=int(settings.HUGGINGFACE_TOP_K),
+                temperature=float(settings.HUGGINGFACE_TEMPERATURE),
+                repetition_penalty=float(
+                    settings.HUGGINGFACE_REPETITION_PENALTY),
+                huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
+                timeout=float(settings.HUGGINGFACE_TIMEOUT),
+                provider=settings.HUGGINGFACE_PROVIDER,
+            )
+            # 0 = use HuggingFaceEndpoint + LangChain Agent
+            # 1 = use ChatHuggingFace + LangChain LCEL
+            other_data["HUGGINGFACE_USE_CHAT_HF"] = \
+                settings.HUGGINGFACE_USE_CHAT_HF
+
+            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+                model_object = ChatHuggingFace(
+                    llm=model_object,
+                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
+                )
+            else:
+                # Instruct models or pure LLMs Doesn't work with LCEL
+                pref_agent_type = 'react_chat_agent'
 
         # Hugging Face Pipelines
         if model_type == "huggingface_pipeline":

@@ -317,8 +317,7 @@ def get_function_specs(
             }
         },
         "required": ["image_path", "question"],
-    },
-        {
+    }, {
         "name": "image_generator",
         "description": "Process the specified text and answer the" +
         " question about it using an image generator. Useful when" +
@@ -345,8 +344,7 @@ def get_function_specs(
             }
         },
         "required": ["question"],
-    },
-        {
+    }, {
         "name": "web_search",
         "description": "Searches the web, useful when you can't" +
         " get enough or updated information from your model." +
@@ -367,8 +365,7 @@ def get_function_specs(
             }
         },
         "required": ["query"],
-    },
-        {
+    }, {
         "name": "conversation_summary",
         "description": "Useful when you need to summarize large the user and" +
         " assistant conversation.",
@@ -382,8 +379,7 @@ def get_function_specs(
             }
         },
         "required": ["who_is_reading"],
-    },
-        {
+    }, {
         "name": "audio_processing",
         "description": "Transcribe an audio file with a audio to text" +
         " generator",
@@ -401,12 +397,11 @@ def get_function_specs(
             }
         },
         "required": ["sound_filespec"],
-    },
+    }, {
         # google: openai chat completion api how to force the chat model to
         #    send back exactly what the gpt function returns ?
         # How to let GPT do not return any accompanying text?
         # https://community.openai.com/t/how-to-let-gpt-do-not-return-any-accompanying-text/324513/6
-        {
         "name": "text_to_audio_response",
         "description": "Useful when you need to generate audio files" +
         " from a given text. Call it when the question begins with one" +

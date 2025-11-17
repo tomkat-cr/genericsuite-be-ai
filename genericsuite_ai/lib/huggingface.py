@@ -24,6 +24,8 @@ from genericsuite_ai.lib.ai_langchain_models_abstract import CustomLLM as LLM
 
 DEBUG = os.environ.get("AI_HUGGINGFACE_DEBUG", "0") == "1"
 
+DEFAULT_TASK = "conversational"  # "text-generation"
+
 cac = CommonAppContext()
 
 
