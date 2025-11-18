@@ -1,6 +1,8 @@
 """
 This module contains the implementation of the AI Chatbot API.
 """
+import os
+
 from openai import OpenAI
 
 from genericsuite_ai.lib.ai_utilities import (
@@ -21,7 +23,7 @@ from genericsuite.util.app_context import AppContext
 from genericsuite.util.app_logger import log_debug
 
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CHATBOT_DEBUG", "0") == "1"
 
 
 def run_conversation(app_context: AppContext) -> dict:
@@ -39,7 +41,8 @@ def run_conversation(app_context: AppContext) -> dict:
             cid (str): coversation ID
     """
     settings = Config(app_context)
-    start_response = start_run_conversation(app_context=app_context, initial_prompt=True)
+    start_response = start_run_conversation(
+        app_context=app_context, initial_prompt=True)
     if start_response["error"]:
         return report_error(start_response)
     conv_response = start_response["conv_response"]
@@ -53,7 +56,8 @@ def run_conversation(app_context: AppContext) -> dict:
     openai_api_key = billing.get_openai_api_key()
     if billing.is_free_plan() and not openai_api_key:
         conv_response["error"] = True
-        conv_response["error_message"] = "You must specify your OPENAI_API_KEY in your" + \
+        conv_response["error_message"] = \
+            "You must specify your OPENAI_API_KEY in your" + \
             " profile or upgrade to a paid plan [AIRCOA-E010]"
     chat_model = billing.get_openai_chat_model()
 
@@ -97,7 +101,8 @@ def run_conversation(app_context: AppContext) -> dict:
             app_context=app_context,
             response_message=gpt_function["response_message"],
         )
-        gpt_function["response"] = gpt_function["run_resp"]["function_response"]
+        gpt_function["response"] = \
+            gpt_function["run_resp"]["function_response"]
         gpt_function["name"] = gpt_function["run_resp"]["function_name"]
 
         # Step 4:

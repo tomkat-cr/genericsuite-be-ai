@@ -4,14 +4,12 @@ Langchain models
 """
 from typing import Union, Optional, Any
 import json
+import os
 
 from langchain_anthropic import ChatAnthropic
-from langchain_aws import ChatBedrock
 from langchain_groq import ChatGroq
-from langchain_openai import OpenAI
-from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAI, ChatOpenAI
 from langchain_ollama import ChatOllama
-from langchain_together import ChatTogether
 from langchain_community.llms import Clarifai
 
 from langchain_core.callbacks import AsyncCallbackHandler
@@ -31,16 +29,16 @@ from genericsuite_ai.lib.clarifai import (
     get_model_config,
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
-from genericsuite_ai.lib.huggingface_endpoint import (
-    GsHuggingFaceEndpoint,
+
+from genericsuite_ai.lib.huggingface import (
+    HuggingFaceChatModel,
+    DEFAULT_TASK as HF_DEFAULT_TASK,
 )
-from genericsuite_ai.lib.huggingface_chat_model import (
-    GsChatHuggingFace,
-)
+
 from genericsuite_ai.lib.ibm import IbmWatsonx
 from genericsuite_ai.lib.gcp import get_gcp_vertexai_credentials
 
-DEBUG = False
+DEBUG = os.environ.get("AI_MODELS_DEBUG", "0") == "1"
 
 
 class BedrockAsyncCallbackHandler(AsyncCallbackHandler):
@@ -125,15 +123,21 @@ def get_openai_api(model_params: dict) -> ChatOpenAI:
         "model": model_name,
         "openai_api_key": openai_api_key,
     }
+    renamed_pars = {
+        "inference_provider": "provider"
+    }
     for key in ["base_url", "stop"]:
         if model_params.get(key):
             model_config[key] = model_params[key]
     for key in ["temperature"]:
         if model_params.get(key):
             model_config[key] = float(model_params[key])
-    for key in ["top_p", "max_tokens"]:
+    for key in ["top_p", "top_k", "max_tokens"]:
         if model_params.get(key):
             model_config[key] = int(model_params[key])
+    for key, new_key in renamed_pars.items():
+        if model_params.get(key):
+            model_config[new_key] = model_params[key]
     if model_params.get("streaming", "0") == "1":
         model_config["streaming"] = True
         model_config["n"] = 1
@@ -286,39 +290,57 @@ def get_model(
             model_object = ChatOllama(**model_config)
 
         # Genericsuite's Hugging Face lightweight Inference API
-        if model_type == "huggingface_remote" or \
-           model_type == "gs_huggingface":
+        if model_type in ["huggingface_remote", "gs_huggingface"]:
             manufacturer = "GS Hugging Face"
+            tools_permitted = False
+            pref_agent_type = 'react_chat_agent'
+            model_name = model_params.get(
+                "model_name") or settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
+            api_key = model_params.get(
+                "api_key") or settings.HUGGINGFACE_API_KEY
+            if not api_key:
+                error = "ERROR [GET_MODEL-HF-010] - Missing" \
+                    " HUGGINGFACE_API_KEY"
+            else:
+                model_object = HuggingFaceChatModel(
+                    model_name=model_name,
+                    api_key=api_key,
+                    app_context=app_context,
+                )
+
+        # Hugging Face with OpenAI API
+        if model_type == "huggingface":
+            # https://huggingface.co/inference/get-started
+            manufacturer = "Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            if 'model_name' in model_params:
-                model_name = model_params['model_name']
-            model_object = GsHuggingFaceEndpoint(
-                repo_id=model_name,
-                task="text-generation",
-                do_sample=False,
-                max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
-                top_k=int(settings.HUGGINGFACE_TOP_K),
-                temperature=float(settings.HUGGINGFACE_TEMPERATURE),
-                repetition_penalty=float(
-                    settings.HUGGINGFACE_REPETITION_PENALTY),
-                huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
-                timeout=float(settings.HUGGINGFACE_TIMEOUT),
-            )
+            openai_model = get_openai_api({
+                "provider": manufacturer,
+                "base_url": settings.HUGGINGFACE_BASE_URL,
+                "api_key": model_params.get(
+                    "api_key", settings.HUGGINGFACE_API_KEY),
+                "model_name": model_name,
+                "temperature": settings.HUGGINGFACE_TEMPERATURE,
+                # "top_k": settings.HUGGINGFACE_TOP_K,
+                "max_tokens": settings.HUGGINGFACE_MAX_NEW_TOKENS,
+                "streaming": settings.AI_STREAMING,
+                "timeout": float(settings.HUGGINGFACE_TIMEOUT),
+                # "inference_provider": settings.HUGGINGFACE_PROVIDER,
+            })
+            if openai_model["error"]:
+                error = openai_model["error_message"]
+            else:
+                model_object = openai_model["model_object"]
+
             # 0 = use HuggingFaceEndpoint + LangChain Agent
             # 1 = use ChatHuggingFace + LangChain LCEL
             other_data["HUGGINGFACE_USE_CHAT_HF"] = \
                 settings.HUGGINGFACE_USE_CHAT_HF
 
-            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
-                model_object = GsChatHuggingFace(
-                    llm=model_object,
-                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
-                )
-            else:
+            if settings.HUGGINGFACE_USE_CHAT_HF != "1":
                 # Instruct models or pure LLMs Doesn't work with LCEL
                 pref_agent_type = 'react_chat_agent'
 
-        if model_type == "huggingface":
+        if model_type == "langchain_huggingface":
             # https://python.langchain.com/docs/integrations/platforms/huggingface/
             # https://python.langchain.com/docs/integrations/llms/huggingface_endpoint/
             # https://python.langchain.com/docs/integrations/chat/huggingface/
@@ -327,16 +349,14 @@ def get_model(
                 import HuggingFaceEndpoint  # type: ignore[import]
             from langchain_huggingface \
                 import ChatHuggingFace  # type: ignore[import]
-            #
+
             manufacturer = "Hugging Face"
             model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            # if 'url' in model_params:
-            #     model_name = model_params['url']
             if 'model_name' in model_params:
                 model_name = model_params['model_name']
             model_object = HuggingFaceEndpoint(
                 repo_id=model_name,
-                task="text-generation",
+                task=HF_DEFAULT_TASK,
                 do_sample=False,
                 max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
                 top_k=int(settings.HUGGINGFACE_TOP_K),
@@ -345,6 +365,7 @@ def get_model(
                     settings.HUGGINGFACE_REPETITION_PENALTY),
                 huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
                 timeout=float(settings.HUGGINGFACE_TIMEOUT),
+                provider=settings.HUGGINGFACE_PROVIDER,
             )
             # 0 = use HuggingFaceEndpoint + LangChain Agent
             # 1 = use ChatHuggingFace + LangChain LCEL
@@ -389,7 +410,7 @@ def get_model(
                 model_config["device"] = settings.HUGGINGFACE_PIPELINE_DEVICE
             # Pipeline() reference:
             # https://huggingface.co/transformers/v3.0.2/main_classes/pipelines.html
-            pipe = pipeline("text-generation", **model_config)
+            pipe = pipeline(HF_DEFAULT_TASK, **model_config)
             model_object = HuggingFacePipeline(
                 pipeline=pipe,
                 # timeout=float(settings.HUGGINGFACE_TIMEOUT),
@@ -444,6 +465,7 @@ def get_model(
         if model_type == "bedrock":
             # https://python.langchain.com/docs/integrations/llms/bedrock/
             # https://python.langchain.com/docs/how_to/response_metadata/#bedrock-anthropic
+            from langchain_aws import ChatBedrock    # type: ignore[import]
             manufacturer = "AWS"
             model_name = settings.AWS_BEDROCK_MODEL_ID
             if 'model_name' in model_params:
@@ -642,6 +664,7 @@ def get_model(
                     # n=n,
                     app_context=app_context,
                 )
+
         # Together
         if model_type == "together":
             # https://python.langchain.com/docs/integrations/chat/together/
@@ -654,9 +677,10 @@ def get_model(
                     "ERROR [GET_MODEL-TOGETHER-010] - Missing TOGETHER_API_KEY"
             else:
                 model_config = {
-                    "together_api_key": api_key,
+                    "api_key": api_key,
                     "model": model_name,
                     "stop": ["<|eot_id|>", "<|eom_id|>"],
+                    "base_url": "https://api.together.xyz/v1",
                 }
                 if settings.TOGETHER_TEMPERATURE:
                     model_config["temperature"] = \
@@ -666,7 +690,7 @@ def get_model(
                 if settings.TOGETHER_MAX_TOKENS:
                     model_config["max_tokens"] = \
                         int(settings.TOGETHER_MAX_TOKENS)
-                model_object = ChatTogether(**model_config)
+                model_object = ChatOpenAI(**model_config)
 
     except Exception as err:
         error = f"[GET_MODEL-GENEX-010] - {err}"

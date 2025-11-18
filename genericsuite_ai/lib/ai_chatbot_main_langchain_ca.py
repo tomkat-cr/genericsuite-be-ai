@@ -1,23 +1,24 @@
 """
 Implementation of the AI Chatbot API using Langchain - Custom Agent (_ca).
 """
+from typing import Union, Callable
+import os
 import re
 import json
-from typing import Union, Callable
 
 from openai import PermissionDeniedError
 
-# from langchain import hub
-from langchain.agents import (
+# from langchain_classic import hub
+from langchain_classic.agents import (
     AgentExecutor,
     # create_structured_chat_agent,
     AgentOutputParser,
     LLMSingleActionAgent,
     Tool,
 )
-from langchain.chains import LLMChain
-from langchain.prompts import StringPromptTemplate
-from langchain.schema import AgentAction, AgentFinish, Document
+from langchain_classic.chains.llm import LLMChain
+from langchain_core.prompts import StringPromptTemplate
+from langchain_classic.schema import AgentAction, AgentFinish, Document
 
 from genericsuite.util.app_logger import log_debug
 from genericsuite.util.utilities import (
@@ -65,7 +66,7 @@ from genericsuite_ai.lib.vector_index import (
     get_vector_engine,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CHATBOT_DEBUG", "0") == "1"
 PASS_ACTION_NOT_MATCH = True
 
 cac = CommonAppContext()
@@ -109,6 +110,7 @@ class CustomOutputParser(AgentOutputParser):
     Custom output parser for parsing LLM output
     [Deprecated]
     """
+
     def parse(self, text: str) -> Union[AgentAction, AgentFinish]:
         # Check if agent should finish
         if "Final Answer:" in text:
@@ -388,7 +390,7 @@ If the called tool result has '""" + gpt_func_error("") + """', stop processing 
 {chat_history}
 
 Question: {input}
-{agent_scratchpad}"""
+{agent_scratchpad}"""  # noqa: E501
     return template.strip()
 
 

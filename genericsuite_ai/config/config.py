@@ -224,12 +224,17 @@ class Config(ConfigSuperClass):
             self.get_env(
                 'OPENAI_MODEL',
                 'gpt-4o-mini'
+                # 'gpt-5-nano'
+                # 'gpt-5-mini'
+                # 'gpt-5'
+                # 'gpt-4o-mini'
                 # 'gpt-4o'
                 # 'gpt-3.5-turbo'
             ))
         self.OPENAI_MODEL_PREMIUM = self.get_env(
             'OPENAI_MODEL_PREMIUM',
             'gpt-4o'
+            # 'gpt-5'
             # "o1-mini"
             # "o1-preview"
             # 'gpt-4'
@@ -413,6 +418,16 @@ class Config(ConfigSuperClass):
             "0" if "-Instruct" in self.HUGGINGFACE_DEFAULT_CHAT_MODEL else "1"
         )
 
+        self.HUGGINGFACE_PROVIDER = self.get_env(
+            'HUGGINGFACE_PROVIDER',
+            "auto"
+            # set your provider here:
+            #   https://hf.co/settings/inference-providers
+            # provider="hyperbolic",
+            # provider="nebius",
+            # provider="together",
+        )
+
         self.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL = self.get_env(
             'HUGGINGFACE_DEFAULT_IMG_GEN_MODEL',
             "black-forest-labs/FLUX.1-schnell"
@@ -442,10 +457,21 @@ class Config(ConfigSuperClass):
 
         # HF Options and general parameters
 
-        self.HUGGINGFACE_ENDPOINT_URL = self.get_env(
-            'HUGGINGFACE_ENDPOINT_URL',
-            "https://api-inference.huggingface.co/models"
+        self.HUGGINGFACE_BASE_URL = self.get_env(
+            'HUGGINGFACE_BASE_URL',
+            "https://router.huggingface.co/v1"
         )
+
+        self.HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT = self.get_env(
+            'HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT',
+            "https://router.huggingface.co/v1/chat/completions"
+        )
+
+        self.HUGGINGFACE_TEXT_TO_IMAGE_ENDPOINT = self.get_env(
+            'HUGGINGFACE_TEXT_TO_IMAGE_ENDPOINT',
+            "https://router.huggingface.co/hf-inference/models"
+        )
+
         self.HUGGINGFACE_VERBOSE = self.get_env(
             "HUGGINGFACE_VERBOSE", "0")
 

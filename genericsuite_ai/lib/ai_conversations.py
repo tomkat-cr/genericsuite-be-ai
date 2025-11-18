@@ -2,6 +2,7 @@
 Conversations handling
 """
 from typing import Union
+import os
 
 from genericsuite.util.app_logger import log_debug
 from genericsuite.util.utilities import get_default_resultset
@@ -15,7 +16,7 @@ from genericsuite_ai.lib.ai_utilities import (
     standard_msg,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CONVERSATIONS_DEBUG", "0") == "1"
 
 
 def load_conversation(

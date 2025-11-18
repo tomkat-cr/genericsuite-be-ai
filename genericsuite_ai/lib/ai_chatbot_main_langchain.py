@@ -4,8 +4,8 @@ Implementation of the AI Chatbot API using Langchain - LCEL or Agents.
 from typing import Any, Union, Dict, Tuple
 import os
 
-from langchain import hub
-from langchain.agents import (
+from langchain_classic import hub
+from langchain_classic.agents import (
     AgentExecutor,
     create_structured_chat_agent,
     create_react_agent,
@@ -13,7 +13,7 @@ from langchain.agents import (
     # create_openai_tools_agent,
     # create_self_ask_with_search_agent,
 )
-from langchain.prompts import PromptTemplate
+from langchain_classic.prompts import PromptTemplate
 # from langchain_community.chat_message_histories import ChatMessageHistory
 # from langchain_core.output_parsers.openai_tools import PydanticToolsParser
 from langchain_core.output_parsers import StrOutputParser
@@ -74,7 +74,7 @@ from genericsuite_ai.lib.translator import translate
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CHATBOT_DEBUG", "0") == "1"
 
 NON_AI_TRANSLATOR = 'google_translate'
 NON_AGENT_PROMPT = 'mediabros/gs_non_agent_lcel'
@@ -142,7 +142,7 @@ def translate_using(input_text: str, llm: Any) -> dict:
             " [TA-E020]"
     _ = DEBUG and log_debug(
         'TRANSLATE_USING |' +
-        f' trans_method: {trans_method}' + 
+        f' trans_method: {trans_method}' +
         f'\n | target "lang": {lang}' +
         f'\n | target "lang_code": {lang_code}' +
         f'\n | input_text: {input_text}' +
@@ -154,7 +154,7 @@ def translate_using(input_text: str, llm: Any) -> dict:
 def needs_answer_translation() -> bool:
     """
     Check if the response needs to be translated
-    
+
     Returns:
         bool: True if the user's prefferred language is not English
     """
@@ -181,7 +181,7 @@ Assistant is constantly learning and improving, and its capabilities are constan
 Overall, Assistant is a powerful tool that can help with a wide range of tasks and provide valuable insights and information on a wide range of topics. Whether you need help with a specific question or just want to have a conversation about a particular topic, Assistant is here to assist.
 
 Begin!
-"""
+"""  # noqa: E501
     else:
         base_prompt = """
 Assistant is a large language model trained by OpenAI.
@@ -222,7 +222,7 @@ Previous conversation history:
 
 New input: {input}
 {agent_scratchpad}
-"""
+"""  # noqa: E501
     return base_prompt
 
 
@@ -372,19 +372,19 @@ def get_agent_executor_non_lcel(
         agent = create_structured_chat_agent(llm, tools, prompt)
 
     # elif agent_type == "openai_tools_agent":
-    #     # https://python.langchain.com/docs/modules/agents/agent_types/openai_tools
+    #     # https://python.langchain.com/docs/modules/agents/agent_types/openai_tools  # noqa: E501
     #     # REJECTION REASON: Doesn't accept long Tool descriptions
     #     prompt = get_agent_prompt("hwchase17/openai-tools-agent")
     #     agent = create_openai_tools_agent(llm, tools, prompt)
 
     # elif agent_type == "openai_functions_agent":
-    #     # https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_agent
+    #     # https://python.langchain.com/docs/modules/agents/agent_types/openai_functions_agent  # noqa: E501
     #     # REJECTION REASON: Doesn't accept long Tool descriptions
     #     prompt = get_agent_prompt("hwchase17/openai-functions-agent")
     #     agent = create_openai_functions_agent(llm, tools, prompt)
 
     # elif agent_type == "self_ask_with_search_agent":
-    #     # https://python.langchain.com/docs/modules/agents/agent_types/self_ask_with_search
+    #     # https://python.langchain.com/docs/modules/agents/agent_types/self_ask_with_search  # noqa: E501
     #     # REJECTION REASON: ValueError: This agent expects exactly one tool
     #     prompt = get_agent_prompt("hwchase17/self-ask-with-search")
     #     agent = create_self_ask_with_search_agent(llm, tools, prompt)
@@ -509,7 +509,8 @@ def get_lcel_chain(
         new_prompt = build_gs_prompt(get_self_base_prompt(NON_AGENT_PROMPT))
         messages.append(("system", new_prompt,))
     messages.append(MessagesPlaceholder(variable_name="messages"))
-    _ = self_debug and log_debug('Start call to ChatPromptTemplate.from_messages()')
+    _ = self_debug and log_debug(
+        'Start call to ChatPromptTemplate.from_messages()')
     prompt = ChatPromptTemplate.from_messages(messages)
     _ = self_debug and log_debug('Start chain = prompt | llm_with_tools')
     # Build a Chatbot
@@ -984,6 +985,8 @@ def run_conversation(app_context: AppContext) -> dict:
             error_message (str): = eventual error message
             cid (str): coversation ID
     """
+    _ = DEBUG and \
+        log_debug('>>> 0) AI Chabot Langchain | RUN_CONVERSATION | Start...')
     cac.set(app_context)
     settings = Config(cac.app_context)
     start_response = start_run_conversation(

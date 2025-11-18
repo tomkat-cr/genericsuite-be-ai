@@ -1,12 +1,16 @@
 """
 HugginFace platform utilities
 """
-from typing import Any
+from typing import Any, List, Optional, Iterator
 import os
 import requests
 import uuid
+import json
 
-from genericsuite.util.app_context import CommonAppContext
+from langchain_core.callbacks.manager import CallbackManagerForLLMRun
+from langchain_core.outputs import GenerationChunk
+
+from genericsuite.util.app_context import CommonAppContext, AppContext
 from genericsuite.util.app_logger import log_debug
 from genericsuite.util.utilities import (
     get_default_resultset,
@@ -16,29 +20,136 @@ from genericsuite.util.utilities import (
 from genericsuite.util.aws import upload_nodup_file_to_s3
 
 from genericsuite_ai.config.config import Config
+from genericsuite_ai.lib.ai_langchain_models_abstract import CustomLLM as LLM
 
-DEBUG = False
+DEBUG = os.environ.get("AI_HUGGINGFACE_DEBUG", "0") == "1"
+
+DEFAULT_TASK = "conversational"  # "text-generation"
+
 cac = CommonAppContext()
 
 
-def hf_query(repo_id: str, payload: dict) -> Any:
+def hf_text_to_image_query(repo_id: str, payload: dict) -> Any:
     """
-    Perform a HuggingFace query
+    Perform a HuggingFace text to image query
 
     Args:
-        api_url (str): HuggingFace API URL
+        repo_id (str): HuggingFace model repository ID
         payload (dict): HuggingFace payload
 
     Returns:
         Any: HuggingFace response
     """
-    # https://huggingface.co/docs/api-inference/detailed_parameters
+    # https://huggingface.co/docs/inference-providers/tasks/text-to-image
     settings = Config(cac.get())
     headers = {
-        "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}"
+        "Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}",
+        "Content-Type": "application/json",
     }
-    api_url = f'{settings.HUGGINGFACE_ENDPOINT_URL}/{repo_id}'
+    api_url = f'{settings.HUGGINGFACE_TEXT_TO_IMAGE_ENDPOINT}/{repo_id}'
     return requests.post(api_url, headers=headers, json=payload)
+
+
+def hf_query(api_url: str, api_key: str, payload: dict
+             ) -> dict:
+    """
+    Perform a HuggingFace query
+
+    Args:
+        api_url (str): HuggingFace API URL
+        api_key (str): HuggingFace API key
+        payload (dict): HuggingFace payload
+
+    Returns:
+        dict: HuggingFace response
+    """
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+    }
+    response = requests.post(api_url, headers=headers, json=payload)
+    return response.json()
+
+
+def hf_query_stream(
+    api_url: str, api_key: str, payload: dict
+) -> Iterator[dict]:
+    """
+    Perform a HuggingFace query and stream the response
+
+    Args:
+        api_url (str): HuggingFace API URL
+        api_key (str): HuggingFace API key
+        payload (dict): HuggingFace payload
+
+    Returns:
+        Iterator[dict]: HuggingFace stream response
+    """
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+    }
+    response = requests.post(
+        api_url, headers=headers, json=payload, stream=True)
+    for line in response.iter_lines():
+        _ = DEBUG and log_debug(f"hf_query_stream | line: {line}")
+        if not line.startswith(b"data:"):
+            continue
+        if line.strip() == b"data: [DONE]":
+            return
+        yield json.loads(line.decode("utf-8").lstrip("data:").rstrip("/n"))
+
+
+def hf_text_to_text_query(repo_id: str, api_key: str, payload: dict
+                          ) -> dict:
+    """
+    Perform a HuggingFace text to text query
+
+    Args:
+        repo_id (str): HuggingFace model repository ID
+        api_key (str): HuggingFace API key
+        payload (dict): HuggingFace payload
+        stream (bool): Whether to stream the response
+
+    Returns:
+        Any: HuggingFace response
+    """
+    # https://huggingface.co/docs/inference-providers/tasks/chat-completion
+    # https://huggingface.co/docs/api-inference/detailed_parameters
+    settings = Config(cac.get())
+    api_url = settings.HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT
+    payload['model'] = repo_id
+    response = hf_query(
+        api_url, api_key or settings.HUGGINGFACE_API_KEY, payload)
+    return response
+
+
+def hf_text_to_text_stream(repo_id: str, api_key: str, payload: dict
+                           ) -> Iterator[dict]:
+    """
+    Stream the HuggingFace text to text query
+
+    Args:
+        repo_id (str): HuggingFace model repository ID
+        api_key (str): HuggingFace API key
+        payload (dict): HuggingFace payload
+
+    Returns:
+        Iterator[dict]: HuggingFace response as a dictionary, one dictionary
+            per line
+    """
+    settings = Config(cac.get())
+    api_url = settings.HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT
+    payload['model'] = repo_id
+    payload['stream'] = True
+    chuncks = hf_query_stream(
+        api_url, api_key or settings.HUGGINGFACE_API_KEY, payload)
+    for chunk in chuncks:
+        _ = DEBUG and log_debug(f"hf_text_to_text_stream | chunk: {chunk}")
+        if 'content' in chunk["choices"][0]["delta"]:
+            yield chunk["choices"][0]["delta"]["content"]
+        else:
+            _ = DEBUG and log_debug(
+                f"hf_text_to_text_stream | no content in chunk: {chunk}")
+            return
 
 
 def huggingface_img_gen(question: str, image_extension: str = 'jpg') -> dict:
@@ -59,7 +170,7 @@ def huggingface_img_gen(question: str, image_extension: str = 'jpg') -> dict:
         f'\n| question: {question}' +
         f'\n| api_url: {settings.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL}')
 
-    image_bytes = hf_query(
+    image_bytes = hf_text_to_image_query(
         repo_id=settings.HUGGINGFACE_DEFAULT_IMG_GEN_MODEL,
         payload={
             "inputs": question,
@@ -99,3 +210,148 @@ def huggingface_img_gen(question: str, image_extension: str = 'jpg') -> dict:
         print(ig_response)
 
     return ig_response
+
+
+def huggingface_chat(
+    prompt: str,
+    repo_id: str = None,
+    api_key: str = None,
+) -> dict:
+    """
+    HuggingFace chat
+
+    Args:
+        prompt (str): The prompt to generate from.
+        repo_id (str): the model to use.
+        api_key (str): The API key to use for the HuggingFace API.
+
+    Returns:
+        dict: The response from the model as a string in the ['resultset'] key.
+    """
+    settings = Config(cac.get())
+    chat_response = get_default_resultset()
+
+    if not prompt:
+        return error_resultset(
+            error_message='No prompt supplied',
+            message_code='HFIG-E010',
+        )
+
+    messages = [
+        {
+            'role': 'user',
+            'content': prompt
+        }
+    ]
+
+    completion = hf_text_to_text_query(
+        repo_id=repo_id or settings.HUGGINGFACE_DEFAULT_CHAT_MODEL,
+        api_key=api_key or settings.HUGGINGFACE_API_KEY,
+        payload={
+            'messages': messages
+        }
+    )
+
+    chat_response['resultset'] = {
+        'content': completion["choices"][0]["message"]
+    }
+
+    return chat_response
+
+
+class HuggingFaceChatModel(LLM):
+    """
+    HuggingFaceChatModel + models class for LangChain.
+    """
+
+    # Mandatory parameters
+    api_key: str
+    app_context: AppContext
+
+    def _call(
+        self,
+        prompt: str,
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> str:
+        """Run the LLM on the given input.
+
+        Override this method to implement the LLM logic.
+
+        Args:
+            prompt: The prompt to generate from.
+            stop: Stop words to use when generating. Model output is cut off
+                at the first occurrence of any of the stop substrings.
+                If stop tokens are not supported consider raising
+                NotImplementedError.
+            run_manager: Callback manager for the run.
+            **kwargs: Arbitrary additional keyword arguments. These are
+                usually passed to the model provider API call.
+
+        Returns:
+            The model output as a string. Actual completions SHOULD NOT
+            include the prompt.
+        """
+        chat_response = huggingface_chat(prompt, self.model_name, self.api_key)
+        result = chat_response['resultset']['content']
+        _ = DEBUG and log_debug(
+            f">> HuggingFaceChatModel | _call chat_response: {chat_response}")
+        return result
+
+    def _stream(
+        self,
+        prompt: str,
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> Iterator[GenerationChunk]:
+        """Stream the LLM on the given prompt.
+
+        This method should be overridden by subclasses that support streaming.
+
+        If not implemented, the default behavior of calls to stream will be to
+        fallback to the non-streaming version of the model and return
+        the output as a single chunk.
+
+        Args:
+            prompt: The prompt to generate from.
+            stop: Stop words to use when generating. Model output is cut off
+                at the first occurrence of any of these substrings.
+            run_manager: Callback manager for the run.
+            **kwargs: Arbitrary additional keyword arguments. These are
+                usually passed to the model provider API call.
+
+        Returns:
+            An iterator of GenerationChunks.
+        """
+        _ = DEBUG and log_debug(
+            ">> HuggingFaceChatModel | _stream"
+            f"| model_name: {self._get_model_name()}"
+            f"| stop: {stop}"
+            f" | prompt: {prompt}")
+        payload = {
+            'messages': [
+                {
+                    'role': 'user',
+                    'content': prompt
+                }
+            ]
+        }
+        for chunk in hf_text_to_text_stream(self.model_name, self.api_key,
+                                            payload):
+            yield GenerationChunk(text=chunk)
+            # if run_manager:
+            #     run_manager.on_llm_new_token(
+            #         chunk)
+            # if stop and \
+            #         chunk.endswith(stop):
+            #     break
+
+    @property
+    def _llm_type(self) -> str:
+        """
+        Get the type of language model used by this chat model. Used for
+        logging purposes only.
+        """
+        return "HuggingFaceChatModel"

@@ -2,6 +2,7 @@
 AI Endpoints (generic)
 """
 from typing import Optional, Callable, Any
+import os
 
 # from chalice.app import Response
 from genericsuite.util.framework_abs_layer import Response, BlueprintOne
@@ -42,7 +43,7 @@ from genericsuite_ai.lib.clarifai import (
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CHATBOT_DEBUG", "0") == "1"
 
 
 def ai_chatbot_endpoint(

@@ -33,6 +33,6 @@ This project is licensed under the ISC License - see the [LICENSE](https://githu
 
 ## Credits
 
-This project is developed and maintained by Carlos J. Ramirez. For more information or to contribute to the project, visit [GenericSuite AI on GitHub](https://github.com/tomkat-cr/genericsuite-be-ai).
+This project is developed and maintained by [Carlos J. Ramirez](https://github.com/tomkat-cr). For more information or to contribute to the project, visit [GenericSuite AI on GitHub](https://github.com/tomkat-cr/genericsuite-be-ai).
 
 Happy Coding!

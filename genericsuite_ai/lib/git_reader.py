@@ -7,10 +7,13 @@ import os
 
 from git import Repo
 from langchain_community.document_loaders.git import GitLoader
-from langchain.schema import Document
+from langchain_classic.schema import Document
 
 from genericsuite.util.utilities import get_default_resultset
 from genericsuite.util.app_logger import log_debug, log_error
+
+
+DEBUG = os.environ.get("AI_GIT_READER_DEBUG", "0") == "1"
 
 
 def remove_dir(local_temp_path: str) -> None:
@@ -34,7 +37,7 @@ def remove_dir(local_temp_path: str) -> None:
 def get_repo(repo_url: str, branch: str = None) -> dict:
     """
     Load `Git` repository files.
-    
+
     Args:
         repo_url (str): repo URL or local repo path.
         branch (str): brach name. If none, get repo.head.reference.
@@ -43,7 +46,8 @@ def get_repo(repo_url: str, branch: str = None) -> dict:
     Returns:
         dict: resultset with a "data" attribute with all Git repository files
             Document object list. If something goes wrong, returns the
-            "error" attr. True and "error_message" attr. with the error message.
+            "error" attr. True and "error_message" attr. with the error
+            message.
     """
     response = get_default_resultset()
     repo_name = repo_url.rsplit('/', 1)[1]
@@ -127,7 +131,7 @@ def get_repo(repo_url: str, branch: str = None) -> dict:
                     "loaded git repository",
                     "supplied branch",
                     "loaded branch",
-            ])
+        ])
     }
     response["data"].append(
         Document(
@@ -152,7 +156,7 @@ def get_repo(repo_url: str, branch: str = None) -> dict:
 def get_repo_data(repo_url: str, branch: str = None) -> list:
     """
     Load `Git` repository files.
-    
+
     Args:
         repo_url (str): repo URL or local repo path.
         branch (str): brach name. If none, get repo.head.reference.
@@ -162,11 +166,15 @@ def get_repo_data(repo_url: str, branch: str = None) -> list:
         list: list of Document objects of all Git repository files.
             If something goes wrong, returns [].
     """
+    _ = DEBUG and log_debug(
+        "GET_REPO_DATA" +
+        f"\n | repo_url: {repo_url}" +
+        f"\n | branch: {branch}")
     if repo_url == "":
         return []
     repo_response = get_repo(repo_url, branch)
     if repo_response["error"]:
-        log_error('GET_REPO_DATA' + 
+        log_error('GET_REPO_DATA' +
                   f'\n | repo_url: {repo_url}' +
                   f'\n | branch: {branch}' +
                   f'\n | error_message: {repo_response["error_message"]}')

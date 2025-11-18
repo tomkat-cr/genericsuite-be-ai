@@ -5,20 +5,20 @@ Reference:
 https://developer.ibm.com/tutorials/integrate-your-watson-assistant-chatbot-with-watsonxai-for-generative-ai/
 https://developer.ibm.com/
 """
+import os
 import requests
 
 from typing import Any, List, Optional
-# from typing import Mapping, Dict, Iterator
 
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 # from langchain_core.outputs import GenerationChunk
 
-# from langchain_core.language_models.llms import LLM
 from genericsuite_ai.lib.ai_langchain_models_abstract import CustomLLM as LLM
+from genericsuite.util.app_context import AppContext
 from genericsuite.util.app_logger import log_debug
 
 
-DEBUG = False
+DEBUG = os.environ.get("AI_IBM_DEBUG", "0") == "1"
 
 
 class IbmWatsonx(LLM):
@@ -31,6 +31,7 @@ class IbmWatsonx(LLM):
     project_id: str
     model_url: str
     identity_token_url: str
+    app_context: Optional[AppContext] = None
 
     def _call(
         self,

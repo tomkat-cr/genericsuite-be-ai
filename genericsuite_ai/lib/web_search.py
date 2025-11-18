@@ -2,7 +2,7 @@
 Web Search ability
 """
 
-from typing import Dict, Union, Any, Optional
+from typing import Union, Any, Optional
 import json
 import time
 import os
@@ -12,7 +12,7 @@ from googleapiclient.discovery import build
 
 from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchResults
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
-from langchain.agents import tool
+from langchain.tools import tool
 
 from pydantic import BaseModel, Field
 
@@ -26,7 +26,7 @@ from genericsuite_ai.lib.ai_utilities import (
 )
 from genericsuite_ai.config.config import Config
 
-DEBUG = Config().DEBUG
+DEBUG = os.environ.get("AI_WEBSEARCH_DEBUG", "0") == "1"
 
 cac = CommonAppContext()
 
@@ -54,13 +54,13 @@ class WebSearch(BaseModel):
 
 
 @tool
-def web_search(params: Dict) -> str:
+def web_search(params: Any) -> str:
     """
 Useful when you need to perform a web search to have access to real-time information, and/or answer questions about recent events.
 Args: params (dict): Tool parameter. Must contain:
 "query" (str): The search query.
 "num_results" (int): number of results to return. Defaults to 30.
-    """
+    """  # noqa: E501
     return web_search_func(params)
 
 

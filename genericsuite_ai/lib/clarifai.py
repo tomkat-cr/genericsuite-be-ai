@@ -5,11 +5,6 @@ import json
 import os
 from uuid import uuid4
 
-from clarifai.client.model import Model
-from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
-from clarifai_grpc.grpc.api import resources_pb2, service_pb2, service_pb2_grpc
-from clarifai_grpc.grpc.api.status import status_code_pb2
-
 from genericsuite_ai.config.config import Config
 
 from genericsuite.util.app_context import CommonAppContext
@@ -20,7 +15,7 @@ from genericsuite.util.generic_db_middleware import (
 )
 from genericsuite.util.utilities import get_default_resultset
 
-DEBUG = False
+DEBUG = os.environ.get("AI_CLARIFAI_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 
@@ -172,6 +167,11 @@ def clarifai_vision_raw(
     """
     Image recognition using the given image url and model config.
     """
+    from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+    from clarifai_grpc.grpc.api import (
+        resources_pb2, service_pb2, service_pb2_grpc)
+    from clarifai_grpc.grpc.api.status import status_code_pb2
+
     settings = Config(cac.get())
     model_type = get_vision_model_type(model_name)
 
@@ -327,6 +327,11 @@ def clarifai_img_gen_raw(
     """
     Image recognition using the given image url and model config.
     """
+    from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+    from clarifai_grpc.grpc.api import (
+        resources_pb2, service_pb2, service_pb2_grpc)
+    from clarifai_grpc.grpc.api.status import status_code_pb2
+
     settings = Config(cac.get())
 
     if DEBUG:
@@ -479,6 +484,11 @@ def clarifai_embeddings_raw(
     Returns:
         Any: model response
     """
+    from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+    from clarifai_grpc.grpc.api import (
+        resources_pb2, service_pb2, service_pb2_grpc)
+    from clarifai_grpc.grpc.api.status import status_code_pb2
+
     settings = Config(cac.get())
 
     if DEBUG:
@@ -549,9 +559,9 @@ def clarifai_embeddings_raw(
         log_debug('CF-EMRAW-3) Clarifai - clarifai_embeddings_raw' +
                   " | Predicted concepts: " +
                   "\n".join([
-                        (f"{concept.name} {concept.value}.2f")
-                        for concept in output.data.concepts
-                    ])
+                      (f"{concept.name} {concept.value}.2f")
+                      for concept in output.data.concepts
+                  ])
                   )
 
         # Uncomment this line to print the full Response JSON
@@ -615,6 +625,11 @@ def clarifai_audio_to_text_raw(
     """
     Audio transcription model for converting speech audio to text
     """
+    from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+    from clarifai_grpc.grpc.api import (
+        resources_pb2, service_pb2, service_pb2_grpc)
+    from clarifai_grpc.grpc.api.status import status_code_pb2
+
     settings = Config(cac.get())
 
     if DEBUG:
@@ -670,9 +685,9 @@ def clarifai_audio_to_text_raw(
         log_debug('CF-ATTRAW-3) Clarifai - clarifai_audio_to_text_raw' +
                   " | Predicted concepts: " +
                   "\n".join([
-                        (f"{concept.name} {concept.value}.2f")
-                        for concept in output.data.concepts
-                    ])
+                      (f"{concept.name} {concept.value}.2f")
+                      for concept in output.data.concepts
+                  ])
                   )
 
         # Uncomment this line to print the full Response JSON
@@ -780,6 +795,11 @@ def clarifai_text_to_audio_raw(
     Returns:
         str: model response as audio file path
     """
+    from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
+    from clarifai_grpc.grpc.api import (
+        resources_pb2, service_pb2, service_pb2_grpc)
+    from clarifai_grpc.grpc.api.status import status_code_pb2
+
     settings = Config(cac.get())
 
     if DEBUG:
@@ -856,9 +876,9 @@ def clarifai_text_to_audio_raw(
         log_debug('CF-TTARAW-3) Clarifai - clarifai_text_to_audio_raw' +
                   " | Predicted concepts: " +
                   "\n".join([
-                        (f"{concept.name} {concept.value}.2f")
-                        for concept in output.data.concepts
-                    ])
+                      (f"{concept.name} {concept.value}.2f")
+                      for concept in output.data.concepts
+                  ])
                   )
 
         # Uncomment this line to print the full Response JSON
@@ -892,6 +912,7 @@ def clarifai_text_to_audio_python_sdk(
     Returns:
         str: model response as audio file path
     """
+    from clarifai.client.model import Model
     settings = Config(cac.get())
 
     if DEBUG:

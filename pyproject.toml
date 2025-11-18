@@ -1,12 +1,12 @@
 [project]
 name = "genericsuite_ai"
-version = "0.1.14"
+version = "0.2.0"
 authors = [
     { name="Carlos J. Ramirez", email="info@genericsuite.com" }
 ]
 description = "The GenericSuite AI for Python (backend version)"
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 classifiers = [
     'Development Status :: 3 - Alpha',
     'Environment :: Console',
@@ -29,7 +29,7 @@ Issues = "https://github.com/tomkat-cr/genericsuite-be-ai/issues"
 
 [tool.poetry]
 name = "genericsuite_ai"
-version = "0.1.14"
+version = "0.2.0"
 description = "The GenericSuite AI for Python (backend version)"
 authors = ["Carlos J. Ramirez <info@genericsuite.com>"]
 license = "ISC"
@@ -41,35 +41,35 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.10,<4.0"
 openai = "^1.7.2"
-langchain = "0.3.24"
 click = "^8.1.7"
 jmespath = "^1.0.1"
 pyyaml = "^6.0.1"
-setuptools = "^75.0.0"
+setuptools = "^78.1.1"
 six = "^1.16.0"
 typing-extensions = "^4.8.0"
 requests-toolbelt = "^1.0.0"
 tiktoken = "^0.7.0"
-faiss-cpu = "1.8.0.post1"
+faiss-cpu = "^1.11.0.post1"
 google-api-python-client = "^2.145.0"
-langchain-google-genai = {extras = ["images"], version = "^2.0.0"}
 pillow = "^10.1.0"
-langchain-openai = "^0.2.0"
 jq = "^1.6.0"
-text-generation = "^0.6.1"
-langchain-core = "^0.3.5"
-langchain-anthropic = "^0.2.1"
-langchain-groq = "^0.2.0"
-urllib3 = "1.26"
-langchain-aws = "^0.2.1"
-clarifai = "10.1.0"
-transformers = "^4.45.1"
-langchain-ollama = "^0.2.0"
-langchain-together = "^0.2.0"
-langchain-google-vertexai = "^2.0.13"
+urllib3 = "^2.5.0"
+transformers = "^4.57.1"
 ddgs = "^9.0.2"
+pypdf = "^6.1.3"
+langchain = "^1.0.3"
+langchain-google-genai = "^3.0.0"
+langchain-openai = "^1.0.1"
+langchain-core = "^1.0.2"
+langchain-anthropic = "^1.0.1"
+langchain-groq = "^1.0.0"
+langchain-ollama = "^1.0.0"
+langchain-google-vertexai = "^3.0.1"
+langchain-community = "^0.4.1"
+langchain-text-splitters = "^1.0.0"
+langchain-aws = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 changelog-cli = "^0.7.1"
@@ -79,6 +79,8 @@ pytest = "^7.0.1"
 pytest-cov = "^3.0.0"
 yapf = "^0.32.0"
 coverage = "^7.2.7"
+build = "^1.3.0"
+twine = "^6.1.0"
 
 [build-system]
 requires = ["poetry-core"]

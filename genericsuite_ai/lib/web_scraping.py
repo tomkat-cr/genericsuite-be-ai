@@ -1,17 +1,18 @@
 """
 Web scrapping module
 """
-from typing import Any, Dict
+from typing import Any
+import os
 import importlib
 # import asyncio
 
 from langchain_community.document_loaders.web_base import WebBaseLoader
 
-# from langchain.embeddings import OpenAIEmbeddings
-# from langchain.vectorstores import Chroma
-from langchain.chains.retrieval_qa.base import RetrievalQA
-# from langchain.chains.retrieval_qa.base import BaseRetrievalQA
-from langchain.agents import tool
+# from langchain_classic.embeddings import OpenAIEmbeddings
+# from langchain_classic.vectorstores import Chroma
+from langchain_classic.chains.retrieval_qa.base import RetrievalQA
+# from langchain_classic.chains.retrieval_qa.base import BaseRetrievalQA
+from langchain.tools import tool
 from pydantic import BaseModel, Field
 
 from genericsuite.util.app_context import CommonAppContext
@@ -30,7 +31,7 @@ from genericsuite_ai.lib.ai_utilities import (
     gpt_func_error,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_WEB_SCRAPPING_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 
@@ -191,7 +192,7 @@ def webpage_analyzer(
                 f"\n | qa_chain: {qa_chain}"
                 # f'\n | qa_chain_result["qa_chain"]:
                 # {qa_chain_result["qa_chain"]}'
-                )
+            )
 
         # loop = asyncio.get_event_loop()
         # result["answer"] = \
@@ -209,7 +210,7 @@ def webpage_analyzer(
 
 
 @tool
-def webpage_analyzer_text_response(params: Dict) -> str:
+def webpage_analyzer_text_response(params: Any) -> str:
     """
 Useful to answer a question about a given webpage URL.
 Args: params (dict): Tool parameters. Must contain:

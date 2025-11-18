@@ -1,12 +1,13 @@
 """
 AI Image Generation: processing text and generate images
 """
-from typing import Any, Dict, Optional
+from typing import Any, Optional
+import os
 
 from openai import OpenAI
 from openai.resources.images import ImagesResponse
 
-from langchain.agents import tool
+from langchain.tools import tool
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -46,7 +47,7 @@ from genericsuite_ai.lib.amazon_bedrock import (
 )
 
 
-DEBUG = False
+DEBUG = os.environ.get("AI_IMAGE_GENERATOR_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 
@@ -228,7 +229,8 @@ def get_img_gen_response(response: dict, other: dict) -> dict:
             openai_api_key = billing.get_openai_api_key()
             if not openai_api_key:
                 response['error'] = True
-                response['error_message'] = "OpenAI API key is not configured [IAIG-E020]"
+                response['error_message'] = \
+                    "OpenAI API key is not configured [IAIG-E020]"
                 return response
             client = OpenAI(
                 api_key=openai_api_key
@@ -252,8 +254,11 @@ def get_img_gen_response(response: dict, other: dict) -> dict:
             # Check if the 'ig_response' is an instance of 'ImagesResponse'
             # and extract the URLs from the 'data' attribute
             if isinstance(ig_response, ImagesResponse):
-                # Assuming each 'Image' object in the 'data' list has a 'url' attribute
-                image_urls = [image.url for image in ig_response.data if hasattr(image, 'url')]
+                # Assuming each 'Image' object in the 'data' list has
+                # a 'url' attribute
+                image_urls = [
+                    image.url for image in ig_response.data
+                    if hasattr(image, 'url')]
                 response['response'] = image_urls
             else:
                 # Handle other types of responses or raise an error
@@ -348,12 +353,12 @@ def image_generator(params: Any) -> dict:
     other["mock_error"] = get_default_value("mock_error", other, "0")
 
     _ = DEBUG and log_debug(
-            "\nGS Image Generator\n" +
-            f"Image size: {other['size']}\n" +
-            f"Image quality: {other['quality']}\n" +
-            f"Question: {question}\n" +
-            f"Other parameters: {other}\n"
-            f"OPENAI_IMAGE_GEN_MODEL: {settings.OPENAI_IMAGE_GEN_MODEL}")
+        "\nGS Image Generator\n" +
+        f"Image size: {other['size']}\n" +
+        f"Image quality: {other['quality']}\n" +
+        f"Question: {question}\n" +
+        f"Other parameters: {other}\n"
+        f"OPENAI_IMAGE_GEN_MODEL: {settings.OPENAI_IMAGE_GEN_MODEL}")
 
     response["question"] = question
 
@@ -405,7 +410,7 @@ def update_img_and_conversation(response: dict, other: dict) -> dict:
                 if save_result['error']:
                     response['error'] = True
                     response['error_message'] = \
-                        f"ERROR [IAIG-020]: {str(save_result['error_message'])}"
+                        f"ERROR [IAIG-020]: {str(save_result['error_message'])}"  # noqa: E501
                     break
                 public_url_list.append({
                     "file_name": file_name,
@@ -424,7 +429,8 @@ def update_img_and_conversation(response: dict, other: dict) -> dict:
                 {
                     "role": "assistant",
                     "type": "file_name",
-                    "sub_type": item["file_type"] if item["file_type"] else "image",
+                    "sub_type": item["file_type"] if item["file_type"]
+                    else "image",
                     "file_name": (
                         f'"{item["final_filename"]}" (' +
                         f'{get_file_size(item["file_size"], "mb")})'
@@ -432,7 +438,7 @@ def update_img_and_conversation(response: dict, other: dict) -> dict:
                     "attachment_url": item["public_url"],
                     "final_filename": item["final_filename"],
                 }
-            for item in public_url_list]
+                for item in public_url_list]
             _ = DEBUG and log_debug(
                 "\nIMAGE_GENERATOR | Answer fixed for" +
                 " 'update_conversation_db':\n" +
@@ -448,18 +454,18 @@ def update_img_and_conversation(response: dict, other: dict) -> dict:
 
 
 @tool
-def image_generator_text_response(params: Dict) -> str:
+def image_generator_text_response(params: Any) -> str:
     """
 Useful when you need to perform text to image generation. This Tool returns the generated image(s) URL(s) only.
 Args: params (dict): Tool parameters. Must contain: "question" (str): a question about the image specified.
-    """
+    """  # noqa: E501
     return image_generator_text_response_func(params)
 
 
 def image_generator_text_response_func(params: Any) -> str:
     """
     Performs text to image generation.
-    
+
     Args:
         params (dict): Tool parameters. Must contain:
             "question" (str): a question about the image specified.

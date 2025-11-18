@@ -14,7 +14,7 @@ from genericsuite.util.aws import upload_nodup_file_to_s3
 
 from genericsuite_ai.config.config import Config
 
-DEBUG = False
+DEBUG = os.environ.get("AI_AMAZON_BEDROCK_DEBUG", "0") == "1"
 cac = CommonAppContext()
 
 

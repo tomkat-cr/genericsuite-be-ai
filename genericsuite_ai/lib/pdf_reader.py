@@ -4,7 +4,7 @@ PDF indexer
 # pipenv install PyPDF2
 from PyPDF2 import PdfReader, PdfWriter
 
-from langchain.text_splitter import CharacterTextSplitter
+from langchain_classic.text_splitter import CharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 
 

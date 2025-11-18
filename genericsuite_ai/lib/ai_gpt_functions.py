@@ -1,8 +1,8 @@
 """
 ChatGPT functions management
 """
-# from typing import Union
 import json
+import os
 
 from openai.types.chat.chat_completion_message import ChatCompletionMessage
 
@@ -51,7 +51,7 @@ from genericsuite_ai.lib.web_scraping import (
     webpage_analyzer_text_response_func,
 )
 
-DEBUG = False
+DEBUG = os.environ.get("AI_GPT_FUNCTIONS_DEBUG", "0") == "1"
 
 
 def get_functions_dict(
@@ -76,7 +76,8 @@ def get_functions_dict(
             # "audio_processing": audio_processing_text_response,
             # "text_to_audio_response": text_to_audio_response,
             # "webpage_analyzer": webpage_analyzer_text_response,
-            "vision_image_analyzer_text_response": vision_image_analyzer_text_response,
+            "vision_image_analyzer_text_response":
+                vision_image_analyzer_text_response,
             "image_generator_text_response": image_generator_text_response,
             "web_search": web_search,
             "conversation_summary_tool": conversation_summary_tool,
@@ -98,7 +99,8 @@ def get_functions_dict(
             # "get_current_date_time": get_current_date_time_func,
         }
 
-    additional_callable = app_context.get_other_data('additional_function_dict')
+    additional_callable = app_context.get_other_data(
+        'additional_function_dict')
     if additional_callable:
         result.update(additional_callable(app_context))
 
@@ -139,7 +141,8 @@ def gpt_func_appcontext_assignment(
         cac_huggingface,
     ]
 
-    additional_func_context = app_context.get_other_data('additional_func_context')
+    additional_func_context = app_context \
+        .get_other_data('additional_func_context')
     if additional_func_context:
         available_func_context.extend(additional_func_context(app_context))
 
@@ -257,7 +260,8 @@ def run_one_function(
     # elif function_name == "get_current_date_time":
     #     function_response = fuction_to_call()
 
-    additional_callable = app_context.get_other_data('additional_run_one_function')
+    additional_callable = app_context.get_other_data(
+        'additional_run_one_function')
     if not function_response and additional_callable:
         result = additional_callable(
             app_context,
@@ -313,8 +317,7 @@ def get_function_specs(
             }
         },
         "required": ["image_path", "question"],
-    },
-    {
+    }, {
         "name": "image_generator",
         "description": "Process the specified text and answer the" +
         " question about it using an image generator. Useful when" +
@@ -324,10 +327,13 @@ def get_function_specs(
         " 'generate an image of...'." +
         'Your answer must be exactly this function response:' +
         '\nExample of function output:' +
-        ' "[Click here to see the image](https://bucketname.s3.amazonaws.com/xxx/img.png)"' +
+        ' "[Click here to see the image]' +
+        '(https://bucketname.s3.amazonaws.com/xxx/img.png)"' +
         '\nExample of your response:' +
-        ' "[Click here to see the image](https://bucketname.s3.amazonaws.com/xxx/img.png)"' +
-        '\nNOTE: If it is the case, you can translate the text "[Click here to see the image]"',
+        ' "[Click here to see the image]' +
+        '(https://bucketname.s3.amazonaws.com/xxx/img.png)"' +
+        '\nNOTE: If it is the case, you can translate the text "[Click here ' +
+        'to see the image]"',
         "parameters": {
             "type": "object",
             "properties": {
@@ -338,8 +344,7 @@ def get_function_specs(
             }
         },
         "required": ["question"],
-    },
-    {
+    }, {
         "name": "web_search",
         "description": "Searches the web, useful when you can't" +
         " get enough or updated information from your model." +
@@ -360,8 +365,7 @@ def get_function_specs(
             }
         },
         "required": ["query"],
-    },
-    {
+    }, {
         "name": "conversation_summary",
         "description": "Useful when you need to summarize large the user and" +
         " assistant conversation.",
@@ -375,8 +379,7 @@ def get_function_specs(
             }
         },
         "required": ["who_is_reading"],
-    },
-    {
+    }, {
         "name": "audio_processing",
         "description": "Transcribe an audio file with a audio to text" +
         " generator",
@@ -394,12 +397,11 @@ def get_function_specs(
             }
         },
         "required": ["sound_filespec"],
-    },
-    # google: openai chat completion api how to force the chat model to send back exactly what
-    #         the gpt function returns ?
-    # How to let GPT do not return any accompanying text?
-    # https://community.openai.com/t/how-to-let-gpt-do-not-return-any-accompanying-text/324513/6
-    {
+    }, {
+        # google: openai chat completion api how to force the chat model to
+        #    send back exactly what the gpt function returns ?
+        # How to let GPT do not return any accompanying text?
+        # https://community.openai.com/t/how-to-let-gpt-do-not-return-any-accompanying-text/324513/6
         "name": "text_to_audio_response",
         "description": "Useful when you need to generate audio files" +
         " from a given text. Call it when the question begins with one" +
@@ -462,21 +464,22 @@ def get_function_specs(
             }
         },
         "required": ["url", "question"],
-    # }, {
-    #     "name": "get_current_date_time",
-    #     "description": "Get the current date and UTC time. Useful when the" +
-    #     " question refers for a specific date respect of today, e.g." +
-    #     " today's date, today's calories consumed, today's meals," +
-    #     " yesterday's meals, yesterday's calories",
-    #     "parameters": {
-    #         "type": "object",
-    #         "properties": {
-    #         }
-    #     },
-    #     "required": [],
+        # }, {
+        #     "name": "get_current_date_time",
+        #     "description": "Get the current date and UTC time. Useful when" +
+        #     " the question refers for a specific date respect of today," +
+        #     " e.g. today's date, today's calories consumed, today's meals," +
+        #     " yesterday's meals, yesterday's calories",
+        #     "parameters": {
+        #         "type": "object",
+        #         "properties": {
+        #         }
+        #     },
+        #     "required": [],
     }]
 
-    additional_callable = app_context.get_other_data('additional_function_specs')
+    additional_callable = app_context.get_other_data(
+        'additional_function_specs')
     if additional_callable:
         result.extend(additional_callable(app_context))
 
