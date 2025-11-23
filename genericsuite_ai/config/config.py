@@ -399,7 +399,7 @@ class Config(ConfigSuperClass):
 
         self.HUGGINGFACE_DEFAULT_CHAT_MODEL = self.get_env(
             'HUGGINGFACE_DEFAULT_CHAT_MODEL',
-            "mistralai/Mixtral-8x7B-Instruct-v0.1"
+            "moonshotai/Kimi-K2-Instruct-0905"
             # "meta-llama/Llama-2-7b-chat-hf"
             # NOTE: instruct models must be configured to run with
             # the HUGGINGFACE_USE_CHAT_HF = "0"

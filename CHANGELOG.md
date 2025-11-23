@@ -18,6 +18,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
+## [Unreleased]
+
+### Changed
+- Update HuggingFace default model to "moonshotai/Kimi-K2-Instruct-0905" because "mistralai/Mixtral-8x7B-Instruct-v0.1" is not longer available [FA-233].
+
+
 ## [0.2.0] - 2025-11-17
 
 ### Added
@@ -32,13 +38,13 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Update author email in pyproject.toml and setup.py.
 - Bump urllib3 to 2.5.0 and numpy to 2.0.2 to have compatibility with GS BE Core.
 - Refactor imports in ai_langchain_models.py to include ChatBedrock (AWS Bedrock) and langchain-aws conditionally.
-- Enhance HuggingFace text query functions ("huggingface_remote" model type) to support OpenAI API integration.
-- Change "huggingface" model type to use OpenAI API instead of langchain's HuggingFaceEndpoint and ChatHuggingFace, so "langchain-huggingface" dependency is not required.
-- The old "huggingface" model type is now "langchain_huggingface" and requires the "langchain-huggingface" dependency, which is optional by default.
-- The "gs_huggingface" model type is the same as the "huggingface_remote" model type, calling Hugging Face with requests.
+- Enhance HuggingFace text query functions ("huggingface_remote" model type) to support OpenAI API integration [GS-136].
+- Change "huggingface" model type to use OpenAI API instead of langchain's HuggingFaceEndpoint and ChatHuggingFace, so "langchain-huggingface" dependency is not required [GS-136].
+- The old "huggingface" model type is now "langchain_huggingface" and requires the "langchain-huggingface" dependency, which is optional by default [GS-136].
+- The "gs_huggingface" model type is the same as the "huggingface_remote" model type, calling Hugging Face with requests [GS-136].
 
 ### Fixed
-- Fix AI tools calling error due to pydantic parameter type mismatch, changing the type annotation from Dict to Any.
+- Fix AI tools calling error due to pydantic parameter type mismatch, changing the type annotation from Dict to Any [GS-143].
 - Fix the "langchain_community not found" by adding the "langchain-community" dependency. This addition required the upgrade of dependencies "langchain" to "0.3.26" and "faiss-cpu" to "^1.11.0.post1".
 - Fix "huggingface_remote" text query functions streaming responses errors.
 - Fix the issues with the new langchain 1.0.x migrating some langchain.* imports to langchain_classic.* imports.
@@ -82,7 +88,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Removed
 - Remove "langchain-together" to enable upgrade of all other langchain dependencies, and routes Together AI calls through the OpenAI API.
 - Remove "clarifai" to make it optional by default [GS-219].
-- Remove GsHuggingFaceEndpoint and GsChatHuggingFace classes because they were replaced by the new Hugging Face with OpenAI API calls.
+- Remove GsHuggingFaceEndpoint and GsChatHuggingFace classes because they were replaced by the new Hugging Face with OpenAI API calls [GS-136] [FA-233].
+
 
 ## [0.1.14] - 2025-07-12
 
