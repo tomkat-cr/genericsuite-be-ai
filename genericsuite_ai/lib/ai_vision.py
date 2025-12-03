@@ -13,10 +13,11 @@ from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from genericsuite.util.aws import (
-    upload_nodup_file_to_s3,
+from genericsuite.util.storage import (
+    upload_nodup_file_to_storage,
     prepare_asset_url,
 )
+
 from genericsuite.util.utilities import (
     get_default_resultset,
     get_file_size,
@@ -44,6 +45,8 @@ from genericsuite_ai.lib.clarifai import (
     clarifai_vision,
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
+from genericsuite_ai.lib.ai_storage import \
+    get_chatbot_attachments_bucket_name
 
 DEBUG = os.environ.get("AI_VISION_DEBUG", "0") == "1"
 cac = CommonAppContext()
@@ -99,7 +102,6 @@ def get_vision_image_url(
                 if no errors
     """
     result = get_default_resultset()
-    settings = Config(cac.get())
     attachment_url = None
     final_filename = None
     # Check if the image path is a URL
@@ -108,16 +110,16 @@ def get_vision_image_url(
         final_filename = deduce_filename_from_url(image_path)
     # Local file...
     elif use_s3:
-        bucket_name = settings.AWS_S3_CHATBOT_ATTACHMENTS_BUCKET
+        bucket_name = get_chatbot_attachments_bucket_name(cac.get())
         if DEBUG:
             log_debug('get_vision_image_url | ' +
-                      f'AWS_S3_CHATBOT_ATTACHMENTS_BUCKET: {str(bucket_name)}')
+                      f'CHATBOT_ATTACHMENTS_BUCKET: {str(bucket_name)}')
         if not bucket_name:
             result['error'] = True
             result['error_message'] = \
-                "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
+                "CHATBOT_ATTACHMENTS_BUCKET is not configured [3]"
         else:
-            upload_result = upload_nodup_file_to_s3(
+            upload_result = upload_nodup_file_to_storage(
                 file_path=image_path,
                 original_filename=original_filename,
                 bucket_name=bucket_name,

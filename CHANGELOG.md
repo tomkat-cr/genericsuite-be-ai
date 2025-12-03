@@ -20,6 +20,11 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ## [Unreleased]
 
+### Added
+- API_VERSION envvar to set the API version, default to "v1" [GS-245].
+- Add Postgres database support [GS-194].
+- Implement storage abstraction layer for S3, Azure and GCP [GS-72].
+
 ### Changed
 - Update HuggingFace default model to "moonshotai/Kimi-K2-Instruct-0905" because "mistralai/Mixtral-8x7B-Instruct-v0.1" is not longer available [FA-233].
 

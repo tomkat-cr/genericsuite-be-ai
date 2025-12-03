@@ -17,10 +17,13 @@ from genericsuite.util.utilities import (
     error_resultset,
     get_mime_type,
 )
-from genericsuite.util.aws import upload_nodup_file_to_s3
+
+from genericsuite.util.storage import upload_nodup_file_to_storage
 
 from genericsuite_ai.config.config import Config
 from genericsuite_ai.lib.ai_langchain_models_abstract import CustomLLM as LLM
+from genericsuite_ai.lib.ai_storage import \
+    get_chatbot_attachments_bucket_name
 
 DEBUG = os.environ.get("AI_HUGGINGFACE_DEBUG", "0") == "1"
 
@@ -186,10 +189,10 @@ def huggingface_img_gen(question: str, image_extension: str = 'jpg') -> dict:
         f.write(image_bytes)
 
     # Store the image bytes in AWS
-    upload_result = upload_nodup_file_to_s3(
+    upload_result = upload_nodup_file_to_storage(
         file_path=image_path,
         original_filename=image_filename,
-        bucket_name=settings.AWS_S3_CHATBOT_ATTACHMENTS_BUCKET,
+        bucket_name=get_chatbot_attachments_bucket_name(cac.get()),
         sub_dir=cac.app_context.get_user_id(),
     )
 

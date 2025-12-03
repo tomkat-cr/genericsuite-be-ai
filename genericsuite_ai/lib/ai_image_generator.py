@@ -12,7 +12,8 @@ from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-from genericsuite.util.aws import save_file_from_url
+from genericsuite.util.storage import save_file_from_url
+
 from genericsuite.util.utilities import (
     get_default_resultset,
     get_default_value,
@@ -45,6 +46,8 @@ from genericsuite_ai.lib.huggingface import (
 from genericsuite_ai.lib.amazon_bedrock import (
     aws_bedrock_img_gen,
 )
+from genericsuite_ai.lib.ai_storage import \
+    get_chatbot_attachments_bucket_name
 
 
 DEBUG = os.environ.get("AI_IMAGE_GENERATOR_DEBUG", "0") == "1"
@@ -109,16 +112,15 @@ def save_image(
             error_message (str): the eventual error message or None if no
                 errors
     """
-    settings = Config(cac.get())
     result = get_default_resultset()
     result['public_url'] = None
     result['final_filename'] = None
     result['file_size'] = None
-    bucket_name = settings.AWS_S3_CHATBOT_ATTACHMENTS_BUCKET
+    bucket_name = get_chatbot_attachments_bucket_name(cac.get())
     if not bucket_name:
         result['error'] = True
         result['error_message'] = \
-            "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [2]"
+            "CHATBOT_ATTACHMENTS_BUCKET is not configured [2]"
     else:
         # public_url, final_filename, file_size, error = save_file_from_url(
         save_result = save_file_from_url(

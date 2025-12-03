@@ -10,9 +10,13 @@ from genericsuite.util.utilities import (
     error_resultset,
     get_mime_type,
 )
-from genericsuite.util.aws import upload_nodup_file_to_s3
+
+from genericsuite.util.storage import upload_nodup_file_to_storage
+from genericsuite.util.cloud_provider_abstractor import get_cloud_region
 
 from genericsuite_ai.config.config import Config
+from genericsuite_ai.lib.ai_storage import \
+    get_chatbot_attachments_bucket_name
 
 DEBUG = os.environ.get("AI_AMAZON_BEDROCK_DEBUG", "0") == "1"
 cac = CommonAppContext()
@@ -32,7 +36,8 @@ def aws_bedrock_img_gen(question: str) -> dict:
         )
 
     # Create a Bedrock Runtime client in the AWS Region of your choice.
-    client = boto3.client("bedrock-runtime", region_name=settings.AWS_REGION)
+    region_name = get_cloud_region()
+    client = boto3.client("bedrock-runtime", region_name=region_name)
 
     # Set the model ID, e.g., Titan Image Generator G1.
     model_id = settings.AWS_BEDROCK_IMAGE_GEN_MODEL_ID
@@ -79,10 +84,10 @@ def aws_bedrock_img_gen(question: str) -> dict:
         file.write(image_data)
 
     # Store the image bytes in AWS
-    upload_result = upload_nodup_file_to_s3(
+    upload_result = upload_nodup_file_to_storage(
         file_path=image_path,
         original_filename=image_filename,
-        bucket_name=settings.AWS_S3_CHATBOT_ATTACHMENTS_BUCKET,
+        bucket_name=get_chatbot_attachments_bucket_name(cac.get()),
         sub_dir=cac.app_context.get_user_id(),
     )
 

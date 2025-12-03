@@ -9,11 +9,16 @@ from genericsuite_ai.config.config import Config
 
 from genericsuite.util.app_context import CommonAppContext
 from genericsuite.util.app_logger import log_debug, log_error
-from genericsuite.util.aws import upload_nodup_file_to_s3
+
+from genericsuite.util.storage import upload_nodup_file_to_storage
+
 from genericsuite.util.generic_db_middleware import (
     fetch_all_from_db,
 )
 from genericsuite.util.utilities import get_default_resultset
+
+from genericsuite_ai.lib.ai_storage import \
+    get_chatbot_attachments_bucket_name
 
 DEBUG = os.environ.get("AI_CLARIFAI_DEBUG", "0") == "1"
 cac = CommonAppContext()
@@ -385,7 +390,7 @@ def clarifai_img_gen_raw(
     # Since we have one input, one output will exist here
     output = post_model_outputs_response.outputs[0].data.image.base64
 
-    bucket_name = settings.AWS_S3_CHATBOT_ATTACHMENTS_BUCKET
+    bucket_name = get_chatbot_attachments_bucket_name(cac.get())
     sub_dir = cac.app_context.get_user_id()
     original_filename = "gen-image.jpg"
 
@@ -393,7 +398,7 @@ def clarifai_img_gen_raw(
     with open(image_filename, 'wb') as f:
         f.write(output)
 
-    upload_result = upload_nodup_file_to_s3(
+    upload_result = upload_nodup_file_to_storage(
         file_path=image_filename,
         original_filename=original_filename,
         bucket_name=bucket_name,
