@@ -23,7 +23,11 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Added
 - API_VERSION envvar to set the API version, default to "v1" [GS-245].
 - Add Postgres database support [GS-194].
-- Implement storage abstraction layer for S3, Azure and GCP [GS-72].
+- Add MySQL support [GS-249].
+- Implement storage abstraction layer for AWS S3, Azure and GCP [GS-72].
+- Implement AWS generate_presigned_url() to protect S3 bucket access, so they can be set to expire in a short time and configured to block all public access. Configuration available with STORAGE_PRESIGNED_EXPIRATION_SECONDS (default to 5 minutes or 300 seconds) [GS-72].
+- Add FastAPI, Flask, and Chalice support to AI Conversation Masking using AWS presigned URLs [GS-72].
+- Add create_app() for Flask [GS-15].
 
 ### Changed
 - Update HuggingFace default model to "moonshotai/Kimi-K2-Instruct-0905" because "mistralai/Mixtral-8x7B-Instruct-v0.1" is not longer available [FA-233].

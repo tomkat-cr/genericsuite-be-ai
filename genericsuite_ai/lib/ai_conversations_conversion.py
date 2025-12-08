@@ -92,7 +92,8 @@ class UnmaskedUrlConversion:
         """
         Get the masked URL from the message.
         """
-        unmasked_url = f"{self.public_url}{self.unmasked_url_filename(message)}"
+        unmasked_url = f"{self.public_url}" + \
+            f"{self.unmasked_url_filename(message)}"
         return unmasked_url
 
     def get_masked_url(self, message):
@@ -161,7 +162,8 @@ def mask_one_conversation(conversation: dict):
     uuc = UnmaskedUrlConversion(
         bucket_name, conversation["user_id"], hostname)
     conversation["messages"] = [
-        uuc.process_one_message(message) for message in conversation["messages"]
+        uuc.process_one_message(message) for message
+        in conversation["messages"]
     ]
     return conversation
 
@@ -199,14 +201,17 @@ def mask_all_conversations(app_context: AppContext):
         json_file="ai_chatbot_conversations_complete",
     )
     conversations = json.loads(conversations_rs["resultset"])
+    prev_conv = None
     for conversation in conversations:
         conversation["user_id"] = clean_value(conversation["user_id"])
         uuc = UnmaskedUrlConversion(
             bucket_name, conversation["user_id"], hostname)
         conversation["messages"] = [
-            uuc.process_one_message(message) for message in conversation["messages"]
+            uuc.process_one_message(message) for message
+            in conversation["messages"]
         ]
         if save and uuc.changed:
+            conv_id = conversation["_id"]
             conversation["id"] = conv_id
             del conversation["_id"]
 

@@ -34,10 +34,11 @@ def ai_conversations_conversion_endpoint(
     log_debug('>> AI_CONVERSATIONS_CONVERSION_ENDPOINT')
     app_context = AppContext()
     # app_context.set_context(request)
-    app_context.set_context_from_blueprint(blueprint=blueprint, request=request)
+    app_context.set_context_from_blueprint(
+        blueprint=bp, request=request)
     if app_context.has_error():
         log_debug('>> AI_CONVERSATIONS_CONVERSION_ENDPOINT | HAS_ERROR' +
-            f' (skip): {app_context.get_error_resultset()}')
+                  f' (skip): {app_context.get_error_resultset()}')
         return return_resultset_jsonified_or_exception(
             app_context.get_error_resultset()
         )
@@ -45,14 +46,19 @@ def ai_conversations_conversion_endpoint(
         mask_all_conversations(app_context)
     )
 
+
 """
 
 Instructions:
 ------------
 
-1. Copy the "ai_chatbot_conversations.json" file into "ai_chatbot_conversations_complete.json" in the "config_dbdef/frontend/" folder.
+1. Copy the "ai_chatbot_conversations.json" file into
+"ai_chatbot_conversations_complete.json" in the
+"config_dbdef/frontend/" folder.
 
-2. Edit the "config_dbdef/frontend/ai_chatbot_conversations_complete.json" file and replace the "messages" definition, changing the "listing" attribute to "true":
+2. Edit the "config_dbdef/frontend/ai_chatbot_conversations_complete.json"
+file and replace the "messages" definition, changing the "listing" attribute
+to "true":
 
     {
         "name": "messages",
@@ -68,14 +74,17 @@ Instructions:
 from genericsuite_ai.chalicelib.endpoints import ai_conversations_conversion
 
 # At the end:
-app.register_blueprint(ai_conversations_conversion.bp, url_prefix='/ai_conversations_conversion')
+app.register_blueprint(ai_conversations_conversion.bp,
+   url_prefix='/ai_conversations_conversion')
 
-4. Login into the "api-[stage].fynapp.com" App and copy the "Authorization: Bearer" token.
+4. Login into the "api-[stage].fynapp.com" App and copy the
+"Authorization: Bearer" token.
 
 5. Make the following call to the "ai_conversations_conversion" endpoint:
 
 
-curl --location 'https://api-[stage].fynapp.com/ai_conversations_conversion?bucket_name=exampleapp-s3-bucket&save=1&hostname=api-[stage].fynapp.com' \
+curl --location 'https://api-[stage].fynapp.com/ai_conversations_conversion?
+bucket_name=exampleapp-s3-bucket&save=1&hostname=api-[stage].fynapp.com' \
 --header 'Authorization: Bearer [token]'
 
 """

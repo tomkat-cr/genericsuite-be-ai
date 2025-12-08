@@ -13,6 +13,7 @@ General configuration module for AI projects.
 # pylint: disable=W0105
 # C0301: | Disable "line-too-long"
 # pylint: disable=C0301
+# noqa: C0301
 
 from typing import Any
 import os
