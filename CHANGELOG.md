@@ -33,7 +33,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Update HuggingFace default model to "moonshotai/Kimi-K2-Instruct-0905" because "mistralai/Mixtral-8x7B-Instruct-v0.1" is not longer available [FA-233].
 
 ### Fixed
-- Update faiss-cpu to version >=1.13.1 and adjust thee project Python version compatibility to >=3.10,<3.15 to fix "Could not find a version that satisfies the requirement faiss-cpu==1.13.1 (from versions: 1.7.3, 1.7.4, 1.8.0, 1.8.0.post1, 1.9.0, 1.9.0.post1, 1.12.0)" running the AWS lambda deployment [GS-251].
+- Update faiss-cpu to version 1.12.0 and adjust the project Python version compatibility to >=3.10,<3.15 to fix "Could not find a version that satisfies the requirement faiss-cpu==1.13.1 (from versions: 1.7.3, 1.7.4, 1.8.0, 1.8.0.post1, 1.9.0, 1.9.0.post1, 1.12.0)" running the AWS lambda deployment [GS-251].
+
 
 ## [0.2.0] - 2025-11-17
 
