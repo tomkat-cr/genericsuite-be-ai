@@ -10,7 +10,6 @@ from openai.resources.images import ImagesResponse
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from genericsuite.util.storage import save_file_from_url
 
@@ -177,6 +176,7 @@ def get_img_gen_response(response: dict, other: dict) -> dict:
               f" {settings.AI_IMG_GEN_TECHNOLOGY}")
     try:
         if settings.AI_IMG_GEN_TECHNOLOGY == "gemini":
+            from langchain_google_genai import ChatGoogleGenerativeAI
             client = ChatGoogleGenerativeAI(
                 # model="gemini-pro-vision"
                 model=settings.GOOGLE_IMG_GEN_MODEL,

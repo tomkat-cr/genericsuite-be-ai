@@ -165,3 +165,6 @@ localstack_requirements.txt
 # GCP
 service_account.json
 gcp_*.json
+
+# Big lambdas deployment
+tmp

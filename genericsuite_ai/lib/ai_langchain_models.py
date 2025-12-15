@@ -6,16 +6,12 @@ from typing import Union, Optional, Any
 import json
 import os
 
-from langchain_anthropic import ChatAnthropic
-from langchain_groq import ChatGroq
 from langchain_openai import OpenAI, ChatOpenAI
-from langchain_ollama import ChatOllama
 from langchain_community.llms import Clarifai
 
 from langchain_core.callbacks import AsyncCallbackHandler
 from langchain_core.runnables.utils import ConfigurableField
 from langchain_core.runnables.base import RunnableSerializable
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from genericsuite.util.app_context import AppContext
 from genericsuite.util.app_logger import log_debug, log_error
@@ -177,14 +173,15 @@ def get_model(
     settings = Config(app_context)
     if not model_params:
         model_params = {}
-    model_object: Union[
-        None,
-        ChatOpenAI,
-        ChatGoogleGenerativeAI,
-        ChatOllama,
-        ChatAnthropic,
-        Clarifai,
-    ] = None
+    # model_object: Union[
+    #     None,
+    #     ChatOpenAI,
+    #     ChatGoogleGenerativeAI,
+    #     ChatOllama,
+    #     ChatAnthropic,
+    #     Clarifai,
+    # ] = None
+    model_object = None
     error = None
     manufacturer = None
     model_name = None
@@ -218,6 +215,7 @@ def get_model(
 
         # Google Gemini
         if model_type == "gemini" and settings.GOOGLE_API_KEY:
+            from langchain_google_genai import ChatGoogleGenerativeAI
             # Google Generative AI Chatbot : Gemini
             # https://python.langchain.com/docs/integrations/chat/google_generative_ai
             manufacturer = "Google"
@@ -278,6 +276,7 @@ def get_model(
 
         # Ollama
         if model_type == "ollama":
+            from langchain_ollama import ChatOllama
             # https://python.langchain.com/docs/integrations/chat/ollama/
             manufacturer = "Ollama"
             model_name = settings.OLLAMA_MODEL
@@ -428,6 +427,7 @@ def get_model(
 
         # Anthropic Claude
         if model_type == "anthropic":
+            from langchain_anthropic import ChatAnthropic
             # https://python.langchain.com/docs/integrations/chat/anthropic/
             manufacturer = "Anthropic"
             model_name = settings.ANTHROPIC_MODEL
@@ -442,6 +442,7 @@ def get_model(
 
         # Groq
         if model_type == "groq":
+            from langchain_groq import ChatGroq
             # https://python.langchain.com/docs/integrations/chat/groq/
             manufacturer = "Groq"
             model_name = settings.GROQ_MODEL

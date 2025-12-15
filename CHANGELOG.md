@@ -62,6 +62,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Fix the issues with the new langchain 1.0.x migrating some langchain.* imports to langchain_classic.* imports.
 - Add new development dependencies including build and twine to fix a "make publish" error.
 - Use Poetry to run build and publish commands in Makefile to fix a "make publish" error. 
+- Move "setuptools" and "requests-toolbelt" to dev dependencies, to reduce the dependencies size [GS-248].
 
 ### Security
 - Update "transformers" to "^4.57.1" to fix security vulnerabilities [GS-219]:
@@ -99,8 +100,10 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ### Removed
 - Remove "langchain-together" to enable upgrade of all other langchain dependencies, and routes Together AI calls through the OpenAI API.
-- Remove "clarifai" to make it optional by default [GS-219].
 - Remove GsHuggingFaceEndpoint and GsChatHuggingFace classes because they were replaced by the new Hugging Face with OpenAI API calls [GS-136] [FA-233].
+- Remove "clarifai" to make it optional by default [GS-219].
+- Remove "tiktoken", "google-api-python-client", "transformers", "pypdf", "langchain-google-genai", "langchain-anthropic", "langchain-groq", "langchain-ollama", "langchain-google-vertexai", "langchain-text-splitters", "langchain-aws", to make it optional by default [GS-248]
+- Remove "openai", "click", "jmespath", "pyyaml", "six", "typing-extensions", "pillow", and "jq" to reduce the dependencies size and most of them are not used in this project and/or are dependencies of other dependencies [GS-248].
 
 
 ## [0.1.14] - 2025-07-12

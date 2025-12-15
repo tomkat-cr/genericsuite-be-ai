@@ -8,7 +8,6 @@ import time
 import os
 
 from ddgs import DDGS
-from googleapiclient.discovery import build
 
 from langchain_community.tools.ddg_search.tool import DuckDuckGoSearchResults
 from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
@@ -95,6 +94,7 @@ def web_search_func(params: Any) -> str:
     elif settings.WEBSEARCH_DEFAULT_PROVIDER == "google":
         result = web_search_google(query, num_results)
     else:
+        # Default to DuckDuckGo
         if DUCKDUCKGO_METHOD == "ddgs":
             result = web_search_ddg(query, num_results)
         else:
@@ -151,6 +151,7 @@ def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS
 def google_search_paginated(search_term: str, api_key: str, cse_id: str,
                             num_results: int = DEFAULT_MAX_RESULTS,
                             **kwargs) -> list:
+    from googleapiclient.discovery import build
     service = build("customsearch", "v1", developerKey=api_key)
     start_index = 1
     all_results = []

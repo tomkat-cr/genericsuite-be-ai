@@ -11,7 +11,6 @@ from openai import OpenAI
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from genericsuite.util.storage import (
     upload_nodup_file_to_storage,
@@ -218,6 +217,7 @@ def get_vision_response(response: dict, other: dict) -> dict:
               f" {settings.AI_VISION_TECHNOLOGY}")
     try:
         if settings.AI_VISION_TECHNOLOGY == "gemini":
+            from langchain_google_genai import ChatGoogleGenerativeAI
             model_config = {
                 "model": settings.GOOGLE_VISION_MODEL,
                 "google_api_key": settings.GOOGLE_API_KEY,

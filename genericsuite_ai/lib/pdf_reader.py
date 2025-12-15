@@ -1,11 +1,6 @@
 """
 PDF indexer
 """
-# pipenv install PyPDF2
-from PyPDF2 import PdfReader, PdfWriter
-
-from langchain_classic.text_splitter import CharacterTextSplitter
-from langchain_community.document_loaders import PyPDFLoader
 
 
 def get_pdf_pages(pdf_docs: list) -> list:
@@ -18,6 +13,10 @@ def get_pdf_pages(pdf_docs: list) -> list:
     Returns:
         list: A list of pages from the PDF documents.
     """
+    from pypdf import PdfReader, PdfWriter
+    from langchain_classic.text_splitter import CharacterTextSplitter
+    from langchain_community.document_loaders import PyPDFLoader
+
     all_pages = []
     for pdf in pdf_docs:
         pdf_reader = PdfReader(pdf)
