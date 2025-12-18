@@ -43,11 +43,11 @@ packages = [
 [tool.poetry.dependencies]
 python = ">=3.10,<3.15"
 faiss-cpu = "1.12.0"
-urllib3 = "^2.5.0"
+urllib3 = "^2.6.2"
 ddgs = "^9.0.2"
-langchain = "^1.0.3"
-langchain-openai = "^1.0.1"
-langchain-core = "^1.0.2"
+langchain = "^1.2.0"
+langchain-openai = "^1.1.4"
+langchain-core = "^1.2.2"
 langchain-community = "^0.4.1"
 
 [tool.poetry.group.dev.dependencies]

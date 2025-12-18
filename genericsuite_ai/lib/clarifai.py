@@ -917,7 +917,13 @@ def clarifai_text_to_audio_python_sdk(
     Returns:
         str: model response as audio file path
     """
-    from clarifai.client.model import Model
+    try:
+        from clarifai.client.model import Model
+    except ImportError:
+        raise Exception(
+            "ERROR - Missing dependency. Please install it with: "
+            "pip install clarifai")
+
     settings = Config(cac.get())
 
     if DEBUG:

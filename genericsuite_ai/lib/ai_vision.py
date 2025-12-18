@@ -217,7 +217,12 @@ def get_vision_response(response: dict, other: dict) -> dict:
               f" {settings.AI_VISION_TECHNOLOGY}")
     try:
         if settings.AI_VISION_TECHNOLOGY == "gemini":
-            from langchain_google_genai import ChatGoogleGenerativeAI
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+            except ImportError:
+                raise Exception(
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-google-genai")
             model_config = {
                 "model": settings.GOOGLE_VISION_MODEL,
                 "google_api_key": settings.GOOGLE_API_KEY,

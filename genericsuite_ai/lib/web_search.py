@@ -151,7 +151,12 @@ def web_search_google(query: str, num_results: int = DEFAULT_MAX_RESULTS
 def google_search_paginated(search_term: str, api_key: str, cse_id: str,
                             num_results: int = DEFAULT_MAX_RESULTS,
                             **kwargs) -> list:
-    from googleapiclient.discovery import build
+    try:
+        from googleapiclient.discovery import build
+    except ImportError:
+        raise Exception(
+            "ERROR - Missing dependency. Please install it with: "
+            "pip install google-api-python-client")
     service = build("customsearch", "v1", developerKey=api_key)
     start_index = 1
     all_results = []

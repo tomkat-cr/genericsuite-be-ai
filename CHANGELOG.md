@@ -22,18 +22,35 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ### Added
 - API_VERSION envvar to set the API version, default to "v1" [GS-245].
-- Add Postgres database support [GS-194].
-- Add MySQL support [GS-249].
+- Postgres database support [GS-194].
+- MySQL support [GS-249].
 - Implement storage abstraction layer for AWS S3, Azure and GCP [GS-72].
 - Implement AWS generate_presigned_url() to protect S3 bucket access, so they can be set to expire in a short time and configured to block all public access. Configuration available with STORAGE_PRESIGNED_EXPIRATION_SECONDS (default to 5 minutes or 300 seconds) [GS-72].
-- Add FastAPI, Flask, and Chalice support to AI Conversation Masking using AWS presigned URLs [GS-72].
-- Add create_app() for Flask [GS-15].
+- FastAPI, Flask, and Chalice support to AI Conversation Masking using AWS presigned URLs [GS-72].
+- create_app() for Flask [GS-15].
+- try-except to all optional imports to report what dependency is missing, so the developer can "pip install" it [GS-248].
+- "timeout" and "max_retries" to get_openai_api() [GS-248].
 
 ### Changed
 - Update HuggingFace default model to "moonshotai/Kimi-K2-Instruct-0905" because "mistralai/Mixtral-8x7B-Instruct-v0.1" is not longer available [FA-233].
 
 ### Fixed
 - Update faiss-cpu to version 1.12.0 and adjust the project Python version compatibility to >=3.10,<3.15 to fix "Could not find a version that satisfies the requirement faiss-cpu==1.13.1 (from versions: 1.7.3, 1.7.4, 1.8.0, 1.8.0.post1, 1.9.0, 1.9.0.post1, 1.12.0)" running the AWS lambda deployment [GS-251].
+
+### Security
+- Update "urllib3" to "^2.6.2" to fix security vulnerabilities [GS-219]:
+    * "Allocation of Resources Without Limits or Throttling": "CWE-770", "CVE-2025-66418", "CVSS 8.9", "SNYK-PYTHON-URLLIB3-14192443"
+    * "Improper Handling of Highly Compressed Data (Data Amplification)": "CWE-409", "CVSS 8.9", "CVE-2025-66471", "SNYK-PYTHON-URLLIB3-14192442".
+- Update "langchain-core" to "^1.2.2" to fix security vulnerabilities [GS-219]:
+    * "Template Injection": "CWE-1336", "CVSS 8.3"
+- Update "langchain" to "^1.2.0" to fix security vulnerabilities [GS-219]:
+    * "Template Injection": "CWE-1336", "CVSS 8.3"
+- Update "langchain-openai" to "^1.1.4" to have the latest version [GS-219].
+
+### Removed
+- "langchain-groq" dependency because its API is now called with the OpenAI API [GS-248].
+- "clarifai", "google-api-python-client", "transformers", "pypdf", "langchain-google-genai", "langchain-anthropic", "langchain-ollama", "langchain-google-vertexai", "langchain-text-splitters", "langchain-aws", dependencies to make it optional by default [GS-248].
+- "tiktoken", "openai", "click", "jmespath", "pyyaml", "six", "typing-extensions", "pillow", and "jq" dependencies to reduce the dependencies size and most of them are not used in this project and/or are dependencies of other dependencies [GS-248].
 
 
 ## [0.2.0] - 2025-11-17
@@ -101,9 +118,6 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Removed
 - Remove "langchain-together" to enable upgrade of all other langchain dependencies, and routes Together AI calls through the OpenAI API.
 - Remove GsHuggingFaceEndpoint and GsChatHuggingFace classes because they were replaced by the new Hugging Face with OpenAI API calls [GS-136] [FA-233].
-- Remove "clarifai" to make it optional by default [GS-219].
-- Remove "tiktoken", "google-api-python-client", "transformers", "pypdf", "langchain-google-genai", "langchain-anthropic", "langchain-groq", "langchain-ollama", "langchain-google-vertexai", "langchain-text-splitters", "langchain-aws", to make it optional by default [GS-248]
-- Remove "openai", "click", "jmespath", "pyyaml", "six", "typing-extensions", "pillow", and "jq" to reduce the dependencies size and most of them are not used in this project and/or are dependencies of other dependencies [GS-248].
 
 
 ## [0.1.14] - 2025-07-12

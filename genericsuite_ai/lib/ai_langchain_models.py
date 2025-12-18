@@ -7,7 +7,6 @@ import json
 import os
 
 from langchain_openai import OpenAI, ChatOpenAI
-from langchain_community.llms import Clarifai
 
 from langchain_core.callbacks import AsyncCallbackHandler
 from langchain_core.runnables.utils import ConfigurableField
@@ -125,10 +124,10 @@ def get_openai_api(model_params: dict) -> ChatOpenAI:
     for key in ["base_url", "stop"]:
         if model_params.get(key):
             model_config[key] = model_params[key]
-    for key in ["temperature"]:
+    for key in ["temperature", "timeout"]:
         if model_params.get(key):
             model_config[key] = float(model_params[key])
-    for key in ["top_p", "top_k", "max_tokens"]:
+    for key in ["top_p", "top_k", "max_tokens", "max_retries"]:
         if model_params.get(key):
             model_config[key] = int(model_params[key])
     for key, new_key in renamed_pars.items():
@@ -173,14 +172,6 @@ def get_model(
     settings = Config(app_context)
     if not model_params:
         model_params = {}
-    # model_object: Union[
-    #     None,
-    #     ChatOpenAI,
-    #     ChatGoogleGenerativeAI,
-    #     ChatOllama,
-    #     ChatAnthropic,
-    #     Clarifai,
-    # ] = None
     model_object = None
     error = None
     manufacturer = None
@@ -215,17 +206,23 @@ def get_model(
 
         # Google Gemini
         if model_type == "gemini" and settings.GOOGLE_API_KEY:
-            from langchain_google_genai import ChatGoogleGenerativeAI
-            # Google Generative AI Chatbot : Gemini
-            # https://python.langchain.com/docs/integrations/chat/google_generative_ai
-            manufacturer = "Google"
-            model_name = settings.GOOGLE_MODEL
-            model_object = ChatGoogleGenerativeAI(
-                model=model_name,
-                temperature=float(settings.OPENAI_TEMPERATURE),
-                google_api_key=settings.GOOGLE_API_KEY,
-                convert_system_message_to_human=True,
-            )
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+            except ImportError:
+                error = (
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-google-genai")
+            else:
+                # Google Generative AI Chatbot : Gemini
+                # https://python.langchain.com/docs/integrations/chat/google_generative_ai
+                manufacturer = "Google"
+                model_name = settings.GOOGLE_MODEL
+                model_object = ChatGoogleGenerativeAI(
+                    model=model_name,
+                    temperature=float(settings.OPENAI_TEMPERATURE),
+                    google_api_key=settings.GOOGLE_API_KEY,
+                    convert_system_message_to_human=True,
+                )
 
         # Google VertexAI
         if model_type == "vertexai":
@@ -235,58 +232,72 @@ def get_model(
             # https://console.cloud.google.com/vertex-ai/studio/freeform
             # https://cloud.google.com/docs/authentication/application-default-credentials#GAC
             # https://cloud.google.com/vertex-ai/generative-ai/docs/start/express-mode/overview
-            from langchain_google_vertexai import ChatVertexAI
-
-            manufacturer = "Google Vertex AI"
-            model_name = settings.VERTEXAI_MODEL
-            model_config = {
-                'model': model_name,
-            }
-
-            if settings.GOOGLE_APPLICATION_CREDENTIALS:
-                model_config["credentials"] = get_gcp_vertexai_credentials(
-                    settings.GOOGLE_APPLICATION_CREDENTIALS)
-            model_config["project"] = settings.GOOGLE_CLOUD_PROJECT
-            model_config["location"] = settings.GOOGLE_CLOUD_LOCATION
-
-            model_config["max_tokens"] = model_params.get(
-                "max_tokens", settings.VERTEXAI_MAX_TOKENS)
-            if model_config["max_tokens"]:
-                model_config["max_tokens"] = int(model_config["max_tokens"])
+            try:
+                from langchain_google_vertexai import ChatVertexAI
+            except ImportError:
+                error = (
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-google-vertexai")
             else:
-                del model_config["max_tokens"]
+                manufacturer = "Google Vertex AI"
+                model_name = settings.VERTEXAI_MODEL
+                model_config = {
+                    'model': model_name,
+                }
 
-            model_config["max_retries"] = model_params.get(
-                "max_retries", settings.VERTEXAI_MAX_RETRIES)
-            if model_config["max_retries"]:
-                model_config["max_retries"] = int(model_config["max_retries"])
-            else:
-                del model_config["max_retries"]
+                if settings.GOOGLE_APPLICATION_CREDENTIALS:
+                    model_config["credentials"] = get_gcp_vertexai_credentials(
+                        settings.GOOGLE_APPLICATION_CREDENTIALS)
+                model_config["project"] = settings.GOOGLE_CLOUD_PROJECT
+                model_config["location"] = settings.GOOGLE_CLOUD_LOCATION
 
-            model_config["temperature"] = model_params.get(
-                "temperature", settings.VERTEXAI_TEMPERATURE)
-            if model_config["temperature"]:
-                model_config["temperature"] = float(
-                    model_config["temperature"])
-            else:
-                del model_config["temperature"]
+                model_config["max_tokens"] = model_params.get(
+                    "max_tokens", settings.VERTEXAI_MAX_TOKENS)
+                if model_config["max_tokens"]:
+                    model_config["max_tokens"] = int(
+                        model_config["max_tokens"])
+                else:
+                    del model_config["max_tokens"]
 
-            _ = DEBUG and log_debug(f"VERTEXAI | model_config: {model_config}")
-            model_object = ChatVertexAI(**model_config)
+                model_config["max_retries"] = model_params.get(
+                    "max_retries", settings.VERTEXAI_MAX_RETRIES)
+                if model_config["max_retries"]:
+                    model_config["max_retries"] = int(
+                        model_config["max_retries"])
+                else:
+                    del model_config["max_retries"]
+
+                model_config["temperature"] = model_params.get(
+                    "temperature", settings.VERTEXAI_TEMPERATURE)
+                if model_config["temperature"]:
+                    model_config["temperature"] = float(
+                        model_config["temperature"])
+                else:
+                    del model_config["temperature"]
+
+                _ = DEBUG and log_debug(
+                    f"VERTEXAI | model_config: {model_config}")
+                model_object = ChatVertexAI(**model_config)
 
         # Ollama
         if model_type == "ollama":
-            from langchain_ollama import ChatOllama
-            # https://python.langchain.com/docs/integrations/chat/ollama/
-            manufacturer = "Ollama"
-            model_name = settings.OLLAMA_MODEL
-            model_config = {
-                'model': model_name,
-                'temperature': float(settings.OLLAMA_TEMPERATURE),
-            }
-            if settings.OLLAMA_BASE_URL:
-                model_config['base_url'] = settings.OLLAMA_BASE_URL
-            model_object = ChatOllama(**model_config)
+            try:
+                from langchain_ollama import ChatOllama
+            except ImportError:
+                error = (
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-ollama")
+            else:
+                # https://python.langchain.com/docs/integrations/chat/ollama/
+                manufacturer = "Ollama"
+                model_name = settings.OLLAMA_MODEL
+                model_config = {
+                    'model': model_name,
+                    'temperature': float(settings.OLLAMA_TEMPERATURE),
+                }
+                if settings.OLLAMA_BASE_URL:
+                    model_config['base_url'] = settings.OLLAMA_BASE_URL
+                model_object = ChatOllama(**model_config)
 
         # Genericsuite's Hugging Face lightweight Inference API
         if model_type in ["huggingface_remote", "gs_huggingface"]:
@@ -344,105 +355,123 @@ def get_model(
             # https://python.langchain.com/docs/integrations/llms/huggingface_endpoint/
             # https://python.langchain.com/docs/integrations/chat/huggingface/
             #
-            from langchain_huggingface \
-                import HuggingFaceEndpoint  # type: ignore[import]
-            from langchain_huggingface \
-                import ChatHuggingFace  # type: ignore[import]
-
-            manufacturer = "Hugging Face"
-            model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            if 'model_name' in model_params:
-                model_name = model_params['model_name']
-            model_object = HuggingFaceEndpoint(
-                repo_id=model_name,
-                task=HF_DEFAULT_TASK,
-                do_sample=False,
-                max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
-                top_k=int(settings.HUGGINGFACE_TOP_K),
-                temperature=float(settings.HUGGINGFACE_TEMPERATURE),
-                repetition_penalty=float(
-                    settings.HUGGINGFACE_REPETITION_PENALTY),
-                huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
-                timeout=float(settings.HUGGINGFACE_TIMEOUT),
-                provider=settings.HUGGINGFACE_PROVIDER,
-            )
-            # 0 = use HuggingFaceEndpoint + LangChain Agent
-            # 1 = use ChatHuggingFace + LangChain LCEL
-            other_data["HUGGINGFACE_USE_CHAT_HF"] = \
-                settings.HUGGINGFACE_USE_CHAT_HF
-
-            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
-                model_object = ChatHuggingFace(
-                    llm=model_object,
-                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
-                )
+            try:
+                from langchain_huggingface \
+                    import HuggingFaceEndpoint  # type: ignore[import]
+                from langchain_huggingface \
+                    import ChatHuggingFace  # type: ignore[import]
+            except ImportError:
+                error = (
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-huggingface")
             else:
-                # Instruct models or pure LLMs Doesn't work with LCEL
-                pref_agent_type = 'react_chat_agent'
+                manufacturer = "Hugging Face"
+                model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
+                if 'model_name' in model_params:
+                    model_name = model_params['model_name']
+                model_object = HuggingFaceEndpoint(
+                    repo_id=model_name,
+                    task=HF_DEFAULT_TASK,
+                    do_sample=False,
+                    max_new_tokens=int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
+                    top_k=int(settings.HUGGINGFACE_TOP_K),
+                    temperature=float(settings.HUGGINGFACE_TEMPERATURE),
+                    repetition_penalty=float(
+                        settings.HUGGINGFACE_REPETITION_PENALTY),
+                    huggingfacehub_api_token=settings.HUGGINGFACE_API_KEY,
+                    timeout=float(settings.HUGGINGFACE_TIMEOUT),
+                    provider=settings.HUGGINGFACE_PROVIDER,
+                )
+                # 0 = use HuggingFaceEndpoint + LangChain Agent
+                # 1 = use ChatHuggingFace + LangChain LCEL
+                other_data["HUGGINGFACE_USE_CHAT_HF"] = \
+                    settings.HUGGINGFACE_USE_CHAT_HF
+
+                if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+                    model_object = ChatHuggingFace(
+                        llm=model_object,
+                        verbose=settings.HUGGINGFACE_VERBOSE == "1",
+                    )
+                else:
+                    # Instruct models or pure LLMs Doesn't work with LCEL
+                    pref_agent_type = 'react_chat_agent'
 
         # Hugging Face Pipelines
         if model_type == "huggingface_pipeline":
             # https://python.langchain.com/v0.2/docs/integrations/llms/huggingface_pipelines/
-            #
-            from langchain_huggingface.llms import \
-                HuggingFacePipeline  # type: ignore[import]
-            from transformers import (
-                AutoModelForCausalLM,
-                AutoTokenizer,
-                pipeline)  # type: ignore[import]
-            from langchain_huggingface import \
-                ChatHuggingFace  # type: ignore[import]
-            #
-            manufacturer = "Hugging Face (Pipeline)"
-            model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
-            if 'model_name' in model_params:
-                model_name = model_params['model_name']
-            tokenizer = AutoTokenizer.from_pretrained(model_name)
-            model = AutoModelForCausalLM.from_pretrained(model_name)
-            model_config = {
-                'model': model,
-                'tokenizer': tokenizer,
-                'max_new_tokens': int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
-                'huggingfacehub_api_token': settings.HUGGINGFACE_API_KEY,
-            }
-            if settings.HUGGINGFACE_PIPELINE_DEVICE != "":
-                model_config["device"] = settings.HUGGINGFACE_PIPELINE_DEVICE
-            # Pipeline() reference:
-            # https://huggingface.co/transformers/v3.0.2/main_classes/pipelines.html
-            pipe = pipeline(HF_DEFAULT_TASK, **model_config)
-            model_object = HuggingFacePipeline(
-                pipeline=pipe,
-                # timeout=float(settings.HUGGINGFACE_TIMEOUT),
-            )
-            other_data["HUGGINGFACE_USE_CHAT_HF"] = \
-                settings.HUGGINGFACE_USE_CHAT_HF
-            if settings.HUGGINGFACE_USE_CHAT_HF == "1":
-                model_object = ChatHuggingFace(
-                    llm=model_object,
-                    verbose=settings.HUGGINGFACE_VERBOSE == "1",
-                )
+            try:
+                from langchain_huggingface.llms import \
+                    HuggingFacePipeline  # type: ignore[import]
+                from langchain_huggingface import \
+                    ChatHuggingFace  # type: ignore[import]
+                from transformers import (
+                    AutoModelForCausalLM,
+                    AutoTokenizer,
+                    pipeline)  # type: ignore[import]
+            except ImportError:
+                error = (
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install transformers langchain-huggingface")
             else:
-                # Instruct models or pure LLMs Doesn't work with LCEL
-                pref_agent_type = 'react_chat_agent'
+                manufacturer = "Hugging Face (Pipeline)"
+                model_name = settings.HUGGINGFACE_DEFAULT_CHAT_MODEL
+                if 'model_name' in model_params:
+                    model_name = model_params['model_name']
+                tokenizer = AutoTokenizer.from_pretrained(model_name)
+                model = AutoModelForCausalLM.from_pretrained(model_name)
+                model_config = {
+                    'model': model,
+                    'tokenizer': tokenizer,
+                    'max_new_tokens': int(settings.HUGGINGFACE_MAX_NEW_TOKENS),
+                    'huggingfacehub_api_token': settings.HUGGINGFACE_API_KEY,
+                }
+                if settings.HUGGINGFACE_PIPELINE_DEVICE != "":
+                    model_config["device"] = \
+                        settings.HUGGINGFACE_PIPELINE_DEVICE
+                # Pipeline() reference:
+                # https://huggingface.co/transformers/v3.0.2/main_classes/pipelines.html
+                pipe = pipeline(HF_DEFAULT_TASK, **model_config)
+                model_object = HuggingFacePipeline(
+                    pipeline=pipe,
+                    # timeout=float(settings.HUGGINGFACE_TIMEOUT),
+                )
+                other_data["HUGGINGFACE_USE_CHAT_HF"] = \
+                    settings.HUGGINGFACE_USE_CHAT_HF
+                if settings.HUGGINGFACE_USE_CHAT_HF == "1":
+                    model_object = ChatHuggingFace(
+                        llm=model_object,
+                        verbose=settings.HUGGINGFACE_VERBOSE == "1",
+                    )
+                else:
+                    # Instruct models or pure LLMs Doesn't work with LCEL
+                    pref_agent_type = 'react_chat_agent'
 
         # Anthropic Claude
         if model_type == "anthropic":
-            from langchain_anthropic import ChatAnthropic
             # https://python.langchain.com/docs/integrations/chat/anthropic/
-            manufacturer = "Anthropic"
-            model_name = settings.ANTHROPIC_MODEL
-            if not settings.ANTHROPIC_API_KEY:
-                error = "ERROR [GET_MODEL-AT-010] - Missing ANTHROPIC_API_KEY"
-            else:
-                model_object = ChatAnthropic(
-                    # model="claude-2"
-                    model=model_name,
-                    anthropic_api_key=settings.ANTHROPIC_API_KEY,
+            try:
+                # type: ignore[import]
+                from langchain_anthropic import ChatAnthropic
+            except ImportError:
+                error = (
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-anthropic"
                 )
+            else:
+                manufacturer = "Anthropic"
+                model_name = settings.ANTHROPIC_MODEL
+                if not settings.ANTHROPIC_API_KEY:
+                    error = "ERROR [GET_MODEL-AT-010] - " \
+                        "Missing ANTHROPIC_API_KEY"
+                else:
+                    model_object = ChatAnthropic(
+                        # model="claude-2"
+                        model=model_name,
+                        anthropic_api_key=settings.ANTHROPIC_API_KEY,
+                    )
 
         # Groq
         if model_type == "groq":
-            from langchain_groq import ChatGroq
             # https://python.langchain.com/docs/integrations/chat/groq/
             manufacturer = "Groq"
             model_name = settings.GROQ_MODEL
@@ -451,69 +480,93 @@ def get_model(
             if not settings.GROQ_API_KEY:
                 error = "ERROR [GET_MODEL-GROQ-010] - Missing GROQ_API_KEY"
             else:
-                model_object = ChatGroq(
-                    model=model_name,
-                    api_key=settings.GROQ_API_KEY,
-                    temperature=float(settings.GROQ_TEMPERATURE),
-                    max_tokens=int(settings.GROQ_MAX_TOKENS)
-                    if settings.GROQ_MAX_TOKENS else None,
-                    timeout=float(settings.GROQ_TIMEOUT)
-                    if settings.GROQ_TIMEOUT else None,
-                    max_retries=int(settings.GROQ_MAX_RETRIES),
-                )
+                openai_model = get_openai_api({
+                    "provider": manufacturer,
+                    "base_url": settings.GROQ_BASE_URL,
+                    "api_key": model_params.get(
+                        "api_key", settings.GROQ_API_KEY),
+                    "model_name": model_name,
+                    "temperature": settings.GROQ_TEMPERATURE,
+                    "top_p": settings.GROQ_TOP_P,
+                    "max_tokens": settings.GROQ_MAX_TOKENS,
+                    "timeout": settings.GROQ_TIMEOUT,
+                    "max_retries": settings.GROQ_MAX_RETRIES,
+                    "streaming": settings.AI_STREAMING,
+                })
+                if openai_model["error"]:
+                    error = openai_model["error_message"]
+                else:
+                    model_object = openai_model["model_object"]
 
         # Amazon Bedrock
         if model_type == "bedrock":
             # https://python.langchain.com/docs/integrations/llms/bedrock/
             # https://python.langchain.com/docs/how_to/response_metadata/#bedrock-anthropic
-            from langchain_aws import ChatBedrock    # type: ignore[import]
-            manufacturer = "AWS"
-            model_name = settings.AWS_BEDROCK_MODEL_ID
-            if 'model_name' in model_params:
-                model_name = model_params['model_name']
-            model_config = {}
-            model_config["model_id"] = model_name
-            if settings.AWS_BEDROCK_CREDENTIALS_PROFILE:
-                model_config["credentials_profile_name"] = \
-                    settings.AWS_BEDROCK_CREDENTIALS_PROFILE
-            if settings.AWS_BEDROCK_GUARDRAIL_ID:
-                model_config["callbacks"] = [BedrockAsyncCallbackHandler()]
-                model_config["guardrails"] = {
-                    "id": settings.AWS_BEDROCK_GUARDRAIL_ID,
-                    "version": settings.AWS_BEDROCK_GUARDRAIL_VERSION,
-                    "trace": settings.AWS_BEDROCK_GUARDRAIL_TRACE == "1",
-                }
-            model_object = ChatBedrock(
-                **model_config,
-            )
+            try:
+                from langchain_aws import ChatBedrock    # type: ignore[import]
+            except ImportError:
+                error = (
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-aws"
+                )
+            else:
+                manufacturer = "AWS"
+                model_name = settings.AWS_BEDROCK_MODEL_ID
+                if 'model_name' in model_params:
+                    model_name = model_params['model_name']
+                model_config = {}
+                model_config["model_id"] = model_name
+                if settings.AWS_BEDROCK_CREDENTIALS_PROFILE:
+                    model_config["credentials_profile_name"] = \
+                        settings.AWS_BEDROCK_CREDENTIALS_PROFILE
+                if settings.AWS_BEDROCK_GUARDRAIL_ID:
+                    model_config["callbacks"] = [BedrockAsyncCallbackHandler()]
+                    model_config["guardrails"] = {
+                        "id": settings.AWS_BEDROCK_GUARDRAIL_ID,
+                        "version": settings.AWS_BEDROCK_GUARDRAIL_VERSION,
+                        "trace": settings.AWS_BEDROCK_GUARDRAIL_TRACE == "1",
+                    }
+                model_object = ChatBedrock(
+                    **model_config,
+                )
 
         # Clarifai Platform
         if model_type == "clarifai":
-            if not settings.CLARIFAI_PAT:
-                error = "ERROR [GET_MODEL-CF-010] - Missing CLARIFAI_PAT"
+            try:
+                # type: ignore[import]
+                from langchain_community.llms import Clarifai
+            except ImportError:
+                error = (
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-community"
+                )
             else:
-                # https://python.langchain.com/docs/integrations/providers/clarifai#llms
-                model_name = settings.AI_CLARIFAI_DEFAULT_CHAT_MODEL
-                all_model_config = \
-                    get_model_config(model_name)
-                if "error" in all_model_config:
-                    error = f"ERROR [GET_MODEL-CF-020] - {all_model_config}"
+                if not settings.CLARIFAI_PAT:
+                    error = "ERROR [GET_MODEL-CF-010] - Missing CLARIFAI_PAT"
                 else:
-                    manufacturer = all_model_config["manufacturer"]
-                    model_config = {}
-                    # The "protected_namespaces" entry was added to fix the
-                    # runtime warning "UserWarning: Field "model_id" has
-                    # conflict with protected namespace "model_"
-                    model_config['protected_namespaces'] = ()
-                    model_config["user_id"] = all_model_config["user_id"]
-                    model_config["app_id"] = all_model_config["app_id"]
-                    model_config["model_id"] = all_model_config["model_id"]
-                    model_config["model_version_id"] = \
-                        all_model_config["model_version_id"]
-                    model_object = Clarifai(
-                        pat=settings.CLARIFAI_PAT,
-                        **model_config,
-                    )
+                    # https://python.langchain.com/docs/integrations/providers/clarifai#llms
+                    model_name = settings.AI_CLARIFAI_DEFAULT_CHAT_MODEL
+                    all_model_config = \
+                        get_model_config(model_name)
+                    if "error" in all_model_config:
+                        error = \
+                            f"ERROR [GET_MODEL-CF-020] - {all_model_config}"
+                    else:
+                        manufacturer = all_model_config["manufacturer"]
+                        model_config = {}
+                        # The "protected_namespaces" entry was added to fix the
+                        # runtime warning "UserWarning: Field "model_id" has
+                        # conflict with protected namespace "model_"
+                        model_config['protected_namespaces'] = ()
+                        model_config["user_id"] = all_model_config["user_id"]
+                        model_config["app_id"] = all_model_config["app_id"]
+                        model_config["model_id"] = all_model_config["model_id"]
+                        model_config["model_version_id"] = \
+                            all_model_config["model_version_id"]
+                        model_object = Clarifai(
+                            pat=settings.CLARIFAI_PAT,
+                            **model_config,
+                        )
 
         # AI/ML API
         if model_type == "aimlapi":

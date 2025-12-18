@@ -176,7 +176,12 @@ def get_img_gen_response(response: dict, other: dict) -> dict:
               f" {settings.AI_IMG_GEN_TECHNOLOGY}")
     try:
         if settings.AI_IMG_GEN_TECHNOLOGY == "gemini":
-            from langchain_google_genai import ChatGoogleGenerativeAI
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+            except ImportError:
+                raise Exception(
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-google-genai")
             client = ChatGoogleGenerativeAI(
                 # model="gemini-pro-vision"
                 model=settings.GOOGLE_IMG_GEN_MODEL,

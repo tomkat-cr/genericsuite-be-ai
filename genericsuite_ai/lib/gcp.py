@@ -14,7 +14,12 @@ def get_service_account_credentials(creds_file_path: str):
     """
     Get Services account credentials for accessing Google Cloud APIs.
     """
-    from google.oauth2 import service_account
+    try:
+        from google.oauth2 import service_account
+    except ImportError:
+        raise Exception(
+            "ERROR - Missing dependency. Please install it with: "
+            "pip install google-api-python-client")
 
     _ = DEBUG and log_debug(
         ">> GCP / GET_SERVICE_ACCOUNT_CREDENTIALS"

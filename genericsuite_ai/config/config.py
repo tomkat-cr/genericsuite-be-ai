@@ -518,6 +518,10 @@ class Config(ConfigSuperClass):
             # 'llama-3.1-70b-versatile'
             # 'llama-3.1-8b-instant'
         )
+        self.GROQ_BASE_URL = self.get_env(
+            'GROQ_BASE_URL',
+            'https://api.groq.com/openai/v1'
+        )
 
         # ...
         # Clarifai

@@ -13,10 +13,19 @@ def get_pdf_pages(pdf_docs: list) -> list:
     Returns:
         list: A list of pages from the PDF documents.
     """
-    from pypdf import PdfReader, PdfWriter
-    from langchain_classic.text_splitter import CharacterTextSplitter
-    from langchain_community.document_loaders import PyPDFLoader
-
+    try:
+        from pypdf import PdfReader, PdfWriter
+    except ImportError:
+        raise ImportError(
+            "ERROR - Missing dependency. Please install it with: "
+            "pip install pypdf")
+    try:
+        from langchain_classic.text_splitter import CharacterTextSplitter
+        from langchain_community.document_loaders import PyPDFLoader
+    except ImportError:
+        raise ImportError(
+            "ERROR - Missing dependency. Please install it with: "
+            "pip install langchain-classic langchain-community")
     all_pages = []
     for pdf in pdf_docs:
         pdf_reader = PdfReader(pdf)
