@@ -1,5 +1,6 @@
 """
 Translation module
+This replaces the old googletrans module.
 """
 import os
 import re

@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
-## [Unreleased]
+## [0.3.0] - 2026-02-18
 
 ### Added
 - API_VERSION envvar to set the API version, default to "v1" [GS-245].
@@ -29,10 +29,12 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - FastAPI, Flask, and Chalice support to AI Conversation Masking using AWS presigned URLs [GS-72].
 - create_app() for Flask [GS-15].
 - try-except to all optional imports to report what dependency is missing, so the developer can "pip install" it [GS-248].
-- "timeout" and "max_retries" to get_openai_api() [GS-248].
+- Model documentation links in `.env.example` [GS-172].
+- Note about the old google translator module replacement in `translator.py` [GS-252].
 
 ### Changed
 - Update HuggingFace default model to "moonshotai/Kimi-K2-Instruct-0905" because "mistralai/Mixtral-8x7B-Instruct-v0.1" is not longer available [FA-233].
+- Update AIMLAPI_BASE_URL to include "/v1" at the end [GS-172].
 
 ### Fixed
 - Update faiss-cpu to version 1.12.0 and adjust the project Python version compatibility to >=3.10,<3.15 to fix "Could not find a version that satisfies the requirement faiss-cpu==1.13.1 (from versions: 1.7.3, 1.7.4, 1.8.0, 1.8.0.post1, 1.9.0, 1.9.0.post1, 1.12.0)" running the AWS lambda deployment [GS-251].

@@ -598,7 +598,7 @@ class Config(ConfigSuperClass):
 
         self.AIMLAPI_BASE_URL = self.get_env(
             'AIMLAPI_BASE_URL',
-            "https://api.aimlapi.com/"
+            "https://api.aimlapi.com/v1"
         )
 
         # ...
