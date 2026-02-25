@@ -40,14 +40,16 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Update faiss-cpu to version 1.12.0 and adjust the project Python version compatibility to >=3.10,<3.15 to fix "Could not find a version that satisfies the requirement faiss-cpu==1.13.1 (from versions: 1.7.3, 1.7.4, 1.8.0, 1.8.0.post1, 1.9.0, 1.9.0.post1, 1.12.0)" running the AWS lambda deployment [GS-251].
 
 ### Security
-- Update "urllib3" to "^2.6.2" to fix security vulnerabilities [GS-219]:
+- Update "urllib3" to "^2.6.3" to fix security vulnerabilities [GS-219]:
     * "Allocation of Resources Without Limits or Throttling": "CWE-770", "CVE-2025-66418", "CVSS 8.9", "SNYK-PYTHON-URLLIB3-14192443"
-    * "Improper Handling of Highly Compressed Data (Data Amplification)": "CWE-409", "CVSS 8.9", "CVE-2025-66471", "SNYK-PYTHON-URLLIB3-14192442".
-- Update "langchain-core" to "^1.2.2" to fix security vulnerabilities [GS-219]:
+    * "Improper Handling of Highly Compressed Data (Data Amplification)": "CWE-409", "CVSS 8.9", "CVE-2025-66471", "CVE-2026-21441", "CWE-409".
+- Update "langchain-core" to "^1.2.5" to fix security vulnerabilities [GS-219]:
     * "Template Injection": "CWE-1336", "CVSS 8.3"
+    * "Deserialization of Untrusted Data": "CVE-2025-68664", "CWE-502"
 - Update "langchain" to "^1.2.0" to fix security vulnerabilities [GS-219]:
     * "Template Injection": "CWE-1336", "CVSS 8.3"
-- Update "langchain-openai" to "^1.1.4" to have the latest version [GS-219].
+- Update "langchain-openai" to "^1.1.9" to fix vulnerabilities [GS-219].
+    * "Server-side Request Forgery (SSRF)": "CVE-2026-26013", "CWE-918"
 
 ### Removed
 - "langchain-groq" dependency because its API is now called with the OpenAI API [GS-248].
