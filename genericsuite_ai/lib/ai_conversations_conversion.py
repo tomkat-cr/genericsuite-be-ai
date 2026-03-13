@@ -75,8 +75,11 @@ class UnmaskedUrlConversion:
         # Remove common trailing punctuation from the sentence.
         url = url.rstrip(".,;:")
         # Remove surrounding parentheses and quotes.
-        url = url.strip("()\"'")        _ = self.debug and log_debug(
+        url = url.strip("()\"'")
+
+        _ = self.debug and log_debug(
             f"\n>-->> UNMASKED_URL_FILENAME | Final url: {url}\n")
+
         return url
 
     def get_unmasked_url(self, message):
