@@ -13,6 +13,7 @@ from langchain_community.embeddings import OllamaEmbeddings
 
 from genericsuite.util.app_context import AppContext
 from genericsuite.util.utilities import log_debug
+from genericsuite.util.cloud_provider_abstractor import get_cloud_region
 
 from genericsuite_ai.config.config import Config
 from genericsuite_ai.lib.clarifai import (
@@ -82,7 +83,7 @@ def get_embeddings_engine(
     elif embedding_engine == "bedrock":
         # https://python.langchain.com/docs/integrations/text_embedding/bedrock
         model_config = {}
-        model_config["region_name"] = settings.AWS_REGION
+        model_config["region_name"] = get_cloud_region()
         model_config["model_id"] = settings.AWS_BEDROCK_EMBEDDINGS_MODEL_ID
         if settings.AWS_BEDROCK_EMBEDDINGS_PROFILE:
             model_config["credentials_profile_name"] = \

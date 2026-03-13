@@ -2,17 +2,17 @@
 GenericSuite AI main module (create_app) for FastAPI
 """
 from typing import Any
-from mangum import Mangum
 
-from genericsuite.fastapilib.util.create_app import (
-    create_app as super_create_app
+from genericsuite.fastapilib.util.create_app import (     # noqa: F401
+    create_app as super_create_app,
+    create_handler,     # noqa: F401
+    set_init_custom_data,
 )
-# from genericsuite.util.app_logger import log_debug
 
 from genericsuite_ai.config.config import Config
 from genericsuite_ai.fastapilib.endpoints import ai_chatbot_endpoint
-
-DEBUG = False
+from genericsuite_ai.lib.ai_conversations_conversion \
+    import ai_conversation_masking
 
 
 def create_app(app_name: str, settings: Config = None) -> Any:
@@ -25,14 +25,13 @@ def create_app(app_name: str, settings: Config = None) -> Any:
         app_name=app_name,
         settings=settings)
 
+    # Register GenericDbHelper specific functions
+    fa_app.custom_data = set_init_custom_data({
+        "ai_conversation_masking": ai_conversation_masking
+    })
+
     # Register AI endpoints
-    fa_app.include_router(ai_chatbot_endpoint.router, prefix='/ai')
+    fa_app.include_router(ai_chatbot_endpoint.router,
+                          prefix=f'/{settings.API_VERSION}/ai')
 
     return fa_app
-
-
-def create_handler(app_object):
-    """
-    Returns the FastAPI App as a valid AWS Lambda Function handler
-    """
-    return Mangum(app_object, lifespan="off")

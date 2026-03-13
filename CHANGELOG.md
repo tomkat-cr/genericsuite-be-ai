@@ -18,6 +18,45 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
+## [0.3.0] - 2026-02-18
+
+### Added
+- API_VERSION envvar to set the API version, default to "v1" [GS-245].
+- Postgres database support [GS-194].
+- MySQL support [GS-249].
+- Implement storage abstraction layer for AWS S3, Azure and GCP [GS-72].
+- Implement AWS generate_presigned_url() to protect S3 bucket access, so they can be set to expire in a short time and configured to block all public access. Configuration available with STORAGE_PRESIGNED_EXPIRATION_SECONDS (default to 5 minutes or 300 seconds) [GS-72].
+- FastAPI, Flask, and Chalice support to AI Conversation Masking using AWS presigned URLs [GS-72].
+- create_app() for Flask [GS-15].
+- try-except to all optional imports to report what dependency is missing, so the developer can "pip install" it [GS-248].
+- Model documentation links in `.env.example` [GS-172].
+- Note about the old google translator module replacement in `translator.py` [GS-252].
+
+### Changed
+- Update HuggingFace default model to "moonshotai/Kimi-K2-Instruct-0905" because "mistralai/Mixtral-8x7B-Instruct-v0.1" is not longer available [FA-233].
+- Update AIMLAPI_BASE_URL to include "/v1" at the end [GS-172].
+
+### Fixed
+- Update faiss-cpu to version 1.12.0 and adjust the project Python version compatibility to >=3.10,<3.15 to fix "Could not find a version that satisfies the requirement faiss-cpu==1.13.1 (from versions: 1.7.3, 1.7.4, 1.8.0, 1.8.0.post1, 1.9.0, 1.9.0.post1, 1.12.0)" running the AWS lambda deployment [GS-251].
+
+### Security
+- Update "urllib3" to "^2.6.3" to fix security vulnerabilities [GS-219]:
+    * "Allocation of Resources Without Limits or Throttling": "CWE-770", "CVE-2025-66418", "CVSS 8.9", "SNYK-PYTHON-URLLIB3-14192443"
+    * "Improper Handling of Highly Compressed Data (Data Amplification)": "CWE-409", "CVSS 8.9", "CVE-2025-66471", "CVE-2026-21441", "CWE-409".
+- Update "langchain-core" to "^1.2.5" to fix security vulnerabilities [GS-219]:
+    * "Template Injection": "CWE-1336", "CVSS 8.3"
+    * "Deserialization of Untrusted Data": "CVE-2025-68664", "CWE-502"
+- Update "langchain" to "^1.2.0" to fix security vulnerabilities [GS-219]:
+    * "Template Injection": "CWE-1336", "CVSS 8.3"
+- Update "langchain-openai" to "^1.1.9" to fix vulnerabilities [GS-219].
+    * "Server-side Request Forgery (SSRF)": "CVE-2026-26013", "CWE-918"
+
+### Removed
+- "langchain-groq" dependency because its API is now called with the OpenAI API [GS-248].
+- "clarifai", "google-api-python-client", "transformers", "pypdf", "langchain-google-genai", "langchain-anthropic", "langchain-ollama", "langchain-google-vertexai", "langchain-text-splitters", "langchain-aws", dependencies to make it optional by default [GS-248].
+- "tiktoken", "openai", "click", "jmespath", "pyyaml", "six", "typing-extensions", "pillow", and "jq" dependencies to reduce the dependencies size and most of them are not used in this project and/or are dependencies of other dependencies [GS-248].
+
+
 ## [0.2.0] - 2025-11-17
 
 ### Added
@@ -32,18 +71,19 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Update author email in pyproject.toml and setup.py.
 - Bump urllib3 to 2.5.0 and numpy to 2.0.2 to have compatibility with GS BE Core.
 - Refactor imports in ai_langchain_models.py to include ChatBedrock (AWS Bedrock) and langchain-aws conditionally.
-- Enhance HuggingFace text query functions ("huggingface_remote" model type) to support OpenAI API integration.
-- Change "huggingface" model type to use OpenAI API instead of langchain's HuggingFaceEndpoint and ChatHuggingFace, so "langchain-huggingface" dependency is not required.
-- The old "huggingface" model type is now "langchain_huggingface" and requires the "langchain-huggingface" dependency, which is optional by default.
-- The "gs_huggingface" model type is the same as the "huggingface_remote" model type, calling Hugging Face with requests.
+- Enhance HuggingFace text query functions ("huggingface_remote" model type) to support OpenAI API integration [GS-136].
+- Change "huggingface" model type to use OpenAI API instead of langchain's HuggingFaceEndpoint and ChatHuggingFace, so "langchain-huggingface" dependency is not required [GS-136].
+- The old "huggingface" model type is now "langchain_huggingface" and requires the "langchain-huggingface" dependency, which is optional by default [GS-136].
+- The "gs_huggingface" model type is the same as the "huggingface_remote" model type, calling Hugging Face with requests [GS-136].
 
 ### Fixed
-- Fix AI tools calling error due to pydantic parameter type mismatch, changing the type annotation from Dict to Any.
+- Fix AI tools calling error due to pydantic parameter type mismatch, changing the type annotation from Dict to Any [GS-143].
 - Fix the "langchain_community not found" by adding the "langchain-community" dependency. This addition required the upgrade of dependencies "langchain" to "0.3.26" and "faiss-cpu" to "^1.11.0.post1".
 - Fix "huggingface_remote" text query functions streaming responses errors.
 - Fix the issues with the new langchain 1.0.x migrating some langchain.* imports to langchain_classic.* imports.
 - Add new development dependencies including build and twine to fix a "make publish" error.
 - Use Poetry to run build and publish commands in Makefile to fix a "make publish" error. 
+- Move "setuptools" and "requests-toolbelt" to dev dependencies, to reduce the dependencies size [GS-248].
 
 ### Security
 - Update "transformers" to "^4.57.1" to fix security vulnerabilities [GS-219]:
@@ -81,8 +121,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ### Removed
 - Remove "langchain-together" to enable upgrade of all other langchain dependencies, and routes Together AI calls through the OpenAI API.
-- Remove "clarifai" to make it optional by default [GS-219].
-- Remove GsHuggingFaceEndpoint and GsChatHuggingFace classes because they were replaced by the new Hugging Face with OpenAI API calls.
+- Remove GsHuggingFaceEndpoint and GsChatHuggingFace classes because they were replaced by the new Hugging Face with OpenAI API calls [GS-136] [FA-233].
+
 
 ## [0.1.14] - 2025-07-12
 
@@ -175,8 +215,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Implement Falcon Mamba with HF [GS-118].
 - Implement Meta Llama 3.1 with HF [GS-119].
 - Implement HuggingFaceChatModel langchain model class that uses the HF fetch/post endpoint [GS-59].
+- Start the test infrastructure [GS-21]
 - Add HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT envvar [GS-59].
-
 
 ### Changed
 - Langchain upgraded to "^0.3.0" [GS-131].
@@ -192,6 +232,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Fix Anthropic Claude2 API Error since large prompt change, replacing Claude2 with Claude 3.5 Sonnet [GS-33].
 - Fix the "Warning: deprecated HuggingFaceTextGenInference-use HuggingFaceEnpoint instead" [GS-59].
 - Fix dependency incompatibility between GS BE Core and GS BE AI fixing the "urllib3" version to "1.26" (and clarifai to "^10.1.0" in consecuence) because GS BE Core's Boto3 use "urllib3" versions less then "<2" [GS-128].
+
+### Security
+- Implement and test URL and local path security validation in AI utilities and vision processing [GS-262].
 
 ### Removed
 - The "langchain_hugginface" dependency is not longer included in this package. It must be imported in the App's project [GS-136].

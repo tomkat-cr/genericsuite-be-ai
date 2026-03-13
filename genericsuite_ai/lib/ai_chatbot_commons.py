@@ -8,6 +8,7 @@ import os
 from genericsuite.util.utilities import get_default_resultset, get_request_body
 from genericsuite.util.app_logger import log_debug
 from genericsuite.util.app_context import AppContext
+from genericsuite.util.storage import prepare_asset_url
 from genericsuite.constants.const_tables import get_constant
 
 from genericsuite_ai.config.config import Config
@@ -35,6 +36,13 @@ def get_role(v):
         log_debug("")
         log_debug(f"v = {v}")
     return v["role"]
+
+
+def mask_attachment_url(url: str):
+    masked_url = prepare_asset_url(url)
+    _ = DEBUG and print(
+        f">> mask_attachment_url | masked_url = {masked_url}")
+    return masked_url
 
 
 def prepare_conversation(prev_conv: list,
@@ -65,13 +73,13 @@ def prepare_conversation(prev_conv: list,
             "content": (
                 v["content"] if v["role"] != "attachment"
                 else (
-                    f'Image URL: {v["attachment_url"]}' +
+                    f'Image URL: {mask_attachment_url(v["attachment_url"])}' +
                     ". The description for this URL is in the" +
                     " previous message. The URL is required when you cannot" +
                     " figure out the image description, so you can send that" +
                     " URL to vision_image_analyzer()"
                 ) if v.get("sub_type", "image").startswith("image") else (
-                    f'File URL: {v["attachment_url"]}' +
+                    f'File URL: {mask_attachment_url(v["attachment_url"])}' +
                     ". The description for this URL is in the" +
                     " previous message. The URL is required when you cannot" +
                     " figure out the file description"

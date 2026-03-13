@@ -11,12 +11,12 @@ from openai import OpenAI
 from langchain.tools import tool
 from pydantic import BaseModel, Field
 from langchain_core.messages import HumanMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
 
-from genericsuite.util.aws import (
-    upload_nodup_file_to_s3,
+from genericsuite.util.storage import (
+    upload_nodup_file_to_storage,
     prepare_asset_url,
 )
+
 from genericsuite.util.utilities import (
     get_default_resultset,
     get_file_size,
@@ -39,11 +39,15 @@ from genericsuite_ai.lib.ai_langchain_tools import (
 )
 from genericsuite_ai.lib.ai_utilities import (
     gpt_func_error,
+    is_safe_url,
+    is_safe_local_path,
 )
 from genericsuite_ai.lib.clarifai import (
     clarifai_vision,
 )
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
+from genericsuite_ai.lib.ai_storage import \
+    get_chatbot_attachments_bucket_name
 
 DEBUG = os.environ.get("AI_VISION_DEBUG", "0") == "1"
 cac = CommonAppContext()
@@ -70,6 +74,8 @@ def encode_image(image_path: str) -> str:
     Returns:
         str: the decoded image string.
     """
+    if not is_safe_local_path(image_path):
+        raise Exception(f"Unsafe local path: {image_path}")
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
@@ -99,25 +105,32 @@ def get_vision_image_url(
                 if no errors
     """
     result = get_default_resultset()
-    settings = Config(cac.get())
     attachment_url = None
     final_filename = None
     # Check if the image path is a URL
     if is_an_url(image_path):
+        if not is_safe_url(image_path):
+            result['error'] = True
+            result['error_message'] = f"Unsafe URL: {image_path}"
+            return result
         attachment_url = image_path
         final_filename = deduce_filename_from_url(image_path)
     # Local file...
     elif use_s3:
-        bucket_name = settings.AWS_S3_CHATBOT_ATTACHMENTS_BUCKET
+        bucket_name = get_chatbot_attachments_bucket_name(cac.get())
         if DEBUG:
             log_debug('get_vision_image_url | ' +
-                      f'AWS_S3_CHATBOT_ATTACHMENTS_BUCKET: {str(bucket_name)}')
+                      f'CHATBOT_ATTACHMENTS_BUCKET: {str(bucket_name)}')
         if not bucket_name:
             result['error'] = True
             result['error_message'] = \
-                "AWS_S3_CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
+                "CHATBOT_ATTACHMENTS_BUCKET is not configured [3]"
         else:
-            upload_result = upload_nodup_file_to_s3(
+            if not is_safe_local_path(image_path):
+                result['error'] = True
+                result['error_message'] = f"Unsafe local path: {image_path}"
+                return result
+            upload_result = upload_nodup_file_to_storage(
                 file_path=image_path,
                 original_filename=original_filename,
                 bucket_name=bucket_name,
@@ -216,6 +229,12 @@ def get_vision_response(response: dict, other: dict) -> dict:
               f" {settings.AI_VISION_TECHNOLOGY}")
     try:
         if settings.AI_VISION_TECHNOLOGY == "gemini":
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+            except ImportError:
+                raise Exception(
+                    "ERROR - Missing dependency. Please install it with: "
+                    "pip install langchain-google-genai")
             model_config = {
                 "model": settings.GOOGLE_VISION_MODEL,
                 "google_api_key": settings.GOOGLE_API_KEY,
@@ -321,6 +340,20 @@ def vision_image_analyzer(params: dict) -> dict:
     question = params.question
     other = params.other
 
+    if image_path:
+        if is_an_url(image_path):
+            if not is_safe_url(image_path):
+                response = get_default_resultset()
+                response["error"] = True
+                response["error_message"] = f"Unsafe URL: {image_path}"
+                return response
+        else:
+            if not is_safe_local_path(image_path):
+                response = get_default_resultset()
+                response["error"] = True
+                response["error_message"] = f"Unsafe local path: {image_path}"
+                return response
+
     if not other:
         other = {
             "cid": cac.app_context.get_other_data("cid"),
@@ -356,9 +389,14 @@ def vision_image_analyzer(params: dict) -> dict:
 
     if not response["error"]:
         try:
-            file_size = (
-                0 if is_an_url(image_path) else
-                os.path.getsize(image_path))
+            if is_an_url(image_path):
+                if not is_safe_url(image_path):
+                    raise Exception(f"Unsafe URL: {image_path}")
+                file_size = 0
+            else:
+                if not is_safe_local_path(image_path):
+                    raise Exception(f"Unsafe local path: {image_path}")
+                file_size = os.path.getsize(image_path)
         except FileNotFoundError as error:
             response["error"] = True
             response["error_message"] = f"ERROR [IAVIA-020]: {error}"

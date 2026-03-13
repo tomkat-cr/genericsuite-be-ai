@@ -4,8 +4,6 @@ GCP (Google Cloud Platform) utilities
 import os
 import json
 
-from google.oauth2 import service_account
-
 from genericsuite.util.app_logger import log_debug
 
 
@@ -16,6 +14,13 @@ def get_service_account_credentials(creds_file_path: str):
     """
     Get Services account credentials for accessing Google Cloud APIs.
     """
+    try:
+        from google.oauth2 import service_account
+    except ImportError:
+        raise Exception(
+            "ERROR - Missing dependency. Please install it with: "
+            "pip install google-api-python-client")
+
     _ = DEBUG and log_debug(
         ">> GCP / GET_SERVICE_ACCOUNT_CREDENTIALS"
         f"\n | creds_file_path: {creds_file_path}")

@@ -13,6 +13,7 @@ General configuration module for AI projects.
 # pylint: disable=W0105
 # C0301: | Disable "line-too-long"
 # pylint: disable=C0301
+# noqa: C0301
 
 from typing import Any
 import os
@@ -399,7 +400,7 @@ class Config(ConfigSuperClass):
 
         self.HUGGINGFACE_DEFAULT_CHAT_MODEL = self.get_env(
             'HUGGINGFACE_DEFAULT_CHAT_MODEL',
-            "mistralai/Mixtral-8x7B-Instruct-v0.1"
+            "moonshotai/Kimi-K2-Instruct-0905"
             # "meta-llama/Llama-2-7b-chat-hf"
             # NOTE: instruct models must be configured to run with
             # the HUGGINGFACE_USE_CHAT_HF = "0"
@@ -517,6 +518,10 @@ class Config(ConfigSuperClass):
             # 'llama-3.1-70b-versatile'
             # 'llama-3.1-8b-instant'
         )
+        self.GROQ_BASE_URL = self.get_env(
+            'GROQ_BASE_URL',
+            'https://api.groq.com/openai/v1'
+        )
 
         # ...
         # Clarifai
@@ -593,7 +598,7 @@ class Config(ConfigSuperClass):
 
         self.AIMLAPI_BASE_URL = self.get_env(
             'AIMLAPI_BASE_URL',
-            "https://api.aimlapi.com/"
+            "https://api.aimlapi.com/v1"
         )
 
         # ...

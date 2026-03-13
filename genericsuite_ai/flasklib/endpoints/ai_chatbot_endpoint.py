@@ -10,6 +10,7 @@ from genericsuite.util.jwt import AuthorizedRequest
 from genericsuite.util.utilities import (
     return_resultset_jsonified_or_exception,
 )
+from genericsuite_ai.config.config import Config
 from genericsuite.util.app_logger import log_debug
 
 from genericsuite.flasklib.util.blueprint_one import BlueprintOne
@@ -28,7 +29,8 @@ from genericsuite_ai.lib.ai_chatbot_endpoint import (
 
 DEBUG = False
 
-bp = BlueprintOne('ai', __name__, url_prefix='/ai')
+settings = Config()
+bp = BlueprintOne('ai', __name__, url_prefix=f'/{settings.API_VERSION}/ai')
 
 
 def send_file_flask(

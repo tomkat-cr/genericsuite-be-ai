@@ -9,11 +9,20 @@ from genericsuite_ai.config.config import Config
 
 from genericsuite.util.app_context import CommonAppContext
 from genericsuite.util.app_logger import log_debug, log_error
-from genericsuite.util.aws import upload_nodup_file_to_s3
+
+from genericsuite.util.storage import upload_nodup_file_to_storage
+
 from genericsuite.util.generic_db_middleware import (
     fetch_all_from_db,
 )
 from genericsuite.util.utilities import get_default_resultset
+
+from genericsuite_ai.lib.ai_storage import \
+    get_chatbot_attachments_bucket_name
+from genericsuite_ai.lib.ai_utilities import (
+    is_safe_url,
+    is_safe_local_path,
+)
 
 DEBUG = os.environ.get("AI_CLARIFAI_DEBUG", "0") == "1"
 cac = CommonAppContext()
@@ -208,6 +217,8 @@ def clarifai_vision_raw(
             )
         )
     else:
+        if not is_safe_url(image_url):
+            raise Exception(f"Unsafe URL: {image_url}")
         inputs.append(
             resources_pb2.Input(
                 data=resources_pb2.Data(
@@ -385,7 +396,7 @@ def clarifai_img_gen_raw(
     # Since we have one input, one output will exist here
     output = post_model_outputs_response.outputs[0].data.image.base64
 
-    bucket_name = settings.AWS_S3_CHATBOT_ATTACHMENTS_BUCKET
+    bucket_name = get_chatbot_attachments_bucket_name(cac.get())
     sub_dir = cac.app_context.get_user_id()
     original_filename = "gen-image.jpg"
 
@@ -393,7 +404,7 @@ def clarifai_img_gen_raw(
     with open(image_filename, 'wb') as f:
         f.write(output)
 
-    upload_result = upload_nodup_file_to_s3(
+    upload_result = upload_nodup_file_to_storage(
         file_path=image_filename,
         original_filename=original_filename,
         bucket_name=bucket_name,
@@ -512,8 +523,14 @@ def clarifai_embeddings_raw(
     if "raw_text" in embed_source:
         input_params["raw"] = embed_source["raw_text"]
     elif "text_file_url" in embed_source:
+        if not is_safe_url(embed_source["text_file_url"]):
+            return "[ERROR-CF-EMRAW-020] Unsafe URL: " + \
+                embed_source["text_file_url"]
         input_params["url"] = embed_source["text_file_url"]
     elif "text_file_location" in embed_source:
+        if not is_safe_local_path(embed_source["text_file_location"]):
+            return "[ERROR-CF-EMRAW-030] Unsafe local path: " + \
+                embed_source["text_file_location"]
         with open(embed_source["text_file_location"], "rb") as f:
             input_params["raw"] = f.read()  # file_bytes
     else:
@@ -648,6 +665,9 @@ def clarifai_audio_to_text_raw(
         user_id=model_config["user_id"],
         app_id=model_config["app_id"],
     )
+
+    if not is_safe_url(audio_url):
+        raise Exception(f"Unsafe URL: {audio_url}")
 
     post_model_outputs_response = stub.PostModelOutputs(
         service_pb2.PostModelOutputsRequest(
@@ -825,8 +845,14 @@ def clarifai_text_to_audio_raw(
     if "raw_text" in text_source:
         input_params["raw"] = text_source["raw_text"]
     elif "text_file_url" in text_source:
+        if not is_safe_url(text_source["text_file_url"]):
+            return "[ERROR-CF-TTARAW-020] Unsafe URL: " + \
+                text_source["text_file_url"]
         input_params["url"] = text_source["text_file_url"]
     elif "text_file_location" in text_source:
+        if not is_safe_local_path(text_source["text_file_location"]):
+            return "[ERROR-CF-TTARAW-030] Unsafe local path: " + \
+                text_source["text_file_location"]
         with open(text_source["text_file_location"], "rb") as f:
             input_params["raw"] = f.read()  # file_bytes
     else:
@@ -912,7 +938,13 @@ def clarifai_text_to_audio_python_sdk(
     Returns:
         str: model response as audio file path
     """
-    from clarifai.client.model import Model
+    try:
+        from clarifai.client.model import Model
+    except ImportError:
+        raise Exception(
+            "ERROR - Missing dependency. Please install it with: "
+            "pip install clarifai")
+
     settings = Config(cac.get())
 
     if DEBUG:
@@ -930,8 +962,14 @@ def clarifai_text_to_audio_python_sdk(
     if "raw_text" in text_source:
         input_text = text_source["raw_text"]
     elif "text_file_url" in text_source:
+        if not is_safe_url(text_source["text_file_url"]):
+            return "[ERROR-CF-TTAPS-020] Unsafe URL: " + \
+                text_source["text_file_url"]
         input_text = text_source["text_file_url"]
     elif "text_file_location" in text_source:
+        if not is_safe_local_path(text_source["text_file_location"]):
+            return "[ERROR-CF-TTAPS-030] Unsafe local path: " + \
+                text_source["text_file_location"]
         with open(text_source["text_file_location"], "rb") as f:
             input_text = f.read()  # file_bytes
     else:
