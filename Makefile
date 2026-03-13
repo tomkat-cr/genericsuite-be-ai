@@ -53,4 +53,4 @@ dev-prepare-pypi:
 	poetry add --group dev genericsuite
 
 dev-prepare-publish:
-	if ! poetry remove genericsuite; then echo "'genericsuite' was not removed..."; else "'genericsuite' removed successfully..."; fi;
+	# if ! poetry remove genericsuite; then echo "'genericsuite' was not removed..."; else "'genericsuite' removed successfully..."; fi;
