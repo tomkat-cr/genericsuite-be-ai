@@ -215,8 +215,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Implement Falcon Mamba with HF [GS-118].
 - Implement Meta Llama 3.1 with HF [GS-119].
 - Implement HuggingFaceChatModel langchain model class that uses the HF fetch/post endpoint [GS-59].
+- Start the test infrastructure [GS-21]
 - Add HUGGINGFACE_TEXT_TO_TEXT_ENDPOINT envvar [GS-59].
-
 
 ### Changed
 - Langchain upgraded to "^0.3.0" [GS-131].
@@ -232,6 +232,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Fix Anthropic Claude2 API Error since large prompt change, replacing Claude2 with Claude 3.5 Sonnet [GS-33].
 - Fix the "Warning: deprecated HuggingFaceTextGenInference-use HuggingFaceEnpoint instead" [GS-59].
 - Fix dependency incompatibility between GS BE Core and GS BE AI fixing the "urllib3" version to "1.26" (and clarifai to "^10.1.0" in consecuence) because GS BE Core's Boto3 use "urllib3" versions less then "<2" [GS-128].
+
+### Security
+- Implement and test URL and local path security validation in AI utilities and vision processing [GS-262].
 
 ### Removed
 - The "langchain_hugginface" dependency is not longer included in this package. It must be imported in the App's project [GS-136].

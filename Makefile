@@ -9,11 +9,17 @@ all:
 install:
 	poetry install
 
+install-dev:
+	poetry install --with dev
+
 lock:
 	poetry lock
 
 update:
 	poetry update
+
+test:
+	APP_DB_URI=fake_db_uri APP_DB_ENGINE=MONGODB APP_DB_NAME=mongo APP_NAME=test_app APP_STAGE=test APP_HOST_NAME=localhost APP_SECRET_KEY=fake_secret_key  STORAGE_URL_SEED=xyz APP_SUPERADMIN_EMAIL=fake_email GIT_SUBMODULE_LOCAL_PATH=fake_path CLOUD_PROVIDER=aws AWS_REGION=us-east-1 GET_SECRETS_ENABLED=0 CURRENT_FRAMEWORK=fastapi poetry run pytest .
 
 requirements:
 	poetry export -f requirements.txt --output requirements.txt --without-hashes

@@ -31,6 +31,8 @@ from genericsuite_ai.lib.ai_langchain_tools import (
 from genericsuite_ai.lib.ai_utilities import (
     gpt_func_error,
     get_user_lang_code,
+    is_safe_url,
+    is_safe_local_path,
 )
 from genericsuite_ai.lib.ai_storage import \
     get_chatbot_attachments_bucket_name
@@ -91,6 +93,8 @@ def process_audio_file(sound_filespec: str, call_to: callable,
         Transcription: The transcription of the audio file.
     """
     if is_an_url(sound_filespec):
+        if not is_safe_url(sound_filespec):
+            raise Exception(f"Unsafe URL: {sound_filespec}")
         headers = {}
         request = urllib.request.Request(sound_filespec, headers=headers)
         with urllib.request.urlopen(request) as audio_file:
@@ -99,6 +103,8 @@ def process_audio_file(sound_filespec: str, call_to: callable,
                 **params,
             )
     else:
+        if not is_safe_local_path(sound_filespec):
+            raise Exception(f"Unsafe local path: {sound_filespec}")
         with open(sound_filespec, "rb") as audio_file:
             return call_to(
                 file=audio_file,
@@ -131,11 +137,19 @@ def process_audio_url(sound_filespec: str, call_to: callable,
         Transcription: The transcription of the audio file.
     """
     resultset = get_default_resultset()
-    user_id = cac.app_context.get_user_id()
     if is_an_url(sound_filespec):
+        if not is_safe_url(sound_filespec):
+            resultset["error"] = True
+            resultset["error_message"] = f"Unsafe URL: {sound_filespec}"
+            return resultset
         params[url_par_name] = sound_filespec
         resultset = call_to(**params)
     else:
+        if not is_safe_local_path(sound_filespec):
+            resultset["error"] = True
+            resultset["error_message"] = \
+                f"Unsafe local path: {sound_filespec}"
+            return resultset
         bucket_name = get_chatbot_attachments_bucket_name(cac.get())
         if DEBUG:
             log_debug('process_audio_url | ' +
@@ -145,6 +159,7 @@ def process_audio_url(sound_filespec: str, call_to: callable,
             resultset["error_message"] = \
                 "CHATBOT_ATTACHMENTS_BUCKET is not configured [1]"
         else:
+            user_id = cac.app_context.get_user_id()
             upload_result = upload_nodup_file_to_storage(
                 file_path=sound_filespec,
                 original_filename=os.path.basename(sound_filespec),

@@ -4,6 +4,9 @@ AI general utilities
 from typing import Union, Optional
 import json
 import os
+import socket
+import ipaddress
+from urllib.parse import urlparse
 
 from genericsuite.util.app_logger import (
     log_debug,
@@ -198,6 +201,67 @@ def report_error(conv_response: dict) -> dict:
 def gpt_func_error(error_message: str) -> str:
     """ Returns a standard GPT Function/Langchain Error """
     return f"[FUNC+ERROR] {error_message}"
+
+
+def is_safe_url(url: str) -> bool:
+    """
+    Check if a URL is safe to access (SSRF protection).
+    Only allows http/https schemes and restricts access to private IPs.
+    """
+    if not url:
+        return False
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ["http", "https"]:
+            log_error(f"is_safe_url | Invalid scheme: {parsed.scheme}")
+            return False
+        hostname = parsed.hostname
+        if not hostname:
+            log_error("is_safe_url | No hostname found")
+            return False
+
+        # Resolve hostname to IP
+        ip_addr = socket.gethostbyname(hostname)
+        ip = ipaddress.ip_address(ip_addr)
+
+        if ip.is_loopback or ip.is_private or ip.is_link_local or \
+           ip.is_multicast or ip.is_unspecified:
+            log_error(f"is_safe_url | Restricted IP: {ip}")
+            return False
+        return True
+    except (ValueError, socket.gaierror) as err:
+        log_error(f"is_safe_url | Error validating URL {url}: {err}")
+        return False
+
+
+def is_safe_local_path(
+    path: str,
+    allowed_dirs: Optional[list[str]] = None
+) -> bool:
+    """
+    Check if a local path is safe to access (LFI protection).
+    Ensures the path is within allowed directories and prevents traversal.
+    """
+    if not path:
+        return False
+
+    # Default allowed directories: /tmp and current working directory
+    if allowed_dirs is None:
+        allowed_dirs = ["/tmp", os.getcwd()]
+
+    try:
+        resolved_path = os.path.realpath(path)
+        for allowed_dir in allowed_dirs:
+            resolved_allowed = os.path.realpath(allowed_dir)
+            if resolved_path.startswith(resolved_allowed):
+                return True
+        log_error(
+            f"is_safe_local_path | Path not in allowed directories: {path}"
+        )
+    except Exception as err:
+        log_error(f"is_safe_local_path | Error validating path {path}: {err}")
+
+    return False
 
 
 def get_assistant_you_are(app_context: AppContext) -> str:

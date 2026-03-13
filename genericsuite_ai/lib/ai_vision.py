@@ -39,6 +39,8 @@ from genericsuite_ai.lib.ai_langchain_tools import (
 )
 from genericsuite_ai.lib.ai_utilities import (
     gpt_func_error,
+    is_safe_url,
+    is_safe_local_path,
 )
 from genericsuite_ai.lib.clarifai import (
     clarifai_vision,
@@ -72,6 +74,8 @@ def encode_image(image_path: str) -> str:
     Returns:
         str: the decoded image string.
     """
+    if not is_safe_local_path(image_path):
+        raise Exception(f"Unsafe local path: {image_path}")
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
@@ -105,6 +109,10 @@ def get_vision_image_url(
     final_filename = None
     # Check if the image path is a URL
     if is_an_url(image_path):
+        if not is_safe_url(image_path):
+            result['error'] = True
+            result['error_message'] = f"Unsafe URL: {image_path}"
+            return result
         attachment_url = image_path
         final_filename = deduce_filename_from_url(image_path)
     # Local file...
@@ -118,6 +126,10 @@ def get_vision_image_url(
             result['error_message'] = \
                 "CHATBOT_ATTACHMENTS_BUCKET is not configured [3]"
         else:
+            if not is_safe_local_path(image_path):
+                result['error'] = True
+                result['error_message'] = f"Unsafe local path: {image_path}"
+                return result
             upload_result = upload_nodup_file_to_storage(
                 file_path=image_path,
                 original_filename=original_filename,
@@ -328,6 +340,20 @@ def vision_image_analyzer(params: dict) -> dict:
     question = params.question
     other = params.other
 
+    if image_path:
+        if is_an_url(image_path):
+            if not is_safe_url(image_path):
+                response = get_default_resultset()
+                response["error"] = True
+                response["error_message"] = f"Unsafe URL: {image_path}"
+                return response
+        else:
+            if not is_safe_local_path(image_path):
+                response = get_default_resultset()
+                response["error"] = True
+                response["error_message"] = f"Unsafe local path: {image_path}"
+                return response
+
     if not other:
         other = {
             "cid": cac.app_context.get_other_data("cid"),
@@ -363,9 +389,14 @@ def vision_image_analyzer(params: dict) -> dict:
 
     if not response["error"]:
         try:
-            file_size = (
-                0 if is_an_url(image_path) else
-                os.path.getsize(image_path))
+            if is_an_url(image_path):
+                if not is_safe_url(image_path):
+                    raise Exception(f"Unsafe URL: {image_path}")
+                file_size = 0
+            else:
+                if not is_safe_local_path(image_path):
+                    raise Exception(f"Unsafe local path: {image_path}")
+                file_size = os.path.getsize(image_path)
         except FileNotFoundError as error:
             response["error"] = True
             response["error_message"] = f"ERROR [IAVIA-020]: {error}"
