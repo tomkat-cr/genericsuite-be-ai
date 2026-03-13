@@ -72,19 +72,10 @@ class UnmaskedUrlConversion:
             f"\n | message: {message}\n"
             + f"\n | url: {url}\n"
         )
-        # Remove any other punctuation
-        url = url.split(",")[0]
-        url = url.split(";")[0]
-        url = url.split(":")[0]
-        # Remove the trailing . but not the dot extension
-        url = url.rstrip(".")
-        # Remove surrounding parentheses
-        url = url.lstrip("(")
-        url = url.rstrip(")")
-        # Remove " and '
-        url = url.replace('"', "")
-        url = url.replace("'", "")
-        _ = self.debug and log_debug(
+        # Remove common trailing punctuation from the sentence.
+        url = url.rstrip(".,;:")
+        # Remove surrounding parentheses and quotes.
+        url = url.strip("()\"'")        _ = self.debug and log_debug(
             f"\n>-->> UNMASKED_URL_FILENAME | Final url: {url}\n")
         return url
 

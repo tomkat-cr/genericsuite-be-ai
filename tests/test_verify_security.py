@@ -6,7 +6,7 @@ from genericsuite_ai.lib.ai_utilities import is_safe_url, is_safe_local_path
 # Add current path and genericsuite-be path to sys.path to allow imports
 sys.path.append(os.getcwd())
 sys.path.append(
-    '/Users/carlosramirez/desarrollo/mediabros_repos/github/genericsuite-be')
+    '../../genericsuite-be')
 
 # Mock log_error to avoid dependency issues if needed,
 # though ai_utilities should be importable if its dependencies are present.

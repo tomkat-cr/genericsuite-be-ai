@@ -1,56 +1,6 @@
-import os
 import sys
-import ipaddress
-import socket
-from urllib.parse import urlparse
 
-# Redefining the logic from ai_utilities.py for standalone verification
-
-
-def is_safe_url(url: str) -> bool:
-    if not url:
-        return False
-    try:
-        parsed = urlparse(url)
-        if parsed.scheme not in ["http", "https"]:
-            return False
-        hostname = parsed.hostname
-        if not hostname:
-            return False
-
-        # Resolve hostname to IP
-        ip_addr = socket.gethostbyname(hostname)
-        ip = ipaddress.ip_address(ip_addr)
-        # print(f"DEBUG: {hostname} resolved to {ip_addr}")
-
-        if ip.is_loopback or ip.is_private or ip.is_link_local or \
-           ip.is_multicast or ip.is_unspecified:
-            print(f"DEBUG: Restricted IP: {ip}")
-            return False
-        return True
-    except (ValueError, socket.gaierror) as e:
-        print(f"DEBUG: Error resolving {hostname}: {e}")
-        return False
-
-
-def is_safe_local_path(path: str, allowed_dirs=None) -> bool:
-    if not path:
-        return False
-
-    # Default allowed directories: /tmp and current working directory
-    if allowed_dirs is None:
-        allowed_dirs = ["/tmp", os.getcwd()]
-
-    try:
-        resolved_path = os.path.realpath(path)
-        for allowed_dir in allowed_dirs:
-            resolved_allowed = os.path.realpath(allowed_dir)
-            if resolved_path.startswith(resolved_allowed):
-                return True
-    except Exception:
-        pass
-
-    return False
+from genericsuite_ai.lib.ai_utilities import is_safe_url, is_safe_local_path
 
 
 def test_verify():
