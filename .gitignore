@@ -168,3 +168,9 @@ gcp_*.json
 
 # Big lambdas deployment
 tmp
+
+# NPM
+node_modules
+
+# Claude Code
+.claude/settings.local.json

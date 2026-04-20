@@ -35,11 +35,14 @@ build:
 	rm -rf dist
 	poetry run python3 -m build
 
-publish-test: dev-prepare-publish requirements build
+sast-test: requirements
+	bash node_modules/genericsuite-be-scripts/scripts/sast_test.sh
+
+publish-test: dev-prepare-publish sast-test build
 	# Pypi Test publish
 	poetry run python3 -m twine upload --repository testpypi dist/*
 
-publish: dev-prepare-publish requirements build
+publish: dev-prepare-publish sast-test build
 	# Production Pypi publish
 	poetry run python3 -m twine upload dist/*
 
@@ -54,3 +57,6 @@ dev-prepare-pypi:
 
 dev-prepare-publish:
 	# if ! poetry remove genericsuite; then echo "'genericsuite' was not removed..."; else "'genericsuite' removed successfully..."; fi;
+
+agents_md_link:
+	ln -s CLAUDE.md AGENTS.md

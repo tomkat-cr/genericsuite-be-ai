@@ -18,6 +18,25 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
+## [Unreleased] - 2026-04-03
+
+### Added
+- AGENTS.md and CLAUDE.md files to provide context and instructions to AI agents [GS-303].
+- Add SAST testing [GS-315].
+
+### Changed:
+- Remove all references to fynapp on `ai_conversations_conversion.py`
+
+### Security
+- Upgrade langchain = "^1.2.15", langchain-openai = "^1.1.9" and langchain-core = "^1.3.0" to fix security vulnerabilities [GS-219].
+    * Directory Traversal (new) [High Severity], SNYK-PYTHON-LANGCHAINCORE-15809257
+    * Allocation of Resources Without Limits or Throttling [High Severity], SNYK-PYTHON-AIOHTTP-14871876, SNYK-PYTHON-AIOHTTP-14871877, SNYK-PYTHON-AIOHTTP-15873732, SNYK-PYTHON-BROTLICFFI-14172734
+    * Infinite loop [High Severity], SNYK-PYTHON-AIOHTTP-14871979
+    * Server-side Request Forgery (SSRF) (new) [High Severity], SNYK-PYTHON-AIOHTTP-15873738
+    * Regular Expression Denial of Service (ReDoS) [High Severity], SNYK-PYTHON-LANGCHAINCLASSIC-14914754
+    * Deserialization of Untrusted Data [High Severity], SNYK-PYTHON-LANGGRAPH-15433492, SNYK-PYTHON-LANGGRAPHCHECKPOINT-15353408, SNYK-PYTHON-LANGGRAPHCHECKPOINT-15433491
+ 
+
 ## [0.3.0] - 2026-02-18
 
 ### Added
