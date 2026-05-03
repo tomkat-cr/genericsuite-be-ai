@@ -57,6 +57,3 @@ dev-prepare-pypi:
 
 dev-prepare-publish:
 	# if ! poetry remove genericsuite; then echo "'genericsuite' was not removed..."; else "'genericsuite' removed successfully..."; fi;
-
-agents_md_link:
-	ln -s CLAUDE.md AGENTS.md
