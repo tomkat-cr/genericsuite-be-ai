@@ -27,6 +27,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Changed:
 - Remove all references to fynapp on `ai_conversations_conversion.py`
 - Enhance comments about how to specify the C0301 and E501 line-too-long lint conditions on `config.py`
+- License changed to MIT [FA-244].
 
 ### Security
 - Upgrade langchain = "^1.2.15", langchain-openai = "^1.1.9" and langchain-core = "^1.3.0" to fix security vulnerabilities [GS-219].

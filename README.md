@@ -29,7 +29,7 @@ Check the [The GenericSuite backend development scripts](https://genericsuite.ca
 
 ## License
 
-This project is licensed under the ISC License - see the [LICENSE](https://github.com/tomkat-cr/genericsuite-be-ai/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/tomkat-cr/genericsuite-be-ai/blob/main/LICENSE) file for details.
 
 ## Credits
 

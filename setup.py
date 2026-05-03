@@ -35,7 +35,7 @@ setup(
     author='Carlos J. Ramirez',
     author_email='info@genericsuite.com',
     url='https://github.com/tomkat-cr/genericsuite-be-ai',
-    license='ISC License',
+    license='MIT',
     py_modules=['genericsuite_ai'],
     classifiers=classifiers,
 )
