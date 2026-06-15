@@ -154,4 +154,4 @@ All LangChain tool calls pass parameters through `interpret_tool_params()` in `l
 ## Important Notes
 
 - The files `AGENTS.md`, `GEMINI.md`, etc. (if present) have only a referece to `@CLAUDE.md` — edit only `CLAUDE.md`.
-- Skills, commands, rules, and sub-agents are located in the `.claude/` directory.
+- Skills live in `.ai/skills/` (source of truth); symlinked under `.agents/skills/`, `.claude/skills/`, `.codex/skills/`, `.gemini/skills/`, and `.devin/skills/`.

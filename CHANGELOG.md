@@ -22,7 +22,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 ### Added
 - AGENTS.md, GEMINI.md, and CLAUDE.md files to provide context and instructions to AI Coding Assistants [GS-303].
-- Add SAST testing [GS-315].
+- SAST testing [GS-315].
+- AWS_SSL_CERTIFICATE_ARN_BE envvar to the `.env.example` file [GS-328].
 
 ### Changed:
 - Remove all references to fynapp on `ai_conversations_conversion.py`
