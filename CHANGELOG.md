@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 
 
-## [Unreleased]
+## [Unreleased] - YYYY-MM-DD
 
 ### Added
 
@@ -350,7 +350,7 @@ Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as defaul
 
 ### Changed
 - Updated genericsuite = "0.1.3".
-- Add links to https://www.carlosjramirez.com/genericsuite/ in the README.
+- Add links to https://www.carlosjramirez.com/en/genericsuite/ in the README.
 - Remove deprecated FRONTEND_AUDIENCE.
 
 

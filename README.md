@@ -8,7 +8,7 @@
     title="GenericSuite AI logo by Carlos J. Ramirez"
 />
 
-[GenericSuite AI](https://www.carlosjramirez.com/genericsuite/) is a versatile backend solution, designed to provide a comprehensive suite of features, tools and functionalities for AI oriented Python APIs.
+[GenericSuite AI](https://genericsuite.carlosjramirez.com) is a versatile backend solution, designed to provide a comprehensive suite of features, tools and functionalities for AI oriented Python APIs.
 
 It's bassed on [The Generic Suite (backend version)](https://github.com/tomkat-cr/genericsuite-be).
 
