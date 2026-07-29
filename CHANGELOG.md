@@ -29,6 +29,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Remove all references to fynapp on `ai_conversations_conversion.py`
 - Enhance comments about how to specify the C0301 and E501 line-too-long lint conditions on `config.py`
 - License changed to MIT [FA-244].
+- Replace Github Gemini code review with SonarQube and Claude code review [GS-336].
 
 ### Security
 - Upgrade langchain = "^1.2.15", langchain-openai = "^1.1.9" and langchain-core = "^1.3.0" to fix security vulnerabilities [GS-219].
@@ -38,7 +39,9 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
     * Server-side Request Forgery (SSRF) (new) [High Severity], SNYK-PYTHON-AIOHTTP-15873738
     * Regular Expression Denial of Service (ReDoS) [High Severity], SNYK-PYTHON-LANGCHAINCLASSIC-14914754
     * Deserialization of Untrusted Data [High Severity], SNYK-PYTHON-LANGGRAPH-15433492, SNYK-PYTHON-LANGGRAPHCHECKPOINT-15353408, SNYK-PYTHON-LANGGRAPHCHECKPOINT-15433491
- 
+- Upgrade "urllib3" to "^2.7.0", pytest to "^9.1.1", pytest-cov to "^7.1.0", twine to "^7.0.0", fastapi to "^0.140.13", starlette to "^1.3.1", pytest-mock to "^3.15.1", to fix security vulnerabilities [GS-219].
+- Upgrade langchain to "^1.3.14", langchain-openai to "^1.4.1", langchain-core to "^1.5.2", langchain-community to "^0.4.2", to fix security vulnerabilities [GS-219].
+
 
 ## [0.3.0] - 2026-02-18
 
