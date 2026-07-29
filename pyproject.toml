@@ -44,11 +44,12 @@ packages = [
 python = ">=3.10,<3.15"
 faiss-cpu = "1.12.0"
 urllib3 = "^2.7.0"
-ddgs = "^9.0.2"
+ddgs = "^9.14.4"
 langchain = "^1.3.14"
 langchain-openai = "^1.4.1"
 langchain-core = "^1.5.2"
 langchain-community = "^0.4.2"
+aiohttp = "^3.14.3"
 
 [tool.poetry.group.dev.dependencies]
 changelog-cli = "^0.7.1"
