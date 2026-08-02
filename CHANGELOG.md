@@ -45,6 +45,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Pin "urllib3" to "^2.7.0" to fix "urllib3: Decompression-bomb safeguards bypassed in parts of the streaming API" security vulnerability [GS-219].
 - Pin starlette to "^1.3.1" to fix "Starlette has missing Host header validation that poisons request.url.path, bypassing path-based security checks" security vulnerability [GS-219].
 - Pin aiohttp to 3.14.1 to fix "Allocation of Resources Without Limits or Throttling [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-AIOHTTP-14871876]" security vulnerability [GS-219].
+- Migrate to Python 3.14 [GS-337].
 
 
 ## [0.3.0] - 2026-02-18
