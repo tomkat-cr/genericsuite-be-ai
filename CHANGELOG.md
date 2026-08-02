@@ -43,8 +43,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Upgrade pytest to "^9.1.1", pytest-cov to "^7.1.0", twine to "^7.0.0", fastapi to "^0.140.13", pytest-mock to "^3.15.1", to fix security vulnerabilities [GS-219].
 - Upgrade ddgs to "^9.14.4" to fix security vulnerabilities [GS-219].
 - Pin "urllib3" to "^2.7.0" to fix "urllib3: Decompression-bomb safeguards bypassed in parts of the streaming API" security vulnerability [GS-219].
-- Pin starlette to "^1.3.1" to fix "Starlette has missing Host header validation that poisons request.url.path, bypassing path-based security checks" security vulnerability [GS-219].
-- Pin aiohttp to 3.14.1 to fix "Allocation of Resources Without Limits or Throttling [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-AIOHTTP-14871876]" security vulnerability [GS-219].
+- Pin starlette to "^1.3.1" to fix "Starlette has missing Host header validation that poisons request.url.path, bypassing path-based security checks" security vulnerability (only for development dependencies) [GS-219].
+- Pin aiohttp to "^3.14.3" to fix "Allocation of Resources Without Limits or Throttling [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-AIOHTTP-14871876]" security vulnerability. This must be removed once aiohttp is greater than "^3.14.3" by its dependers [GS-219].
 - Migrate to Python 3.14 [GS-337].
 
 

@@ -45,7 +45,7 @@ publish-test: dev-prepare-publish sast-test build
 	# Pypi Test publish
 	poetry run python3 -m twine upload --repository testpypi dist/*
 
-publish: dev-prepare-publish build
+publish: dev-prepare-publish requirements build
 	# Production Pypi publish
 	poetry run python3 -m twine upload dist/*
 

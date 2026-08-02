@@ -176,7 +176,7 @@ node_modules
 .sonar
 
 # Claude Code
-.claude/settings.local.json
+#.claude/settings.local.json
 
 # AI Agents
 .claude

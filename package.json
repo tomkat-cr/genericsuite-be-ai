@@ -5,6 +5,6 @@
   "author": "Carlos J. Ramirez",
   "license": "MIT",
   "devDependencies": {
-    "genericsuite-be-scripts": "file:../genericsuite-be-scripts"
+    "genericsuite-be-scripts": "github:tomkat-cr/genericsuite-be-scripts#develop"
   }
 }
