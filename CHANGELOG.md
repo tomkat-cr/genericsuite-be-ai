@@ -46,6 +46,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Pin starlette to "^1.3.1" to fix "Starlette has missing Host header validation that poisons request.url.path, bypassing path-based security checks" security vulnerability (only for development dependencies) [GS-219].
 - Pin aiohttp to "^3.14.3" to fix "Allocation of Resources Without Limits or Throttling [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-AIOHTTP-14871876]" security vulnerability. This must be removed once aiohttp is greater than "^3.14.3" by its dependers [GS-219].
 - Migrate to Python 3.14 [GS-337].
+- Bump Node.js version in .nvmrc to 26 [GS-339].
 
 
 ## [0.3.0] - 2026-02-18
