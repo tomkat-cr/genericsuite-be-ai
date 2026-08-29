@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Security
 
 
-## [0.4.0] - 2026-07-15
+## [0.4.0] - 2026-08-30
 
 ### Added
 - AGENTS.md, GEMINI.md, and CLAUDE.md files to provide context and instructions to AI Coding Assistants [GS-303].
