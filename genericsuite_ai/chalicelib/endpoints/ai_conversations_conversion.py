@@ -77,14 +77,14 @@ from genericsuite_ai.chalicelib.endpoints import ai_conversations_conversion
 app.register_blueprint(ai_conversations_conversion.bp,
    url_prefix='/ai_conversations_conversion')
 
-4. Login into the "api-[stage].fynapp.com" App and copy the
+4. Login into the "api-[stage].[app-name].com" App and copy the
 "Authorization: Bearer" token.
 
 5. Make the following call to the "ai_conversations_conversion" endpoint:
 
 
-curl --location 'https://api-[stage].fynapp.com/ai_conversations_conversion?
-bucket_name=exampleapp-s3-bucket&save=1&hostname=api-[stage].fynapp.com' \
+curl --location 'https://api-[stage].[app-name].com/ai_conversations_conversion?
+bucket_name=exampleapp-s3-bucket&save=1&hostname=api-[stage].[app-name].com' \
 --header 'Authorization: Bearer [token]'
 
 """

@@ -168,3 +168,19 @@ gcp_*.json
 
 # Big lambdas deployment
 tmp
+
+# NPM
+node_modules
+
+# SonarQube
+.sonar
+
+# Claude Code
+#.claude/settings.local.json
+
+# AI Agents
+.claude
+.agents
+.codex
+.cursor
+.gemini

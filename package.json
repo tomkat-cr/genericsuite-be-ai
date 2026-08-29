@@ -1,0 +1,10 @@
+{
+  "name": "genericsuite-be-ai",
+  "version": "0.3.0",
+  "description": "The GenericSuite AI for Python (backend version).",
+  "author": "Carlos J. Ramirez",
+  "license": "MIT",
+  "devDependencies": {
+    "genericsuite-be-scripts": "github:tomkat-cr/genericsuite-be-scripts#develop"
+  }
+}

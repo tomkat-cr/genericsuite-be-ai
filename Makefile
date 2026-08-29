@@ -35,7 +35,13 @@ build:
 	rm -rf dist
 	poetry run python3 -m build
 
-publish-test: dev-prepare-publish requirements build
+sast-test: requirements
+	# bash node_modules/genericsuite-be-scripts/scripts/sast_test.sh
+	snyk auth
+	snyk code test --severity-threshold=high --all-projects .
+	snyk test --severity-threshold=high --all-projects .
+
+publish-test: dev-prepare-publish sast-test build
 	# Pypi Test publish
 	poetry run python3 -m twine upload --repository testpypi dist/*
 

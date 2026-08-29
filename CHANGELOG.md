@@ -5,7 +5,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 
 
 
-## [Unreleased]
+## [Unreleased] - YYYY-MM-DD
 
 ### Added
 
@@ -16,6 +16,44 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Removed
 
 ### Security
+
+
+## [0.4.0] - 2026-08-30
+
+### Added
+- AGENTS.md, GEMINI.md, and CLAUDE.md files to provide context and instructions to AI Coding Assistants [GS-303].
+- SAST testing [GS-315].
+- AWS_SSL_CERTIFICATE_ARN_BE envvar to the `.env.example` file [GS-328].
+
+### Changed:
+- Remove all references to fynapp on `ai_conversations_conversion.py`
+- Enhance comments about how to specify the C0301 and E501 line-too-long lint conditions on `config.py`
+- License changed to MIT [FA-244].
+- Replace Github Gemini code review with SonarQube and Claude code review [GS-336].
+
+### Security
+- Upgrade langchain to "^1.3.14", langchain-openai to "^1.4.1", langchain-core to "^1.5.2", langchain-community to "^0.4.2", to fix security vulnerabilities [GS-219].
+    * Directory Traversal (new) [High Severity], SNYK-PYTHON-LANGCHAINCORE-15809257
+    * Allocation of Resources Without Limits or Throttling [High Severity], SNYK-PYTHON-AIOHTTP-14871876, SNYK-PYTHON-AIOHTTP-14871877, SNYK-PYTHON-AIOHTTP-15873732, SNYK-PYTHON-BROTLICFFI-14172734
+    * Infinite loop [High Severity], SNYK-PYTHON-AIOHTTP-14871979
+    * Server-side Request Forgery (SSRF) (new) [High Severity], SNYK-PYTHON-AIOHTTP-15873738
+    * Regular Expression Denial of Service (ReDoS) [High Severity], SNYK-PYTHON-LANGCHAINCLASSIC-14914754
+    * Deserialization of Untrusted Data [High Severity], SNYK-PYTHON-LANGGRAPH-15433492, SNYK-PYTHON-LANGGRAPHCHECKPOINT-15353408, SNYK-PYTHON-LANGGRAPHCHECKPOINT-15433491
+    * h2: Duplicate Host header could facilitate request smuggling
+- Upgrade pytest to "^9.1.1", pytest-cov to "^7.1.0", twine to "^7.0.0", fastapi to "^0.140.13", pytest-mock to "^3.15.1", to fix security vulnerabilities [GS-219].
+- Upgrade ddgs to "^9.14.4" to fix security vulnerabilities [GS-219].
+- Pin "urllib3" to "^2.7.0" to fix "urllib3: Decompression-bomb safeguards bypassed in parts of the streaming API" security vulnerability [GS-219].
+- Pin starlette to "^1.3.1" to fix "Starlette has missing Host header validation that poisons request.url.path, bypassing path-based security checks" security vulnerability (only for development dependencies) [GS-219].
+- Pin aiohttp to "^3.14.3" to fix "Allocation of Resources Without Limits or Throttling [High Severity][https://security.snyk.io/vuln/SNYK-PYTHON-AIOHTTP-14871876]" security vulnerability. This must be removed once aiohttp is greater than "^3.14.3" by its dependers [GS-219].
+- Upgrade cryptography to "^50.0.0" to fix security vulnerabilities [GS-219].
+    * python-cryptography: Duplicate self-signed intermediates can cause exponential path-building
+    * cryptography: PKCS#7 EnvelopedData decryption exposes a Bleichenbacher oracle through distinguishable errors and timing
+    * python-cryptography verifier accepts wildcard DNS names allowing escape from permittedSubtrees 
+- Upgrade pyjwt to "^2.13.0" to fix security vulnerabilities [GS-219].
+    * PyJWKClient: missing scheme allowlist enables CVE-2024-21643-class SSRF + token forgery via file://, ftp://, data: schemes
+    * PyJWKClient unbounded JWKS endpoint requests via attacker-controlled kid values (DoS)
+- Migrate to Python 3.14 [GS-337].
+- Bump Node.js version in .nvmrc to 26 [GS-339].
 
 
 ## [0.3.0] - 2026-02-18
@@ -328,7 +366,7 @@ Tiktoken and langchain-openai upgraded to use 'text-embedding-3-small' as defaul
 
 ### Changed
 - Updated genericsuite = "0.1.3".
-- Add links to https://www.carlosjramirez.com/genericsuite/ in the README.
+- Add links to https://www.carlosjramirez.com/en/genericsuite/ in the README.
 - Remove deprecated FRONTEND_AUDIENCE.
 
 
