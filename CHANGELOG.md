@@ -30,6 +30,8 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 - Enhance comments about how to specify the C0301 and E501 line-too-long lint conditions on `config.py`
 - License changed to MIT [FA-244].
 - Replace Github Gemini code review with SonarQube and Claude code review [GS-336].
+- Modify Makefile to allow optional arguments for twine upload during production publish, e.g. "--verbosity" [GS-327].
+- Update version to 0.4.0 in package.json, pyproject.toml, and setup.py [GS-327].
 
 ### Security
 - Upgrade langchain to "^1.3.14", langchain-openai to "^1.4.1", langchain-core to "^1.5.2", langchain-community to "^0.4.2", to fix security vulnerabilities [GS-219].
