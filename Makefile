@@ -47,7 +47,7 @@ publish-test: dev-prepare-publish sast-test build
 
 publish: dev-prepare-publish requirements build
 	# Production Pypi publish
-	poetry run python3 -m twine upload dist/*
+	poetry run python3 -m twine upload dist/* ${ARGS:-}
 
 dev-prepare-local:
 	poetry add --group dev ../genericsuite-be
