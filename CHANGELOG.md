@@ -8,6 +8,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ## [Unreleased] - YYYY-MM-DD
 
 ### Added
+- Optional `client_date` (`YYYY-MM-DD`) parameter in the chatbot request: the user's LOCAL date. It is used as "today" in the date/time tool and in the system prompts only if it is a valid date within 1 day of the UTC date. Otherwise the UTC date is used, as before.
 
 ### Changed
 

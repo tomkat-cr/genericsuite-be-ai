@@ -1,9 +1,11 @@
 """
 AI general utilities
 """
-from typing import Union, Optional
+from typing import Any, Union, Optional
+from datetime import date, datetime, timedelta, timezone
 import json
 import os
+import re
 import socket
 import ipaddress
 from urllib.parse import urlparse
@@ -18,6 +20,38 @@ from genericsuite.constants.const_tables import get_constant
 from genericsuite_ai.config.config import Config
 
 DEBUG = os.environ.get("AI_UTILITIES_DEBUG", "0") == "1"
+
+CLIENT_DATE_PATTERN = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+
+
+def get_valid_client_date(
+    value: Any,
+    today_utc: Optional[date] = None,
+) -> Optional[str]:
+    """
+    Returns the "client_date" (user's LOCAL date) if it is a strict valid
+    "YYYY-MM-DD" string within 1 calendar day of the current UTC date,
+    otherwise None (the caller must use the UTC date).
+
+    Args:
+        value (Any): client_date value received from the client.
+        today_utc (date): current UTC date (only to set a fixed clock).
+
+    Returns:
+        Optional[str]: the valid client_date or None.
+    """
+    if not isinstance(value, str) or \
+       not CLIENT_DATE_PATTERN.fullmatch(value):
+        return None
+    try:
+        client_day = datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError:
+        return None
+    if today_utc is None:
+        today_utc = datetime.now(timezone.utc).date()
+    if abs(client_day - today_utc) > timedelta(days=1):
+        return None
+    return value
 
 
 def standard_gpt_func_response(

@@ -20,9 +20,10 @@ from genericsuite_ai.lib.ai_utilities import (
     report_error,
     get_response_lang,
     get_assistant_you_are,
+    get_valid_client_date,
 )
 from genericsuite_ai.lib.ai_gpt_fn_conversations import (
-    get_current_date_time
+    get_current_date_time_text,
 )
 
 DEBUG = os.environ.get("AI_CHATBOT_COMMONS_DEBUG", "0") == "1"
@@ -90,6 +91,17 @@ def prepare_conversation(prev_conv: list,
     return conversation
 
 
+def set_client_date(app_context: AppContext, query_params: dict) -> None:
+    """
+    Store the optional "client_date" (user's LOCAL date) request parameter
+    in the app context, only if it is valid (see get_valid_client_date()).
+    Otherwise nothing is stored and the UTC date is used.
+    """
+    client_date = get_valid_client_date(query_params.get("client_date"))
+    if client_date:
+        app_context.set_other_data("client_date", client_date)
+
+
 def get_starting_prompt(app_context):
     """ Starting prompt for the assistant """
     bottom_line_prompt = get_constant("AI_PROMPT_TEMPLATES", "BOTTOM_LINE", "")
@@ -108,7 +120,8 @@ def get_starting_prompt(app_context):
             # '. Your response:' +
             # ' "[SEND_FILE_BACK]=/tmp/tts.mp3"',
             "\n" +
-            f"For date references, {get_current_date_time({})}." +
+            "For date references, " +
+            f"{get_current_date_time_text(app_context)}." +
             "\n" +
             bottom_line_prompt +
             "\n" +
@@ -189,6 +202,9 @@ def start_run_conversation(app_context: AppContext,
 
     # Store the question for GPT function / LangChain Tools
     app_context.set_other_data("question", conv_response["question"])
+
+    # Store the user's local date (optional) for the date/time GPT function
+    set_client_date(app_context, query_params)
 
     # Get the conversation ID and data
     conv_response = init_conversation_db(
