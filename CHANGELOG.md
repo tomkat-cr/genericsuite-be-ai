@@ -13,6 +13,7 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Changed
 
 ### Fixed
+- FastAPI `/chatbot` route now passes the optional `client_date` body field to the model layer (the route dropped it).
 
 ### Removed
 
