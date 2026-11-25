@@ -68,7 +68,7 @@ from genericsuite_ai.lib.ai_langchain_models import (
     # get_chat_engine_desc,
 )
 from genericsuite_ai.lib.ai_gpt_fn_conversations import (
-    get_current_date_time
+    get_current_date_time_text
 )
 from genericsuite_ai.lib.translator import translate
 from genericsuite_ai.models.billing.billing_utilities import BillingUtilities
@@ -273,7 +273,8 @@ def build_gs_prompt(base_prompt: str) -> str:
 
     _ = DEBUG and log_debug('>>> Before get_current_date_time')
     suffix += \
-        f"* For date references, {get_current_date_time.invoke({})}.\n" + \
+        "* For date references, " + \
+        f"{get_current_date_time_text(cac.app_context)}.\n" + \
         "\n" + \
         f"* If the called Tool result has '{gpt_func_error('')}'," + \
         " stop processing and report the error, otherwise the" + \

@@ -60,7 +60,7 @@ from genericsuite_ai.lib.ai_langchain_models import (
 )
 from genericsuite_ai.lib.ai_gpt_fn_conversations import (
     get_conversation_buffer,
-    get_current_date_time
+    get_current_date_time_text
 )
 from genericsuite_ai.lib.vector_index import (
     get_vector_engine,
@@ -383,7 +383,7 @@ Begin! Remember to speak as a kind person when giving your final answer. Use lot
 
 Only the very very last Final Answer should be in """ + lang + """.
 
-For date references, """ + get_current_date_time({}) + """.
+For date references, """ + get_current_date_time_text(cac.app_context) + """.
 
 If the called tool result has '""" + gpt_func_error("") + """', stop processing and report the error.
 

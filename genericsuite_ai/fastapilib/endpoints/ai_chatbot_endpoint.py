@@ -129,6 +129,7 @@ async def ai_chatbot_endpoint(
     current_user: str = Depends(get_current_user),
     conversation: str = Body(None),
     cid: str = Body(None),
+    client_date: Any = Body(None),
 ) -> Any:
     """
     This function is the endpoint for the AI chatbot.
@@ -145,6 +146,9 @@ async def ai_chatbot_endpoint(
         'conversation': conversation,
         'cid': cid,
     }
+    if client_date is not None:
+        # Optional user's local date. It is validated in the model layer.
+        json_body['client_date'] = client_date
     _ = DEBUG and \
         log_debug(f'ai_chatbot_endpoint | json_body: {json_body}')
     gs_request, other_params = get_default_fa_request(

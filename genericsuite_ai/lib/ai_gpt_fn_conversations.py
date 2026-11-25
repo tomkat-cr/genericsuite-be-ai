@@ -95,9 +95,28 @@ def conversation_summary_tool_func(params: Any = None) -> Any:
 @tool
 def get_current_date_time(params: Any = None) -> str:
     """
-Useful when you need to get the current date and UTC time when a question refers for a specific date respect of today, e.g. today's date, today's calories consumed, today's meals, yesterday's meals, yesterday's calories.
+Useful when you need to get the user's current local date (or the UTC date if it is unknown) and the UTC time when a question refers for a specific date respect of today, e.g. today's date, today's calories consumed, today's meals, yesterday's meals, yesterday's calories.
     """  # noqa: E501
     return get_current_date_time_func(params)
+
+
+def get_current_date_time_text(app_context: Any = None) -> str:
+    """
+    Text with today's date and the current UTC time.
+    If the app context has a valid "client_date" (user's LOCAL date),
+    that date is today's date, otherwise today's date is the UTC date.
+    """
+    client_date = app_context.get_other_data("client_date") \
+        if app_context else None
+    if client_date:
+        return \
+            f"today is {client_date} (the user's local date)" + \
+            ", and the current UTC time is" + \
+            f" {datetime.utcnow().strftime('%H:%M:%S')}"
+    return "today is" + \
+        f" {datetime.utcnow().strftime('%Y-%m-%d')}" + \
+        ", and the current UTC time is" + \
+        f" {datetime.utcnow().strftime('%H:%M:%S')}"
 
 
 def get_current_date_time_func(params: Any = None) -> str:
@@ -105,10 +124,7 @@ def get_current_date_time_func(params: Any = None) -> str:
     Get the current date and UTC time when a question refers for a specific
     date reference of today, e.g. today's date, today's calories consumed,
     today's meals, yesterday's meals, yesterday's calories.
+    Today's date is the user's local date when the client sent it.
     """
     params = interpret_tool_params(tool_params=params)
-    result = "today is" + \
-             f" {datetime.utcnow().strftime('%Y-%m-%d')}" + \
-             ", and the current UTC time is" + \
-             f" {datetime.utcnow().strftime('%H:%M:%S')}"
-    return result
+    return get_current_date_time_text(cac.app_context)
